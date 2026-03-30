@@ -362,5 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Ignorar tailwind porq castra
+# Ignorar el CSS generado de tailwind porq castra
 MediMarket.web/Content/Site.css
