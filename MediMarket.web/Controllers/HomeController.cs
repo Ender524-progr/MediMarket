@@ -6,7 +6,7 @@ using System.Web.Mvc;
 
 namespace MediMarket.web.Controllers
 {
-    public class IndexController : Controller
+    public class HomeController : Controller
     {
         // GET: Index
         public ActionResult Index()
