@@ -5,35 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - My ASP.NET Application</title>
     <link href="~/Content/Site.css" rel="stylesheet" type="text/css"/>
+    <link href="~/Content/" rel="stylesheet" type="text/css"/>
+     <link rel="stylesheet" href="~/Content/fontawesome/css/all.min.css" />
     <script src="~/Scripts/modernizr-2.6.2.js"></script>
 </head>
-<body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                </ul>
-            </div>
+<body class="bg-white min-h-screen">
+    <header class="w-full h-16 fixed flex justify-between items-center text-black px-4 md:px-10 bg-white backdrop-blur-md z-10">
+        <div>
+             <h2 class="flex items-center gap-4 text-teal-700 text-2xl font-bold">MediMarket</h2>
         </div>
-    </div>
+        <nav id="mainNav" class="w-full md:w-fit hidden md:flex absolute left-0 md:relative mt-16 md:mt-0 md:gap-6">
+            <div class="not-md:bg-linear-to-b from-white to-teal-100 rounded-b-xl md:bg-white flex gap-10 flex-col md:flex-row items-center w-full md:w-auto px-4 py-6 md:p-0 absolute md:relative left-0 top-full">
+                @Html.ActionLink("CARACTERÍSTICAS", "Index", "Index", null, new { @class = "text-gray-700 font-medium hover:text-teal-800" })
+                @Html.ActionLink("CÓMO FUNCIONA", "Index", "Funciones", null, new { @class = "text-gray-700 font-semibold hover:text-teal-800" })
+                @Html.ActionLink("PRECIOS", "Index", "Dashboard", null, new { @class = "text-gray-700 font-semibold hover:text-teal-800" })
+        </nav>
+        <div class="bg-teal-700 rounded-full p-2 px-6 hover:bg-emerald-800 transition-colors hidden md:block">
+            @Html.ActionLink("COMENZAR", "Login", "Account", null, new { @class = "text-white font-semibold" })
 
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
-        </footer>
-    </div>
-
+        </div>
+        <button id="bars" class="md:hidden text-teal-700 focus:outline-none">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+    @RenderBody()
+    <footer class="w-full h-fit px-4 md:px-14 py-8 bg-white mt-16">
+        <div class="w-full md:flex justify-between">
+            <section class="md:w-2/5">
+                <h2 class="flex items-center gap-2 text-teal-700 font-bold text-2xl">MediMarket</h2>
+                <p class="text-gray-700 hidden md:flex">Digitalizando el suministro médico para un sistema de salud más eficiente y transparente a través de tecnología B2B</p>
+            </section>
+                <nav class="md:w-3/5 flex justify-end items-end">
+                    <div class="flex flex-col md:flex-row text-right md:gap-6">
+                        @Html.ActionLink("Inicio", "Index", "Home", null, new { @class = "text-gray-700 font-semibold hover:text-teal-800" })
+                        @Html.ActionLink("Funciones", "Index", "Funciones", null, new { @class = "text-gray-700 font-semibold hover:text-teal-800" })
+                        @Html.ActionLink("Panel", "Index", "Dashboard", null, new { @class = "text-gray-700 font-semibold hover:text-teal-800" })
+                        @Html.ActionLink("Soporte", "Index", "Soporte", null, new { @class = "text-gray-700 font-semibold hover:text-teal-800" })
+                    </div>
+                </nav>
+        </div>
+        <hr class="my-6 border-gray-800" />
+        <div>
+            <p class="text-center text-gray-700">&copy; @DateTime.Now.Year MediMarket. Todos los derechos reservados.</p>
+        </div>
+    </footer>   
     <script src="~/Scripts/jquery-1.10.2.min.js"></script>
-    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script>
+        const bars = document.getElementById('bars');
+        const mainNav = document.getElementById('mainNav');
+        // Toggle del menú al hacer clic en el ícono de barras
+        bars.addEventListener('click', () => {
+            mainNav.classList.toggle('hidden');
+        });
+        // Cerrar el menú al hacer clic en un otra parte de la página
+        document.addEventListener('click', (event) => {
+            if (!mainNav.contains(event.target) && !bars.contains(event.target)) {
+                mainNav.classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 </html>
