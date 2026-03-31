@@ -1,1 +1,53 @@
-﻿@import "tailwindcss";
+﻿/* Geist normal */
+@font-face {
+    font-family: 'Geist';
+    src: url('/Content/fonts/Geist/Geist[wght].woff2') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+}
+
+/* Geist Mono */
+@font-face {
+    font-family: 'Geist Mono';
+    src: url('/Content/fonts/GeistMono/GeistMono[wght].woff2') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+}
+
+/* Geist Pixel */
+@font-face {
+    font-family: 'Geist Pixel Circle';
+    src: url('/Content/fonts/GeistPixel/GeistPixel-Circle.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Geist Pixel Grid';
+    src: url('/Content/fonts/GeistPixel/GeistPixel-Grid.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Geist Pixel Line';
+    src: url('/Content/fonts/GeistPixel/GeistPixel-Line.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Geist Pixel Square';
+    src: url('/Content/fonts/GeistPixel/GeistPixel-Square.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Geist Pixel Triangle';
+    src: url('/Content/fonts/GeistPixel/GeistPixel-Triangle.woff2') format('woff2');
+}
+
+/* Tailwind v4 */
+@theme {
+    --font-sans: 'Geist', sans-serif;
+    --font-mono: 'Geist Mono', monospace;
+    --font-pixel-circle: 'Geist Pixel Circle', sans-serif;
+    --font-pixel-grid: 'Geist Pixel Grid', sans-serif;
+    --font-pixel-line: 'Geist Pixel Line', sans-serif;
+    --font-pixel-square: 'Geist Pixel Square', sans-serif;
+    --font-pixel-triangle: 'Geist Pixel Triangle', sans-serif;
+}
+@import "tailwindcss";
