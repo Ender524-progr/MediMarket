@@ -1,31 +1,35 @@
 ﻿@{
-    ViewBag.Title = "Home";
+ViewBag.Title = "Home";
 }
 <main class="min-h-dvh font-sans">
     <header class="relative w-full h-dvh">
         <img src="~/Content/Images/medicos.png" alt="Imagen de fondo" class="w-full h-dvh object-cover">
 
-        <section class="flex justify-center content-center flex-col items-center absolute top-0 left-0  w-full h-dvh text-center text-white px-4 pt-14 gap-6">
-            <div class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-4xl border-2 border-gray-300/40 font-semibold gap-2">
+        <section
+            class="flex justify-center content-center flex-col items-center absolute top-0 left-0  w-full h-dvh text-center text-white px-4 pt-14 gap-6">
+            <div
+                class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-4xl border-2 border-gray-300/40 font-semibold gap-2">
                 <span class="w-3.5 h-3.5 text-sm text-teal-400  animate-pulse flex items-center justify-center">
                     <i class="fa-solid fa-circle"></i>
-                </span>                
+                </span>
                 <p class="text-xs md:text-lg">LÍDER EN SUMINISTROS MÉDICOS B2B</p>
             </div>
             <div class="font-bold leading-tight flex flex-col gap-4">
                 <h2 class="max-w-xl text-4xl md:text-6xl leading-tight">
-                    Conecta con 
-                <span class="text-teal-300 md:text-7xl">proveedores</span> 
+                    Conecta con
+                    <span class="text-teal-300 md:text-7xl">proveedores</span>
                     verificados.
                 </h2>
                 <p class="text-sm md:text-lg font-medium max-w-xl mx-auto leading-relaxed">
-                    La infraestructura digital para que las instutuciones de salud gestionen adquisiciones con transparecia, seguridad y eficiencia total.
+                    La infraestructura digital para que las instutuciones de salud gestionen adquisiciones con
+                    transparecia, seguridad y eficiencia total.
                 </p>
             </div>
-             <a href="@Url.Action("accion", "controlador")" class="text-lg md:text-xl bg-teal-700 rounded-2xl px-8 py-4 text-white font-semibold hover:bg-teal-800 flex items-center justify-center gap-2 hover:translate-x-1 transition-all">               
+            <a href="@Url.Action(" accion", "controlador" )"
+                class="text-lg md:text-xl bg-teal-700 rounded-2xl px-8 py-4 text-white font-semibold hover:bg-teal-800 flex items-center justify-center gap-2 hover:translate-x-1 transition-all">
                 Crear cuenta gratuita
                 <i class="fa-solid fa-arrow-right"></i>
-             </a>
+            </a>
         </section>
     </header>
     <section class="w-full h-1/2
@@ -54,129 +58,132 @@
             </article>
         </div>
     </section>
-  
+
     <!-- proceso simplificado -->
 
-<div class="bg-gray-200 py-24 w-full flex flex-col items-center">
+    <div class="bg-gray-200 py-24 w-full flex flex-col items-center">
 
- <h2 class="
+        <h2 class="
  font-mono text-sm text-teal-700
  py-5">
- PROCESO SIMPLIFICADO</h2>
+            PROCESO SIMPLIFICADO</h2>
 
- <h3 class="
+        <h3 class="
  text-4xl font-semibold">
-    Cómo funciona MediMarket
- </h3>
+            Cómo funciona MediMarket
+        </h3>
 
-<section class="
+        <section class="
  w-full h-fit 
  flex justify-center items-center 
  md:px-10 py-20">
 
-        <div class="
+            <div class="
         w-full h-fit 
         flex max-md:flex-col justify-center items-center
         md:gap-10 gap-6">
 
-            <article class="
+                <article class="
             rounded-3xl 
             bg-white shadow-lg 
             p-10 md:mx-0 mx-5 
             md:w-full md:h-80 
             hover:translate-y-1 transition-transform">
 
-                <div class="
+                    <div class="
                 w-fit 
                 p-5 mb-8
                 bg-teal-700 rounded-full 
                 text-2xl text-white">
-                    <i class="fa-solid fa-list-check"></i>
-                </div>                
-                
-                <h3 class="
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+
+                    <h3 class="
                 text-black text-2xl font-semibold
                 my-4">
-                Publica una solicitud (RFQ)</h3>
-                
-                <p class="text-gray-600">
-                    Sube tus requerimientos médicos detallados, desde insumos quirúrgicos hasta servicios de mantenimiento especializado.</p>
-            </article>
+                        Publica una solicitud (RFQ)</h3>
 
-            <article class="
+                    <p class="text-gray-600">
+                        Sube tus requerimientos médicos detallados, desde insumos quirúrgicos hasta servicios de
+                        mantenimiento especializado.</p>
+                </article>
+
+                <article class="
             rounded-3xl p-10 md:mx-0 mx-5 shadow-lg 
             bg-white  md:w-full md:h-80 
             hover:translate-y-1 transition-transform">
-                
-                <div class="
+
+                    <div class="
                 w-fit 
                 p-5 
                 bg-teal-700 rounded-full 
                 text-2xl text-white 
                 mb-8">
-                    <i class="fa-solid fa-repeat"></i>
-                </div>
+                        <i class="fa-solid fa-repeat"></i>
+                    </div>
 
-                <h3 class="
+                    <h3 class="
                 text-black text-2xl font-semibold
                 my-4">
-                Recibe y compara cotizaciones</h3>
+                        Recibe y compara cotizaciones</h3>
 
-                <p class="text-gray-600">
-                    Analiza múltiples presupuestos coompetitivos de proveedores certificados en un panel comparativo inteligente y unificado.</p>
-                </article>      
-            
+                    <p class="text-gray-600">
+                        Analiza múltiples presupuestos coompetitivos de proveedores certificados en un panel comparativo
+                        inteligente y unificado.</p>
+                </article>
+
                 <article class="
                 rounded-3xl p-10 md:mx-0 mx-5 shadow-lg 
               bg-white  md:w-full md:h-80 
                 hover:translate-y-1 transition-transform">
 
-                <div class="
+                    <div class="
                 w-fit p-4 
                 bg-teal-700 rounded-full 
                 text-3xl text-white 
                 mb-8">
-                    <i class="fa-regular fa-circle-check"></i>
-                </div>
+                        <i class="fa-regular fa-circle-check"></i>
+                    </div>
 
-                <h3 class="
+                    <h3 class="
                 text-black text-2xl  font-semibold
                 my-4">
-                Contrata y gestiona servicios</h3>
-                
-                <p class="text-gray-600">
-                    Cierra contratos legalmente vinculantes, realiza pagos protegidos y realiza el seguimiento de la entrega en tiempo real.</p>
-            </article>
-        </div>
-</section>
+                        Contrata y gestiona servicios</h3>
 
-<!-- dos cuadros -->
+                    <p class="text-gray-600">
+                        Cierra contratos legalmente vinculantes, realiza pagos protegidos y realiza el seguimiento de la
+                        entrega en tiempo real.</p>
+                </article>
+            </div>
+        </section>
 
-<section class="
+        <!-- dos cuadros -->
+
+        <section class="
  w-full h-fit 
  flex justify-center items-center 
  md:px-10 py-24">
 
-        <div class="
+            <div class="
         w-full h-fit 
         flex justify-center items-center
         md:gap-10 gap-6">
 
-            <article class="
+                <article class="
             flex flex-col
             rounded-4xl 
             bg-white
             p-10 md:mx-0 mx-5 
             md:w-full md:h-fit">
-            
-            <h1 class="
+
+                    <h1 class="
             text-teal-700 font-semibold text-4xl mb-10">
-                Para intituciones médicas
-            </h1>
+                        Para intituciones médicas
+                    </h1>
 
-            <div class="flex items-start mb-10">
+                    <div class="flex items-start mb-10">
 
-                <div class="
+                        <div class="
                 flex items-center justify-center shrink-0
                 size-fit
                 p-5 mb-8 mr-4
@@ -184,23 +191,23 @@
                 text-2xl text-teal-700 
                 animate-pulse
                 ">
-                    <i class="fa-solid fa-bolt"></i>
-                </div>     
-                                
-                <div>
-                <h3 class="
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+
+                        <div>
+                            <h3 class="
                 text-black text-2xl font-semibold
                 my-2">
-                Ahorra tiempo</h3>
-                
-                <p class="text-gray-600">
-                    Reduce en un 40% el tiempo necesario para búsqueda y negociación con proveedores.</p>
-                </div>
-            </div>
+                                Ahorra tiempo</h3>
 
-              <div class="flex items-start mb-10">
-                
-                <div class="
+                            <p class="text-gray-600">
+                                Reduce en un 40% el tiempo necesario para búsqueda y negociación con proveedores.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start mb-10">
+
+                        <div class="
                 flex items-center justify-center shrink-0
                 size-fit
                 p-5 mb-8 mr-4
@@ -208,23 +215,23 @@
                 text-2xl text-teal-700
                 animate-pulse
                 ">
-                    <i class="fa-solid fa-chart-simple"></i>
-                </div>     
-                                
-                <div>
-                <h3 class="
+                            <i class="fa-solid fa-chart-simple"></i>
+                        </div>
+
+                        <div>
+                            <h3 class="
                 text-black text-2xl font-semibold
                 my-2">
-                Compara proveedores</h3>
-                
-                <p class="text-gray-600">
-                    Accede a un catálogo global de proveedores con reseñas reales de otros hospitales.</p>
-                </div>
-            </div>
+                                Compara proveedores</h3>
 
-              <div class="flex items-start mb-10">
-                
-                <div class="
+                            <p class="text-gray-600">
+                                Accede a un catálogo global de proveedores con reseñas reales de otros hospitales.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start mb-10">
+
+                        <div class="
                 flex items-center justify-center shrink-0
                 size-fit
                 p-5 mb-8 mr-4
@@ -232,37 +239,37 @@
                 text-2xl text-teal-700
                 animate-pulse
                 ">
-                    <i class="fa-solid fa-lock"></i>
-                </div>     
-                                
-                <div>
-                <h3 class="
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+
+                        <div>
+                            <h3 class="
                 text-black text-2xl font-semibold
                 my-2">
-                Contratación segura</h3>
-                
-                <p class="text-gray-600">
-                    Contratos digitales y cumplimiento normativo garantizado en cada transacción.</p>
-                </div>
-            </div>
-         
-            </article>     
-            
+                                Contratación segura</h3>
+
+                            <p class="text-gray-600">
+                                Contratos digitales y cumplimiento normativo garantizado en cada transacción.</p>
+                        </div>
+                    </div>
+
+                </article>
+
                 <article class="
             flex flex-col
             rounded-4xl 
             bg-teal-700 text-white
             p-10 md:mx-0 mx-5 
             md:w-full md:h-fit">
-            
-            <h1 class="
+
+                    <h1 class="
             font-semibold text-4xl mb-10">
-                Para proveedores
-            </h1>
+                        Para proveedores
+                    </h1>
 
-            <div class="flex items-start mb-10">
+                    <div class="flex items-start mb-10">
 
-                <div class="
+                        <div class="
                 flex items-center justify-center shrink-0
                 size-fit
                 p-5 mb-8 mr-4
@@ -270,23 +277,24 @@
                 text-2xl text-white
                 animate-pulse
                 ">
-                    <i class="fa-solid fa-people-group"></i>
-                </div>     
-                                
-                <div>
-                <h3 class="
+                            <i class="fa-solid fa-people-group"></i>
+                        </div>
+
+                        <div>
+                            <h3 class="
                 text-2xl font-semibold
                 my-2">
-                Consigue clientes</h3>
-                
-                <p class="text-gray-300">
-                    Acceso directo a los tomadores de decisiones de las principales clínicas y hospitales del país.</p>
-                </div>
-            </div>
+                                Consigue clientes</h3>
 
-              <div class="flex items-start mb-10">
-                
-                <div class="
+                            <p class="text-gray-300">
+                                Acceso directo a los tomadores de decisiones de las principales clínicas y hospitales
+                                del país.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start mb-10">
+
+                        <div class="
                 flex items-center justify-center shrink-0
                 size-fit
                 p-5 mb-8 mr-4
@@ -294,23 +302,24 @@
                 text-2xl text-white
                 animate-pulse
                 ">
-                    <i class="fa-solid fa-eye"></i>
-                </div>     
-                                
-                <div>
-                <h3 class="
+                            <i class="fa-solid fa-eye"></i>
+                        </div>
+
+                        <div>
+                            <h3 class="
                 text-2xl font-semibold
                 my-2">
-                Mayor visibilidad</h3>
-                
-                <p class="text-gray-300">
-                    Destaca tus servicios y productos en un marketplaces especializado en el sector salud.</p>
-                </div>
-            </div>
+                                Mayor visibilidad</h3>
 
-              <div class="flex items-start mb-10">
-                
-                <div class="
+                            <p class="text-gray-300">
+                                Destaca tus servicios y productos en un marketplaces especializado en el sector salud.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start mb-10">
+
+                        <div class="
                 flex items-center justify-center shrink-0
                 size-fit
                 p-5 mb-8 mr-4
@@ -318,252 +327,285 @@
                 text-2xl text-white
                 animate-pulse
                 ">
-                    <i class="fa-solid fa-star"></i>
-                </div>     
-                                
-                <div>
-                <h3 class="
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+
+                        <div>
+                            <h3 class="
                 text-2xl font-semibold
                 my-2">
-                Construye reputación</h3>
-                
-                <p class="text-gray-300">
-                    Escala tu negocio basándote en un perfil verificado y calificaciones positivas de clientes satisfechos.</p>
-                </div>
+                                Construye reputación</h3>
+
+                            <p class="text-gray-300">
+                                Escala tu negocio basándote en un perfil verificado y calificaciones positivas de
+                                clientes satisfechos.</p>
+                        </div>
+                    </div>
+
+                </article>
             </div>
-         
-            </article>     
-        </div>
-</section>
+        </section>
 
-<!-- Planes -->
+        <!-- Planes -->
 
-<div class=" pt-24 w-full flex flex-col items-center">
+        <div class=" pt-24 w-full flex flex-col items-center">
 
- <h2 class="
+            <h2 class="
  text-5xl font-semibold
  py-5">
- Planes diseñados para crecer</h2>
+                Planes diseñados para crecer</h2>
 
- <h3 class="
+            <h3 class="
  text-base">
-    Sin costos ocultos, sin complicaciones. Transparecncia total en cada operación.
- </h3>
+                Sin costos ocultos, sin complicaciones. Transparecncia total en cada operación.
+            </h3>
 
-</div>
+        </div>
 
-<section class="
+        <section class="
  w-full h-fit 
  flex justify-center items-center 
  md:px-60 py-14">
 
-        <div class="
+            <div class="
         w-full h-fit 
         flex justify-center items-center
         md:gap-10 gap-6">
 
-            <article class="
-            flex flex-col
-            rounded-4xl border-teal-700 border-4
-            bg-white
-            p-10 md:mx-0 mx-5 
-            md:w-full md:h-fit">       
-            
-             <span class="
-            bg-gray-300
-            rounded-full 
-            text-gray-600 font-sans px-3 py-1 self-start mb-4
-            ">GRATIS</span>
-
-            <h1 class="
-            text-black font-semibold text-4xl">
-                Plan Gratuito
-            </h1>
-            <h2 class="pb-10">
-                Para consulturios y pequeñas clínicas.
-            </h2>
-
-            <div class="flex mb-14">
-                                               
-                <h3 class="
-                text-black text-6xl font-bold">
-                $0</h3>
-
-                <p>/mes</p>
-            </div>
-
-              <div class="flex items-center mb-8">
-                
-                <div class="
-                flex items-center justify-center shrink-0
-                size-fit
-                pr-5
-                text-2xl text-teal-700
-                ">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>     
-
-                <h3 class="
-                text-black text-2xl">
-                Publicaciones ilimitadas</h3>
-            </div>
-
-              <div class="flex items-center mb-8">
-                
-                <div class="
-                flex items-center justify-center shrink-0           
-                pr-5    
-                text-2xl text-teal-700               
-                ">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>     
-
-                <h3 class="
-                text-black text-2xl">
-                Acceso a red de proveedores</h3>
-            </div>
-
-              <div class="flex items-center mb-8">
-                
-                <div class="
-                flex items-center justify-center shrink-0                
-                pr-5
-                text-2xl text-teal-700               
-                ">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>     
-                                
-                <h3 class="
-                text-black text-2xl">
-                Soporte vía email</h3>
-            </div>
-
-            <div class="flex items-center mb-8 text-gray-400">
-                
-                <div class="
-                flex items-center justify-center shrink-0
-                pr-5          
-                text-2xl          
-                ">
-                    <i class="fa-solid fa-circle-xmark"></i>
-                </div>     
-                                
-                <h3 class="text-2xl">
-                Reportes avanzados</h3>
-            </div>
-
-            <a href="@Url.Action("accion", "controlador")" class="
-            text-lg md:text-xl text-teal-700 font-semibold
-            rounded-2xl border-teal-700 border-2
-            px-8 py-4 my-8 
-            flex items-center justify-center gap-2 
-           hover:bg-teal-700 hover:text-white  transition-colors">               
-                Empezar gratis             
-             </a>
-         
-            </article>     
-        
-            <article class="
+                <article class="
             flex flex-col
             rounded-4xl border-teal-700 border-4
             bg-white
             p-10 md:mx-0 mx-5 
             md:w-full md:h-fit">
-            
-             <span class="
-            bg-teal-700
+
+                    <span class="
+            bg-gray-300
             rounded-full 
-            text-white font-sans px-3 py-1 self-start mb-4
-            ">RECOMENDADO</span>
+            text-gray-600 font-sans px-3 py-1 self-start mb-4
+            ">GRATIS</span>
 
-            <h1 class="
+                    <h1 class="
             text-black font-semibold text-4xl">
-                Plan Premium
-            </h1>
-            <h2 class="pb-10">
-                Para hospitales y redes de salud.
-            </h2>
+                        Plan Gratuito
+                    </h1>
+                    <h2 class="pb-10">
+                        Para consulturios y pequeñas clínicas.
+                    </h2>
 
-            <div class="flex mb-14">
-                                               
-                <h3 class="
+                    <div class="flex mb-14">
+
+                        <h3 class="
                 text-black text-6xl font-bold">
-                $299</h3>
+                            $0</h3>
 
-                <p>/mes</p>
-            </div>
+                        <p>/mes</p>
+                    </div>
 
-              <div class="flex items-center mb-8">
-                
-                <div class="
+                    <div class="flex items-center mb-8">
+
+                        <div class="
                 flex items-center justify-center shrink-0
                 size-fit
                 pr-5
                 text-2xl text-teal-700
                 ">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>     
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
 
-                <h3 class="
+                        <h3 class="
                 text-black text-2xl">
-                Todo el plan gratuito</h3>
-            </div>
+                            Publicaciones ilimitadas</h3>
+                    </div>
 
-              <div class="flex items-center mb-8">
-                
-                <div class="
+                    <div class="flex items-center mb-8">
+
+                        <div class="
                 flex items-center justify-center shrink-0           
                 pr-5    
                 text-2xl text-teal-700               
                 ">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>     
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
 
-                <h3 class="
+                        <h3 class="
                 text-black text-2xl">
-                Reportes de analítica avanzada</h3>
-            </div>
+                            Acceso a red de proveedores</h3>
+                    </div>
 
-              <div class="flex items-center mb-8">
-                
-                <div class="
+                    <div class="flex items-center mb-8">
+
+                        <div class="
                 flex items-center justify-center shrink-0                
                 pr-5
                 text-2xl text-teal-700               
                 ">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>     
-                                
-                <h3 class="
-                text-black text-2xl">
-                Account Manager dedicado</h3>
-            </div>
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
 
-            <div class="flex items-center mb-8">
-                
-                <div class="
+                        <h3 class="
+                text-black text-2xl">
+                            Soporte vía email</h3>
+                    </div>
+
+                    <div class="flex items-center mb-8 text-gray-400">
+
+                        <div class="
                 flex items-center justify-center shrink-0
                 pr-5          
-                text-2xl text-teal-700     
+                text-2xl          
                 ">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>     
-                                
-                <h3 class="text-2xl text-black">
-                Comisiones reducidas</h3>
-            </div>
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </div>
 
-            <a href="@Url.Action("accion", "controlador")" class="
+                        <h3 class="text-2xl">
+                            Reportes avanzados</h3>
+                    </div>
+
+                    <a href="@Url.Action(" accion", "controlador" )" class="
             text-lg md:text-xl text-teal-700 font-semibold
             rounded-2xl border-teal-700 border-2
             px-8 py-4 my-8 
             flex items-center justify-center gap-2 
-           hover:bg-teal-700 hover:text-white  transition-colors">               
-                Solicitar Premium
-             </a>
-         
-            </article>     
-        </div>
-</section>
-</div>
+           hover:bg-teal-700 hover:text-white  transition-colors">
+                        Empezar gratis
+                    </a>
+
+                </article>
+
+                <article class="
+            flex flex-col
+            rounded-4xl border-teal-700 border-4
+            bg-white
+            p-10 md:mx-0 mx-5 
+            md:w-full md:h-fit">
+
+                    <span class="
+            bg-teal-700
+            rounded-full 
+            text-white font-sans px-3 py-1 self-start mb-4
+            ">RECOMENDADO</span>
+
+                    <h1 class="
+            text-black font-semibold text-4xl">
+                        Plan Premium
+                    </h1>
+                    <h2 class="pb-10">
+                        Para hospitales y redes de salud.
+                    </h2>
+
+                    <div class="flex mb-14">
+
+                        <h3 class="
+                text-black text-6xl font-bold">
+                            $299</h3>
+
+                        <p>/mes</p>
+                    </div>
+
+                    <div class="flex items-center mb-8">
+
+                        <div class="
+                flex items-center justify-center shrink-0
+                size-fit
+                pr-5
+                text-2xl text-teal-700
+                ">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+
+                        <h3 class="
+                text-black text-2xl">
+                            Todo el plan gratuito</h3>
+                    </div>
+
+                    <div class="flex items-center mb-8">
+
+                        <div class="
+                flex items-center justify-center shrink-0           
+                pr-5    
+                text-2xl text-teal-700               
+                ">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+
+                        <h3 class="
+                text-black text-2xl">
+                            Reportes de analítica avanzada</h3>
+                    </div>
+
+                    <div class="flex items-center mb-8">
+
+                        <div class="
+                flex items-center justify-center shrink-0                
+                pr-5
+                text-2xl text-teal-700               
+                ">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+
+                        <h3 class="
+                text-black text-2xl">
+                            Account Manager dedicado</h3>
+                    </div>
+
+                    <div class="flex items-center mb-8">
+
+                        <div class="
+                flex items-center justify-center shrink-0
+                pr-5          
+                text-2xl text-teal-700     
+                ">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+
+                        <h3 class="text-2xl text-black">
+                            Comisiones reducidas</h3>
+                    </div>
+
+                    <a href="@Url.Action(" accion", "controlador" )" class="
+            text-lg md:text-xl text-teal-700 font-semibold
+            rounded-2xl border-teal-700 border-2
+            px-8 py-4 my-8 
+            flex items-center justify-center gap-2 
+           hover:bg-teal-700 hover:text-white  transition-colors">
+                        Solicitar Premium
+                    </a>
+
+                </article>
+            </div>
+        </section>
+    </div>
+    
+    <!-- cuadro verde de abajo xd -->
+
+    <div class="
+    flex flex-col items-center justify-center
+    bg-teal-700 
+    text-white 
+    py-24 px-4 my-48 mx-12 gap-8
+    rounded-[5rem] shadow-2xl
+    text-center">
+        <h1 class="
+        max-w-4xl mx-auto
+        text-4xl md:text-7xl font-bold">
+            Opimiza la gestión de proveedores hoy mismo.
+        </h1>
+
+        <h2 class="
+        max-w-4xl mx-auto leading-relaxed
+         text-3xl text-white/80">
+            Únete a MediMarket y transforma tu cadena de suministro con tecnología de punta.
+        </h2>
+
+        <a href="@Url.Action(" accion", "controlador" )" class="
+            text-lg md:text-2xl text-teal-700 font-semibold
+            rounded-2xl
+            px-8 py-4 my-8 
+            flex items-center justify-center gap-2 
+           hover:scale-105 bg-white  transition-all hover:bg-white/90">
+                        Únete a la red ahora
+                    </a>
+
+    </div>
 </main>
