@@ -373,6 +373,94 @@ ViewBag.Title = "Home";
         </div>
 </section>
 
+<!-- Herramientas para la salud -->
+ <section class="w-full h-fit
+                flex max-md:flex-col items-center justify-between
+                px-4 md:px-12 py-12 md:py-28 gap-8">
+        <div class="w-full md:w-2/8 h-fit flex flex-col gap-4">
+            <div class="w-full h-fit
+                        flex flex-col
+                        gap-4
+                        text-pretty">
+                <h3 class="font-mono text-teal-700 text-base font-semibold">INSFRAESTRUCTURA ENTERPRISE</h3>
+                <h2 class="font-semibold text-5xl">Herramientas diseñadas para la salud</h2>
+                <p class="text-lg text-gray-500">Nuestra infraestructura técnica cumple
+                con los más altos estándares de
+                seguridad y eficiencia operativa,
+                facilitando la toma de decisiones basada
+                en datos.</p>
+            </div>
+            <div class="w-full h-fit
+                        flex flex-col
+                        gap-6">
+                <article class="w-full h-auto
+                                flex items-baseline
+                                gap-4 px-4 py-3
+                                bg-white rounded-2xl shadow-sm">
+                    <i class="fa-solid fa-chart-line text-teal-700"></i>
+                    <div>
+                        <h2 class="font-semibold">Métricas en tiempo real</h2>
+                        <p class="text-sm text-gray-600">Visualiza el gasto y tiempos de entrega en un solo lugar.</p>
+                    </div>
+                </article>
+                <article class="w-full h-auto
+                                flex items-baseline
+                                gap-4 px-4 py-3
+                                bg-white rounded-2xl shadow-sm">
+                    <i class="fa-solid fa-chart-line text-teal-700"></i>
+                    <div>
+                        <h2 class="font-semibold">IA en Adquisiciones</h2>
+                        <p class="text-sm text-gray-600">Automatiza RFQs basados en tus niveles de inventario.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+            <div class="w-full md:w-6/12 h-fit relative border-8 border-gray-300 rounded-3xl shadow-lg overflow-hidden">
+                <img src="~/Content/Images/img-herramientas.png" alt="Imagen de dashboard" class="w-full h-auto 
+                object-cover 
+                rounded-2xl shadow-lg
+                relative">
+                
+                <div class="absolute top-0 left-0 w-full h-full
+                                bg-line-to-t from-black/30 to-transparent
+                                rounded-2xl
+                                flex p-8">
+                    <article class="w-fit h-fit
+                                    flex items-baseline
+                                    gap-2 px-2 py-1
+                                    md:gap-4 md:px-4 md:py-3
+                                    bg-white rounded-2xl shadow-sm
+                                    absolute top-1/5 left-8 max-md:text-xs">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                        <div>
+                            <h2 class="font-semibold text-sm">Comparativa Inteligente</h2>
+                        </div>
+                    </article>
+                    <article class="w-fit h-fit
+                                    flex items-baseline
+                                    gap-2 px-2 py-1
+                                    md:gap-4 md:px-4 md:py-3
+                                    bg-white rounded-2xl shadow-sm
+                                    absolute top-1/2 right-4 md:right-8 max-md:text-xs">
+                        <i class="fa-solid fa-money-bills"></i>
+                        <div>
+                            <h2 class="font-semibold text-sm">Pagos Protegidos</h2>
+                        </div>
+                    </article>
+                    <article class="w-fit h-fit
+                                    flex items-baseline
+                                    gap-2 px-2 py-1
+                                    md:gap-4 md:px-4 md:py-3
+                                    bg-white rounded-2xl shadow-sm
+                                    absolute top-9/12 left-1/4 max-md:text-xs">
+                        <i class="fa-solid fa-shield-halved "></i>
+                        <div>
+                            <h2 class="font-semibold text-sm">HIPAA Compliant</h2>
+                        </div>
+                    </article>
+                </div>
+ </section>
+
         <!-- Planes -->
 
         <div class=" pt-24 w-full flex flex-col items-center">
@@ -402,7 +490,7 @@ ViewBag.Title = "Home";
 
                 <article class="
             flex flex-col
-            rounded-4xl border-teal-700 border-4
+            rounded-4xl 
             bg-white
             p-10 md:mx-0 mx-5 
             md:w-full md:h-fit">
