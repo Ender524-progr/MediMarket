@@ -3,25 +3,123 @@
     ViewBag.Title = "Login";
 }
 
-<main class="w-full min-h-screen flex flex-col justify-center items-center text-white gap-8">
-    <section class="flex flex-col items-center justify-center gap-2">
-        <div class="p-4 bg-teal-700 rounded-md">
-            <i class="fa-solid fa-money-bill-wave text-xl"></i>
+<main class="w-full min-h-screen gap-8  pt-24
+flex flex-col justify-center items-center 
+text-white bg-gray-200">
+
+    <section class="flex items-center justify-center gap-2">
+
+        <div class="
+        p-1 rounded-md 
+        text-teal-700 text-2xl">
+            <i class="
+            fa-solid fa-briefcase-medical"></i>
         </div>
-        <h2 class="font-medium text-2xl text-teal-700">MediMarket</h2>
+        <h2 class="
+        font-bold text-2xl text-teal-700">MediMarket</h2>
     </section>
-    <section class="w-fit h-fit flex flex-col justify-center items-center gap-8 py-8 px-12 rounded-md ">
+
+    <section class="
+    w-fit h-fit 
+    flex flex-col justify-center items-center gap-8 
+    py-14 px-8 rounded-2xl
+    bg-white shadow-md">
+        
         <div class="flex flex-col items-center">
-            <h1 class="text-3xl font-semibold">Iniciar Sesión</h1>
-            <p class="text-gray-400 max-w-xs text-center">Adquiere tus productos de forma inteligente y segura en un solo lugar</p>
+            
+            <h1 class="text-2xl font-semibold text-black px-16">Bienvenido a MediMarket</h1>
+            <p class="
+            text-gray-600 
+            max-w-xs font-medium text-center 
+            py-2">
+            Accede con tu cuenta para continuar</p>
         </div>
+        
         <a href="@Url.Action("GoogleLogin", "Account")"
-        class="w-full bg-teal-700 py-2 flex justify-center items-center gap-2 rounded-md text-lg font-semibold">
-            <img src="~/Content/assets/google.svg" alt="Google Logo" width="20" height="20" />
-            <p class="text-white">Iniciar sesión con Google</p>
+        class="
+        w-full bg-gray-300 rounded-xl 
+        py-4 flex justify-center items-center gap-2         
+        text-lg font-semibold text-black 
+        border border-gray-300
+        hover:border-teal-800 hover:bg-teal-600/10 transition-colors">
+            <i class="fa-brands fa-google"></i>
+            <p>Iniciar sesión con Google</p>
         </a>
+        <p class="
+            text-gray-600 
+            max-w-xs font-normal text-center 
+            py-2">
+            ---------- SELECCIONA TU PERFIL ---------</p>
+
+        <div class="w-full flex gap-4">
+            <a href="@Url.Action("Login", "Account", new { role = "Buyer" })"
+            class="
+            w-full bg-gray-200 rounded-xl group
+            py-6 flex justify-center items-center gap-4 flex-col     
+            font-semibold text-black 
+            border-2 border-gray-200 
+            hover:border-teal-800 hover:bg-teal-600/10 transition-colors">
+            <div class="
+            bg-gray-300 
+            group-hover:bg-teal-600/20 group-hover:text-teal-800 
+            rounded-full p-2 
+            text-2xl">
+                 <i class="fa-solid fa-house-medical"></i>
+            </div>
+               <p class="text-xs">Soy Clínica</p>
+            </a>
+
+             <a href="@Url.Action("Login", "Account", new { role = "Buyer" })"
+            class="
+            w-full bg-gray-200 rounded-xl group
+            py-6 flex justify-center items-center gap-4 flex-col     
+            font-semibold text-black 
+            border-2 border-gray-200 
+            hover:border-teal-800 hover:bg-teal-600/10 transition-colors">
+            <div class="
+            bg-gray-300 
+            group-hover:bg-teal-600/20 group-hover:text-teal-800 
+            rounded-full p-2 
+            text-2xl">
+                 <i class="fa-solid fa-box-archive"></i>
+            </div>
+               <p class="text-xs">Soy Proveedor</p>
+            </a>
+
+            <a href="@Url.Action("Login", "Account", new { role = "Buyer" })"
+            class="
+            w-full bg-gray-200 rounded-xl group
+            py-6 flex justify-center items-center gap-4 flex-col     
+            font-semibold text-black 
+            border-2 border-gray-200 
+            hover:border-teal-800 hover:bg-teal-600/10 transition-colors">
+            <div class="
+            bg-gray-300 
+            group-hover:bg-teal-600/20 group-hover:text-teal-800 
+            rounded-full p-2 
+            text-2xl">
+                 <i class="fa-solid fa-heart-circle-plus"></i>
+            </div>
+               <p class="text-xs">Soy Ambos</p>
+            </a>
+        </div>
+
+    <div class="
+    w-full max-w-md 
+    flex
+    p-4 rounded-xl
+    text-emerald-600
+    bg-teal-50 
+    border-teal-100 border-2
+    ">
+    <div class="p-2">
+        <i class="fa-solid fa-shield-halved"></i>
+    </div>        
+        <p class="font-semibold text-sm">Tu cuenta está verificada para garantizar confianza en la plataforma y cumplir con las políticas de uso</p>
+    </div>
+
     </section>
-    <section>
-        <p class="max-w-sm text-center text-gray-400">Al continuar, aceptas nuestros <a href="" class="text-teal-700">Términos y Condiciones</a> y nuestra Politica de privacidad</p>
+    <section class="pb-12">
+        <p class="max-w-sm text-center text-sm text-gray-400">Al continuar, aceptas nuestros <a href="" class="text-teal-700">Términos y Condiciones</a> y nuestra Politica de privacidad</p>
     </section>
 </main>
