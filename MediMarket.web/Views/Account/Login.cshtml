@@ -34,75 +34,19 @@ text-white bg-gray-200">
             py-2">
             Accede con tu cuenta para continuar</p>
         </div>
-        
-        <a href="@Url.Action("GoogleLogin", "Account")"
-        class="
-        w-full bg-gray-300 rounded-xl 
-        py-4 flex justify-center items-center gap-2         
+
+        @using (Html.BeginForm("LoginConGoogle", "Account", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    <button type="submit" class="w-full bg-gray-300 rounded-xl 
+        py-4 px-22 flex justify-center items-center gap-2         
         text-lg font-semibold text-black 
         border border-gray-300
         hover:border-teal-800 hover:bg-teal-600/10 transition-colors">
-            <i class="fa-brands fa-google"></i>
-            <p>Iniciar sesión con Google</p>
-        </a>
-        <p class="
-            text-gray-600 
-            max-w-xs font-normal text-center 
-            py-2">
-            ---------- SELECCIONA TU PERFIL ---------</p>
-
-        <div class="w-full flex gap-4">
-            <a href="@Url.Action("Login", "Account", new { role = "Buyer" })"
-            class="
-            w-full bg-gray-200 rounded-xl group
-            py-6 flex justify-center items-center gap-4 flex-col     
-            font-semibold text-black 
-            border-2 border-gray-200 
-            hover:border-teal-800 hover:bg-teal-600/10 transition-colors">
-            <div class="
-            bg-gray-300 
-            group-hover:bg-teal-600/20 group-hover:text-teal-800 
-            rounded-full p-2 
-            text-2xl">
-                 <i class="fa-solid fa-house-medical"></i>
-            </div>
-               <p class="text-xs">Soy Clínica</p>
-            </a>
-
-             <a href="@Url.Action("Login", "Account", new { role = "Buyer" })"
-            class="
-            w-full bg-gray-200 rounded-xl group
-            py-6 flex justify-center items-center gap-4 flex-col     
-            font-semibold text-black 
-            border-2 border-gray-200 
-            hover:border-teal-800 hover:bg-teal-600/10 transition-colors">
-            <div class="
-            bg-gray-300 
-            group-hover:bg-teal-600/20 group-hover:text-teal-800 
-            rounded-full p-2 
-            text-2xl">
-                 <i class="fa-solid fa-box-archive"></i>
-            </div>
-               <p class="text-xs">Soy Proveedor</p>
-            </a>
-
-            <a href="@Url.Action("Login", "Account", new { role = "Buyer" })"
-            class="
-            w-full bg-gray-200 rounded-xl group
-            py-6 flex justify-center items-center gap-4 flex-col     
-            font-semibold text-black 
-            border-2 border-gray-200 
-            hover:border-teal-800 hover:bg-teal-600/10 transition-colors">
-            <div class="
-            bg-gray-300 
-            group-hover:bg-teal-600/20 group-hover:text-teal-800 
-            rounded-full p-2 
-            text-2xl">
-                 <i class="fa-solid fa-heart-circle-plus"></i>
-            </div>
-               <p class="text-xs">Soy Ambos</p>
-            </a>
-        </div>
+         <i class="fa-brands fa-google"></i>
+        <span class="font-bold text-on-surface">Iniciar sesión con Google</span>
+    </button>
+}       
 
     <div class="
     w-full max-w-md 
