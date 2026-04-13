@@ -208,6 +208,7 @@
     <Content Include="Content\fonts\Geist\Geist-Thin.woff2" />
     <Content Include="Content\fonts\Geist\Geist-ThinItalic.woff2" />
     <Content Include="Content\fonts\Geist\Geist[wght].woff2" />
+    <Content Include="connections.config" />
     <None Include="packages.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
