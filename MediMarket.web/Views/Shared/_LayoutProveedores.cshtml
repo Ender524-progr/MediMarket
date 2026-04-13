@@ -1,0 +1,120 @@
+﻿@{
+    var currentController = ViewContext.RequestContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RequestContext.RouteData.Values["action"]?.ToString();
+    
+
+    var dashboardActive = (currentController == "Proveedores" && currentAction == "Index")
+        ? "bg-green-500/50 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
+        : "hover:bg-gray-400";
+
+    var rfqsActive = (currentController == "Proveedores" && currentAction == "RFQs")
+        ? "bg-gray-400 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
+        : "hover:bg-gray-400";
+
+    var catalogoActive = (currentController == "Proveedores" && currentAction == "MiCatalogo")
+        ? "bg-gray-400 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
+        : "hover:bg-gray-400";
+
+    var ordenesActive = (currentController == "Proveedores" && currentAction == "Ordenes")
+        ? "bg-gray-400 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
+        : "hover:bg-gray-400";
+}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Dashboard Proveedor</title>
+    <!-- <link href="" rel="icon" type="image/png" /> -->
+    <link href="~/Content/Site.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="~/Content/fontawesome/css/all.min.css" />
+    <script src="~/Scripts/modernizr-2.6.2.js"></script>
+</head>
+<body class="bg-white min-h-screen overflow-hidden">
+
+    <aside
+        id="Navbar"
+        class="w-15 h-screen bg-gray-300 text-black p-2 fixed top-0 left-0 z-50
+               transition-[width] duration-200 overflow-hidden">
+
+        <!-- Logo -->
+        <a href="@Url.Action("Index", "Home")"
+           class="w-fit flex items-center gap-2 ml-2 mt-2 mb-6 rounded hover:text-green-700 text-xl font-semibold">
+            <i class="fa-solid fa-briefcase-medical shrink-0 w-5 text-center"></i>
+            <p class="txtNavbar max-w-0 opacity-0 overflow-hidden whitespace-nowrap
+                      transition-[max-width,opacity] duration-200">MediMarket</p>
+        </a>
+
+        <ul>
+            <li class="mb-2">
+                <a href="@Url.Action("Index", "Proveedores")"
+                   class="w-full flex items-center gap-2 py-2 px-3 rounded @dashboardActive">
+                    <i class="fas fa-tachometer-alt shrink-0 w-5 text-center"></i>
+                    <p class="txtNavbar max-w-0 opacity-0 overflow-hidden whitespace-nowrap
+                              transition-[max-width,opacity] duration-200">Dashboard</p>
+                </a>
+            </li>
+            <li class="mb-2">
+                <a href="@Url.Action("RFQs", "Proveedores")"
+                   class="w-full flex items-center gap-2 py-2 px-3 rounded @rfqsActive">
+                    <i class="fa-solid fa-quote-left shrink-0 w-5 text-center"></i>
+                    <p class="txtNavbar max-w-0 opacity-0 overflow-hidden whitespace-nowrap
+                              transition-[max-width,opacity] duration-200">RFQs</p>
+                </a>
+            </li>
+            <li class="mb-2">
+                <a href="@Url.Action("MiCatalogo", "Proveedores")"
+                   class="w-full flex items-center gap-2 py-2 px-3 rounded @catalogoActive">
+                    <i class="fas fa-box shrink-0 w-5 text-center"></i>
+                    <p class="txtNavbar max-w-0 opacity-0 overflow-hidden whitespace-nowrap
+                              transition-[max-width,opacity] duration-200">Mi Catálogo</p>
+                </a>
+            </li>
+            <li class="mb-2">
+                <a href="@Url.Action("Ordenes", "Proveedores")"
+                   class="w-full flex items-center gap-2 py-2 px-3 rounded @ordenesActive">
+                    <i class="fas fa-shopping-cart shrink-0 w-5 text-center"></i>
+                    <p class="txtNavbar max-w-0 opacity-0 overflow-hidden whitespace-nowrap
+                              transition-[max-width,opacity] duration-200">Ordenes</p>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- El main usa margin-left en px para sincronizar con el aside -->
+    <main id="MainContent"
+          class="min-h-screen ml-15 transition-[margin-left] duration-200">
+        @RenderBody()
+    </main>
+
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script>
+        const navbar = document.getElementById('Navbar');
+        const mainContent = document.getElementById('MainContent');
+        const txtNavbar = document.querySelectorAll('.txtNavbar');
+
+        const COLLAPSED_W = '60px';
+        const EXPANDED_W  = '220px';
+
+        navbar.addEventListener('mouseenter', () => {
+            navbar.style.width = EXPANDED_W;
+            mainContent.style.marginLeft = EXPANDED_W;
+            txtNavbar.forEach(txt => {
+                txt.style.maxWidth = '160px';
+                txt.style.opacity  = '1';
+            });
+        });
+
+        navbar.addEventListener('mouseleave', () => {
+            if (!navbar.classList.contains('fixed-open')) {
+                navbar.style.width = COLLAPSED_W;
+                mainContent.style.marginLeft = COLLAPSED_W;
+                txtNavbar.forEach(txt => {
+                    txt.style.maxWidth = '0';
+                    txt.style.opacity  = '0';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
