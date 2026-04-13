@@ -49,11 +49,10 @@ public async Task<ActionResult> GoogleResponse()
         var usuarioExistente = db.usuarios.FirstOrDefault(u => u.email == email);
         if (usuarioExistente != null)
         {
-            return RedirectToAction("Index", "Dashboard");
+            return RedirectToAction("Index", "Proveedores");
         }
         else
         {
-            // Pasamos la foto en la redirección
             return RedirectToAction("CompletarPerfil", "Account", new { correo = email, nombre = nombreCompleto, fotoUrl = foto });
         }
     }
@@ -111,7 +110,7 @@ public ActionResult RegistrarClinica(
         db.clinicas.Add(clinica);
 
         db.SaveChanges();
-          return Content("¡Registro exitoso! Mi amor cambia esto por el dashboard");
+          return RedirectToAction("Index", "Proveedores"); 
     }
 }
 
@@ -154,7 +153,7 @@ public ActionResult RegistrarProveedor(
         db.proveedores.Add(prov);
 
         db.SaveChanges();
-        return Content("¡Registro exitoso! Mi amor cambia esto por el dashboard");
+        return RedirectToAction("Index", "Proveedores");
     }
 }
 
@@ -185,7 +184,6 @@ public ActionResult RegistrarHibrido(
 
         string direccionProveedor = direccionClinica + $", {municipio}, {estado}";
 
-        // 3. Registro de Clínica (Aprovechamos la dirección unificada)
         db.clinicas.Add(new clinicas {
             id = Guid.NewGuid(),
             usuario_id = user.id,
@@ -200,7 +198,6 @@ public ActionResult RegistrarHibrido(
             direccion = direccionClinica
         });
 
-        // 4. Registro de Proveedor
         db.proveedores.Add(new proveedores {
             id = Guid.NewGuid(),
             usuario_id = user.id,
@@ -214,13 +211,10 @@ public ActionResult RegistrarHibrido(
         });
 
         db.SaveChanges();
-        return Content("¡Registro Híbrido exitoso! Mi amor cambia esto por el dashboard");
+            return RedirectToAction("Index", "Proveedores");
     }
 }
 
-
-
-        // 7. Cerrar sesión
         public ActionResult Logout()
         {
             HttpContext.GetOwinContext().Authentication.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
