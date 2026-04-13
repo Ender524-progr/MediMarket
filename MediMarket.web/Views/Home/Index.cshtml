@@ -1,7 +1,7 @@
 ﻿@{
 ViewBag.Title = "Home";
 }
-<main class="min-h-dvh font-sans">
+<main id="INICIO" class="min-h-dvh font-sans">
     <header class="relative w-full h-dvh">
         <img src="~/Content/Images/medicos.png" alt="Imagen de fondo" class="w-full h-dvh object-cover">
 
@@ -25,7 +25,7 @@ ViewBag.Title = "Home";
                     transparecia, seguridad y eficiencia total.
                 </p>
             </div>
-            <a href="@Url.Action(" Login", "Account" )"
+            <a href="@Url.Action("Login", "Account" )"
                 class="text-lg md:text-xl bg-teal-700 rounded-2xl px-8 py-4 text-white font-semibold hover:bg-teal-800 flex items-center justify-center gap-2 hover:translate-x-1 transition-all">
                 Crear cuenta gratuita
                 <i class="fa-solid fa-arrow-right"></i>
@@ -459,6 +459,7 @@ ViewBag.Title = "Home";
                         </div>
                     </article>
                 </div>
+               </div>
  </section>
 
         <!-- Planes -->
