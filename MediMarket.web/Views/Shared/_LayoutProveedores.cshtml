@@ -34,7 +34,7 @@
     <link rel="stylesheet" href="~/Content/fontawesome/css/all.min.css" />
     <script src="~/Scripts/modernizr-2.6.2.js"></script>
 </head>
-<body class="bg-white min-h-screen overflow-hidden">
+<body class="bg-white min-h-screen">
 
     <aside
         id="Navbar"
@@ -88,7 +88,7 @@
     <!-- El main usa margin-left en px para sincronizar con el aside -->
     <main id="MainContent"
           class="min-h-screen ml-15 transition-[margin-left] duration-200">
-    <header class="w-full h-16 bg-gray-200 flex items-center justify-between px-4 shadow">
+    <header class="sticky top-0 z-40 w-full h-16 bg-gray-200 flex items-center justify-between px-4 shadow">
     <div class="flex items-center gap-4 w-1/4">
         <input type="text" placeholder="Buscar..." class="px-3 py-1 rounded-md bg-gray-400/50 focus:outline-none focus:ring-2 focus:ring-green-600/50 w-full" />
     </div>
@@ -172,7 +172,9 @@
         }
     });
 </script>
-        @RenderBody()
+
+    @RenderBody()
+
     </main>
 
     <script src="~/Scripts/jquery-1.10.2.min.js"></script>

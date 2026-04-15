@@ -1,59 +1,85 @@
-﻿@{
+﻿@model IEnumerable<MediMarket.web.Models.productos>
+@{
     Layout = "~/Views/Shared/_LayoutProveedores.cshtml";
     ViewBag.Title = "Mi Catalogo";
 }
 
-<section class="w-full h-fit flex justify-between items-end-safe gap-2 p-8">
+<section class="w-full h-fit flex justify-between items-end gap-2 p-8">
     <div class="w-fit h-fit flex flex-col items-start">
         <h1 class="text-4xl font-bold">Mi Catálogo de Productos y Servicios</h1>
-        <p class="text-xl text-gray-500">Gestione su inventario médico, suministros y servicios para centros de salud.
-        </p>
+        <p class="text-xl text-gray-500">Gestione su inventario médico, suministros y servicios para centros de salud.</p>
     </div>
     <div>
-        <a href="@Url.Action("Create", "MiCatalogo")" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2 px-4 rounded">
+        <a href="@Url.Action("Create", "MiCatalogo")"
+           class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2 px-4 rounded">
             Agregar Producto
         </a>
     </div>
 </section>
+
 <div class="w-full h-fit flex items-center gap-4 px-8 mb-4">
-    <input type="text" placeholder="Buscar productos..." class="border rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-    <select name="categoria" id="categoria" class="border rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <input type="text" placeholder="Buscar productos..."
+           class="border rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <select name="categoria" id="categoria"
+            class="border rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
         <option value="">Todas las categorías</option>
         <option value="medicamentos">Medicamentos</option>
         <option value="insumos">Insumos</option>
         <option value="servicios">Servicios</option>
     </select>
 </div>
-<section class="w-full h-fit flex flex-col gap-4">
-    <div class="w-full h-fit flex flex-col gap-4 p-8">
-        @if (Model != null && Model.Any())
+
+<section class="w-full h-fit flex flex-col gap-4 p-8">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var item in Model)
         {
-            foreach (var item in Model)
-            {
-                <div class="w-full h-fit flex justify-between items-center gap-4 p-4 border rounded-lg">
-                    <div class="flex items-center gap-4">
-                        <img src="@item.ImagenUrl" alt="@item.Nombre" class="w-16 h-16 object-cover rounded">
-                        <div>
-                            <h2 class="text-xl font-bold">@item.Nombre</h2>
-                            <p class="text-gray-500">@item.Descripcion</p>
+            var imagen = item.producto_imagenes?.FirstOrDefault(i => i.es_principal)?.url
+                      ?? item.producto_imagenes?.FirstOrDefault()?.url
+                      ?? "/Content/img/no-image.png";
+
+            <div class="w-full flex justify-between items-center gap-4 p-4 border rounded-lg">
+                <div class="flex items-center gap-4">
+                    <img src="@imagen" alt="@item.nombre" class="w-16 h-16 object-cover rounded">
+                    <div>
+                        <h2 class="text-xl font-bold">@item.nombre</h2>
+                        <p class="text-gray-500">@item.descripcion</p>
+                        <div class="flex gap-3 mt-1 text-sm text-gray-600">
+                            <span>SKU: @(item.sku ?? "—")</span>
+                            <span>$@item.precio_unitario.ToString("N2")</span>
+                            <span>Stock: @item.stock_disponible</span>
+                            <span class="@(item.activo ? "text-green-600" : "text-red-500") font-semibold">
+                                @(item.activo ? "Activo" : "Inactivo")
+                            </span>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2
-">
-                        <a href="@Url.Action("Edit", "MiCatalogo", new { id = item.Id })" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                            Editar
-                        </a>
-                        <form action="@Url.Action("Delete", "MiCatalogo", new { id = item.Id })" method="post" onsubmit="return confirm('¿Está seguro de eliminar este producto?');">
-                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
-                                Eliminar
-                            </button>
-                        </form>
-                    </div>
                 </div>
-            }
+                <div class="flex items-center gap-2">
+                    <a href="@Url.Action("Details", "MiCatalogo", new { id = item.id })"
+                       class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">
+                        Ver
+                    </a>
+                    <a href="@Url.Action("Edit", "MiCatalogo", new { id = item.id })"
+                       class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                        Editar
+                    </a>
+                    <a href="@Url.Action("Delete", "MiCatalogo", new { id = item.id })"
+                   class="flex-1 text-center py-2 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold transition">
+                    Eliminar
+                </a>
+                </div>
+            </div>
         }
-        else
-        {
-            <p class="text-gray-500">No tienes productos en tu catálogo. ¡Agrega uno para empezar!</p>
-        }
+    }
+    else
+    {
+        <div class="w-full flex flex-col items-center justify-center py-16 text-gray-400">
+            <i class="fas fa-box-open text-6xl mb-4"></i>
+            <p class="text-xl">No tienes productos en tu catálogo.</p>
+            <a href="@Url.Action("Create", "MiCatalogo")"
+               class="mt-4 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2 px-4 rounded">
+                Agregar tu primer producto
+            </a>
+        </div>
+    }
 </section>
