@@ -10,6 +10,7 @@ using Microsoft.Owin.Security.Cookies;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security.Google;
 using System.Security.Claims;
+using MediMarket.web.Models;
 
 namespace MediMarket.web.Controllers
 {
