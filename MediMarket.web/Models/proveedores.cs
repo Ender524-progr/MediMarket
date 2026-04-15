@@ -1,4 +1,4 @@
-namespace MediMarket.web
+namespace MediMarket.web.Models
 {
     using System;
     using System.Collections.Generic;
@@ -6,13 +6,12 @@ namespace MediMarket.web
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
 
-    public partial class clinicas
+    public partial class proveedores
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public clinicas()
+        public proveedores()
         {
-            lista_deseos = new HashSet<lista_deseos>();
-            pedidos = new HashSet<pedidos>();
+            productos = new HashSet<productos>();
         }
 
         public Guid id { get; set; }
@@ -21,13 +20,13 @@ namespace MediMarket.web
 
         [Required]
         [StringLength(255)]
-        public string nombre_clinica { get; set; }
+        public string nombre_empresa { get; set; }
 
         [StringLength(13)]
         public string rfc { get; set; }
 
         [StringLength(100)]
-        public string especialidad { get; set; }
+        public string categoria_principal { get; set; }
 
         [StringLength(20)]
         public string telefono { get; set; }
@@ -37,21 +36,12 @@ namespace MediMarket.web
 
         public string direccion { get; set; }
 
-        [StringLength(100)]
-        public string ciudad { get; set; }
+        [StringLength(50)]
+        public string registro_sanitario { get; set; }
 
-        [StringLength(60)]
-        public string estado { get; set; }
-
-        [StringLength(20)]
-        public string cedula_profesional { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<productos> productos { get; set; }
 
         public virtual usuarios usuarios { get; set; }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<lista_deseos> lista_deseos { get; set; }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<pedidos> pedidos { get; set; }
     }
 }

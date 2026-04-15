@@ -1,4 +1,4 @@
-namespace MediMarket.web
+namespace MediMarket.web.Models
 {
     using System;
     using System.Collections.Generic;
@@ -6,42 +6,31 @@ namespace MediMarket.web
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
 
-    public partial class proveedores
+    public partial class categorias
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public proveedores()
+        public categorias()
         {
+            categorias1 = new HashSet<categorias>();
             productos = new HashSet<productos>();
         }
 
         public Guid id { get; set; }
 
-        public Guid usuario_id { get; set; }
-
         [Required]
-        [StringLength(255)]
-        public string nombre_empresa { get; set; }
-
-        [StringLength(13)]
-        public string rfc { get; set; }
-
         [StringLength(100)]
-        public string categoria_principal { get; set; }
+        public string nombre { get; set; }
 
-        [StringLength(20)]
-        public string telefono { get; set; }
+        public string descripcion { get; set; }
 
-        [StringLength(10)]
-        public string cp { get; set; }
+        public Guid? padre_id { get; set; }
 
-        public string direccion { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<categorias> categorias1 { get; set; }
 
-        [StringLength(50)]
-        public string registro_sanitario { get; set; }
+        public virtual categorias categorias2 { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<productos> productos { get; set; }
-
-        public virtual usuarios usuarios { get; set; }
     }
 }

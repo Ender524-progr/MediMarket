@@ -164,31 +164,31 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="administradores.cs" />
+    <Compile Include="Models\administradores.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="categorias.cs" />
-    <Compile Include="clinicas.cs" />
-    <Compile Include="ConexionModel.cs" />
+    <Compile Include="Models\categorias.cs" />
+    <Compile Include="Models\clinicas.cs" />
+    <Compile Include="Models\ConexionModel.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\BaseProovedoresController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\MiCatalogoController.cs" />
     <Compile Include="Controllers\ProveedoresController.cs" />
-    <Compile Include="detalle_pedidos.cs" />
+    <Compile Include="Models\detalle_pedidos.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="lista_deseos.cs" />
+    <Compile Include="Models\lista_deseos.cs" />
     <Compile Include="obj\Debug\.NETFramework,Version=v4.8.1.AssemblyAttributes.cs" />
-    <Compile Include="pedidos.cs" />
-    <Compile Include="planes.cs" />
-    <Compile Include="productos.cs" />
-    <Compile Include="producto_imagenes.cs" />
+    <Compile Include="Models\pedidos.cs" />
+    <Compile Include="Models\planes.cs" />
+    <Compile Include="Models\productos.cs" />
+    <Compile Include="Models\producto_imagenes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="proveedores.cs" />
+    <Compile Include="Models\proveedores.cs" />
     <Compile Include="Startup.cs" />
-    <Compile Include="suscripciones.cs" />
-    <Compile Include="usuarios.cs" />
+    <Compile Include="Models\suscripciones.cs" />
+    <Compile Include="Models\usuarios.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />
@@ -263,7 +263,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
     <Folder Include="Views\BaseProovedores\" />
   </ItemGroup>
   <ItemGroup>

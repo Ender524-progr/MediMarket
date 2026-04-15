@@ -1,4 +1,4 @@
-namespace MediMarket.web
+namespace MediMarket.web.Models
 {
     using System;
     using System.Collections.Generic;

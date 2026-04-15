@@ -1,6 +1,7 @@
 ﻿// Controllers/BaseProveedorController.cs
 using System.Security.Claims;
 using System.Web.Mvc;
+using MediMarket.web.Models;
 
 [Authorize]
 public class BaseProveedorController : Controller
