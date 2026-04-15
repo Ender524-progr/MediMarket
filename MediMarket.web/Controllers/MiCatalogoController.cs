@@ -5,11 +5,11 @@ using System.Web;
 using System.Web.Mvc;
 using System.Security.Claims;
 
-
 namespace MediMarket.web.Controllers
 {
-    public class ProveedoresController : BaseProveedorController
+    public class MiCatalogoController : BaseProveedorController
     {
+        // GET: MiCatalogo
         public ActionResult Index()
         {
             var identity = (ClaimsIdentity)User.Identity;

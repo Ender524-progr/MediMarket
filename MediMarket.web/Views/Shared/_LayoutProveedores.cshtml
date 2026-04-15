@@ -1,4 +1,8 @@
-﻿@{
+﻿@using System.Security.Claims
+@{
+    var identity = (ClaimsIdentity)User.Identity;
+    var nombre   = identity.FindFirst(ClaimTypes.Name)?.Value;
+    var foto     = identity.FindFirst("foto_url")?.Value;
     var currentController = ViewContext.RequestContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RequestContext.RouteData.Values["action"]?.ToString();
     
@@ -11,8 +15,8 @@
         ? "bg-gray-400 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
         : "hover:bg-gray-400";
 
-    var catalogoActive = (currentController == "Proveedores" && currentAction == "MiCatalogo")
-        ? "bg-gray-400 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
+    var catalogoActive = (currentController == "MiCatalogo" && currentAction == "Index")
+        ? "bg-green-500/50 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
         : "hover:bg-gray-400";
 
     var ordenesActive = (currentController == "Proveedores" && currentAction == "Ordenes")
@@ -63,7 +67,7 @@
                 </a>
             </li>
             <li class="mb-2">
-                <a href="@Url.Action("MiCatalogo", "Proveedores")"
+                <a href="@Url.Action("Index", "MiCatalogo")"
                    class="w-full flex items-center gap-2 py-2 px-3 rounded @catalogoActive">
                     <i class="fas fa-box shrink-0 w-5 text-center"></i>
                     <p class="txtNavbar max-w-0 opacity-0 overflow-hidden whitespace-nowrap
@@ -84,6 +88,90 @@
     <!-- El main usa margin-left en px para sincronizar con el aside -->
     <main id="MainContent"
           class="min-h-screen ml-15 transition-[margin-left] duration-200">
+    <header class="w-full h-16 bg-gray-200 flex items-center justify-between px-4 shadow">
+    <div class="flex items-center gap-4 w-1/4">
+        <input type="text" placeholder="Buscar..." class="px-3 py-1 rounded-md bg-gray-400/50 focus:outline-none focus:ring-2 focus:ring-green-600/50 w-full" />
+    </div>
+    <div class="flex items-center gap-4">
+        <div class="relative">
+            <button id="ToggleNotifications" class="text-gray-700 focus:outline-none cursor-pointer">
+                <i class="fa-solid fa-bell"></i>
+            </button>
+            <span id="notifications"
+            class="w-64 hidden px-4 py-2 absolute top-10 right-2 rounded-lg bg-gray-300 shadow-sm before:w-0 before:h-0 before:border-r-0 before:border-r-transparent before:border-l-24 before:border-l-transparent before:border-b-24 before:border-b-gray-300 before:-top-3 before:right-1  before:absolute">
+            Notificaciones
+            <p class="w-full h-0.5 bg-black/20 my-1"></p>
+            <div class="flex flex-col items-center w-full h-fit overflow-hidden">
+                <p class="text-sm text-gray-500">No tienes nuevas notificaciones.</p>
+            </div>
+            </span>
+        </div>
+        <div class="relative flex items-center gap-2">
+            <button id="TogglePerfil" class="text-gray-700 focus:outline-none cursor-pointer">
+            <img src="@ViewBag.FotoUrl" alt="Foto de perfil" class="w-8 h-8 rounded-full object-cover">
+        </button>
+        <span id="PerfilInfo"
+    class="w-64 hidden px-4 py-2 absolute top-12 right-2 rounded-lg bg-gray-300 shadow-sm before:w-0 before:h-0 before:border-r-0 before:border-r-transparent before:border-l-24 before:border-l-transparent before:border-b-24 before:border-b-gray-300 before:-top-3 before:right-1  before:absolute">
+    <div class="flex flex-col items-start w-full h-fit overflow-hidden">
+        <h3>@nombre</h3>
+        <p class="w-full h-0.5 bg-black/20 my-1"></p>
+        <a href="@Url.Action("Logout", "Account")" class="block mt-2 text-red-500 hover:text-red-700">Cerrar sesión</a>
+    </div>
+  </span>
+        </div>
+    </div>
+    
+</header>
+
+<script>
+    // Toggle del perfil
+    const perfilInfo = document.getElementById("PerfilInfo");
+    document.getElementById("TogglePerfil").addEventListener("click", function(e) {
+        e.stopPropagation();
+        perfilInfo.classList.toggle("hidden");
+
+        if (!perfilInfo.classList.contains("hidden")) {
+            // Si se acaba de mostrar, ocultar las notificaciones
+            const notifications = document.getElementById("notifications");
+            if (!notifications.classList.contains("hidden")) {
+                notifications.classList.add("hidden");
+            }
+        }
+    });
+
+    // Cerrar el perfil al hacer clic fuera de él
+    document.addEventListener("click", function(event) {
+        if(perfilInfo.classList.contains("hidden")) return; // Si ya está oculto, no hacer nada
+        const isClickInside = perfilInfo.contains(event.target) || event.target.id === "TogglePerfil";
+        if (!isClickInside) {
+            perfilInfo.classList.add("hidden");
+        }
+    });
+
+    // Toggle de notificaciones
+    const notifications = document.getElementById("notifications");
+    document.getElementById("ToggleNotifications").addEventListener("click", function(e) {
+        e.stopPropagation();
+        notifications.classList.toggle("hidden");
+
+        if (!notifications.classList.contains("hidden")) {
+            // Si se acaba de mostrar, ocultar el perfil
+            const perfilInfo = document.getElementById("PerfilInfo");
+            if (!perfilInfo.classList.contains("hidden")) {
+                perfilInfo.classList.add("hidden");
+            }
+        }
+    });
+
+    // Cerrar las notificaciones al hacer clic fuera de ellas
+    document.addEventListener("click", function(event) {
+        if(notifications.classList.contains("hidden")) return; // Si ya está oculto, no hacer nada
+        const isClickInside = notifications.contains(event.target) || event.target.id === "ToggleNotifications";
+        if (!isClickInside) {
+            notifications.classList.add("hidden");
+        }
+    });
+</script>
         @RenderBody()
     </main>
 
@@ -98,7 +186,7 @@
 
         navbar.addEventListener('mouseenter', () => {
             navbar.style.width = EXPANDED_W;
-            mainContent.style.marginLeft = EXPANDED_W;
+            // mainContent.style.marginLeft = EXPANDED_W;//checar
             txtNavbar.forEach(txt => {
                 txt.style.maxWidth = '160px';
                 txt.style.opacity  = '1';
@@ -108,7 +196,7 @@
         navbar.addEventListener('mouseleave', () => {
             if (!navbar.classList.contains('fixed-open')) {
                 navbar.style.width = COLLAPSED_W;
-                mainContent.style.marginLeft = COLLAPSED_W;
+                // mainContent.style.marginLeft = COLLAPSED_W;//checar
                 txtNavbar.forEach(txt => {
                     txt.style.maxWidth = '0';
                     txt.style.opacity  = '0';

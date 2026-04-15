@@ -1,0 +1,59 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutProveedores.cshtml";
+    ViewBag.Title = "Mi Catalogo";
+}
+
+<section class="w-full h-fit flex justify-between items-end-safe gap-2 p-8">
+    <div class="w-fit h-fit flex flex-col items-start">
+        <h1 class="text-4xl font-bold">Mi Catálogo de Productos y Servicios</h1>
+        <p class="text-xl text-gray-500">Gestione su inventario médico, suministros y servicios para centros de salud.
+        </p>
+    </div>
+    <div>
+        <a href="@Url.Action("Create", "MiCatalogo")" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2 px-4 rounded">
+            Agregar Producto
+        </a>
+    </div>
+</section>
+<div class="w-full h-fit flex items-center gap-4 px-8 mb-4">
+    <input type="text" placeholder="Buscar productos..." class="border rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <select name="categoria" id="categoria" class="border rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">Todas las categorías</option>
+        <option value="medicamentos">Medicamentos</option>
+        <option value="insumos">Insumos</option>
+        <option value="servicios">Servicios</option>
+    </select>
+</div>
+<section class="w-full h-fit flex flex-col gap-4">
+    <div class="w-full h-fit flex flex-col gap-4 p-8">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <div class="w-full h-fit flex justify-between items-center gap-4 p-4 border rounded-lg">
+                    <div class="flex items-center gap-4">
+                        <img src="@item.ImagenUrl" alt="@item.Nombre" class="w-16 h-16 object-cover rounded">
+                        <div>
+                            <h2 class="text-xl font-bold">@item.Nombre</h2>
+                            <p class="text-gray-500">@item.Descripcion</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2
+">
+                        <a href="@Url.Action("Edit", "MiCatalogo", new { id = item.Id })" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                            Editar
+                        </a>
+                        <form action="@Url.Action("Delete", "MiCatalogo", new { id = item.Id })" method="post" onsubmit="return confirm('¿Está seguro de eliminar este producto?');">
+                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+                                Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-gray-500">No tienes productos en tu catálogo. ¡Agrega uno para empezar!</p>
+        }
+</section>

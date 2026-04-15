@@ -79,8 +79,8 @@
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="NuGet.Frameworks, Version=6.4.3.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\NuGet.Frameworks.6.4.3\lib\net472\NuGet.Frameworks.dll</HintPath>
+    <Reference Include="NuGet.Frameworks, Version=6.5.1.2, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\NuGet.Frameworks.6.5.1\lib\net472\NuGet.Frameworks.dll</HintPath>
     </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
@@ -170,7 +170,9 @@
     <Compile Include="clinicas.cs" />
     <Compile Include="ConexionModel.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\BaseProovedoresController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\MiCatalogoController.cs" />
     <Compile Include="Controllers\ProveedoresController.cs" />
     <Compile Include="detalle_pedidos.cs" />
     <Compile Include="Global.asax.cs">
@@ -251,6 +253,7 @@
     <Content Include="Views\Account\CompletarPerfil.cshtml" />
     <Content Include="Views\Shared\_LayoutProveedores.cshtml" />
     <Content Include="secrets.config" />
+    <Content Include="Views\MiCatalogo\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -261,6 +264,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Models\" />
+    <Folder Include="Views\BaseProovedores\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
