@@ -179,6 +179,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\lista_deseos.cs" />
+    <Compile Include="Models\ViewModels\ProductoViewModel.cs" />
     <Compile Include="obj\Debug\.NETFramework,Version=v4.8.1.AssemblyAttributes.cs" />
     <Compile Include="Models\pedidos.cs" />
     <Compile Include="Models\planes.cs" />
@@ -254,6 +255,10 @@
     <Content Include="Views\Shared\_LayoutProveedores.cshtml" />
     <Content Include="secrets.config" />
     <Content Include="Views\MiCatalogo\Index.cshtml" />
+    <Content Include="Views\MiCatalogo\Create.cshtml" />
+    <Content Include="Views\MiCatalogo\Details.cshtml" />
+    <Content Include="Views\MiCatalogo\Edit.cshtml" />
+    <Content Include="Views\MiCatalogo\Delete.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
