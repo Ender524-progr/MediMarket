@@ -24,6 +24,7 @@ namespace MediMarket.web.Models
         public virtual DbSet<proveedores> proveedores { get; set; }
         public virtual DbSet<suscripciones> suscripciones { get; set; }
         public virtual DbSet<usuarios> usuarios { get; set; }
+        public virtual DbSet<solicitudes_rfq> solicitudes_rfq { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -115,6 +116,16 @@ namespace MediMarket.web.Models
                 .HasMany(e => e.suscripciones)
                 .WithRequired(e => e.usuarios)
                 .HasForeignKey(e => e.usuario_id);
+
+            modelBuilder.Entity<solicitudes_rfq>()
+                .HasRequired(e => e.clinicas)
+                .WithMany()
+                .HasForeignKey(e => e.clinica_id);
+
+            modelBuilder.Entity<solicitudes_rfq>()
+                .HasOptional(e => e.categorias)
+                .WithMany()
+                .HasForeignKey(e => e.categoria_id);
         }
     }
 }

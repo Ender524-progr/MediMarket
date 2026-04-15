@@ -1,0 +1,123 @@
+@model MediMarket.web.Models.solicitudes_rfq
+@{
+    ViewBag.Title = "Nueva Solicitud RFQ";
+    Layout = "~/Views/Shared/_LayoutProveedores.cshtml";
+}
+
+<div class="p-8 max-w-2xl">
+
+    @* ── Breadcrumb ──────────────────────────────────────────────────────────── *@
+    <nav class="flex items-center gap-2 text-sm text-gray-400 mb-6">
+        <a href="@Url.Action("Index")" class="hover:text-gray-700 transition-colors">
+            Solicitudes
+        </a>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
+        <span class="text-gray-700 font-medium">Nueva solicitud</span>
+    </nav>
+
+    <h1 class="text-2xl font-bold text-gray-800 mb-1">Nueva Solicitud</h1>
+    <p class="text-sm text-gray-500 mb-8">
+        Publica tu requerimiento para que los proveedores certificados puedan cotizar.
+    </p>
+
+    @* ── Formulario ──────────────────────────────────────────────────────────── *@
+    @using (Html.BeginForm("Crear", "SolicitudesRfq", FormMethod.Post,
+            new { @class = "bg-white rounded-2xl border shadow-sm p-8 space-y-6" }))
+    {
+        @Html.AntiForgeryToken()
+
+        @* Título *@
+        <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">
+                Título del requerimiento <span class="text-red-500">*</span>
+            </label>
+            @Html.TextBoxFor(m => m.titulo, new
+            {
+                placeholder = "Ej: Insumos Médicos – Guantes Nitrilo",
+                @class = "w-full px-4 py-3 rounded-xl border bg-gray-50 text-sm " +
+                         "focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
+            })
+            @Html.ValidationMessageFor(m => m.titulo, "", new { @class = "text-red-500 text-xs mt-1 block" })
+        </div>
+
+        @* Descripción *@
+        <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">
+                Descripción detallada
+            </label>
+            @Html.TextAreaFor(m => m.descripcion, 4, 0, new
+            {
+                placeholder = "Describe el requerimiento: especificaciones, normas, condiciones de entrega…",
+                @class = "w-full px-4 py-3 rounded-xl border bg-gray-50 text-sm resize-none " +
+                         "focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
+            })
+        </div>
+
+        @* Categoría + Cantidad *@
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">
+                    Categoría
+                </label>
+                @Html.DropDownListFor(m => m.categoria_id,
+                    (SelectList)ViewBag.Categorias,
+                    "— Selecciona —",
+                    new
+                    {
+                        @class = "w-full px-4 py-3 rounded-xl border bg-gray-50 text-sm " +
+                                 "focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
+                    })
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">
+                    Cantidad estimada
+                </label>
+                @Html.TextBoxFor(m => m.cantidad_estimada, new
+                {
+                    placeholder = "Ej: 500 unidades, 3 cajas",
+                    @class = "w-full px-4 py-3 rounded-xl border bg-gray-50 text-sm " +
+                             "focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
+                })
+            </div>
+        </div>
+
+        @* Fecha límite *@
+        <div class="md:w-1/2">
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">
+                Fecha límite de cotización
+            </label>
+            @Html.TextBoxFor(m => m.fecha_limite, "{0:yyyy-MM-dd}", new
+            {
+                type = "date",
+                @class = "w-full px-4 py-3 rounded-xl border bg-gray-50 text-sm " +
+                         "focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500"
+            })
+        </div>
+
+        @* Info publicación verificada *@
+        <div class="flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+            <i class="fa-solid fa-circle-check text-green-600 mt-0.5"></i>
+            <div>
+                <p class="text-sm font-semibold text-green-800">Publicación verificada</p>
+                <p class="text-xs text-green-700 mt-0.5">
+                    Tu solicitud será visible para proveedores certificados por MediMarket.
+                </p>
+            </div>
+        </div>
+
+        @* Botones *@
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <a href="@Url.Action("Index")"
+               class="px-5 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-100
+                      text-sm font-semibold text-gray-700 transition-colors">
+                Cancelar
+            </a>
+            <button type="submit"
+                    class="px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-700
+                           text-white text-sm font-semibold transition-colors shadow">
+                <i class="fa-solid fa-paper-plane mr-1.5"></i>
+                Publicar solicitud
+            </button>
+        </div>
+    }
+</div>
