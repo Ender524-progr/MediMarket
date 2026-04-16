@@ -1,0 +1,147 @@
+@model MediMarket.web.Models.solicitudes_rfq
+@{
+    ViewBag.Title = "Editar Solicitud RFQ";
+    Layout = "~/Views/Shared/_LayoutProveedores.cshtml";
+}
+
+<div class="p-8 max-w-2xl">
+
+    @* ── Breadcrumb ──────────────────────────────────────────────────────────── *@
+    <nav class="flex items-center gap-2 text-sm text-gray-400 mb-6">
+        <a href="@Url.Action("Index")" class="hover:text-gray-700 transition-colors">
+            Solicitudes
+        </a>
+        <i class="fa-solid fa-chevron-right text-xs"></i>
+        <span class="text-gray-700 font-medium">Editar solicitud</span>
+    </nav>
+
+    <div class="flex items-start justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">Editar Solicitud</h1>
+            <p class="text-sm text-gray-500">
+                Creada el @Model.creado_en.ToString("dd MMM yyyy")
+            </p>
+        </div>
+        @* Badge de estado actual *@
+        @{
+            string badgeClass;
+            switch (Model.estado)
+            {
+                case "abierta": badgeClass = "bg-green-100 text-teal-800"; break;
+                case "en_revision": badgeClass = "bg-yellow-100 text-yellow-700"; break;
+                case "cerrada": badgeClass = "bg-gray-200 text-gray-600"; break;
+                default: badgeClass = "bg-red-100 text-red-600"; break;
+            }
+        }
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold @badgeClass">
+            @(string.IsNullOrEmpty(Model.estado) ? "" : Model.estado == "en_revision" ? "En revisión" : char.ToUpper(Model.estado[0]) + Model.estado.Substring(1))
+        </span>
+    </div>
+
+    @* ── Formulario ──────────────────────────────────────────────────────────── *@
+    @using (Html.BeginForm("Editar", "SolicitudesRfq", new { id = Model.id }, FormMethod.Post, new { @class = "bg-white rounded-2xl border shadow-sm p-8 space-y-6" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.id)
+        @Html.HiddenFor(m => m.estado)
+
+        @* Título *@
+        <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">
+                Titulo del requerimiento <span class="text-red-500">*</span>
+            </label>
+            @Html.TextBoxFor(m => m.titulo, new
+            {
+                placeholder = "Ej: Insumos Medicos, Guantes Nitrilo",
+                @class = "w-full px-4 py-3 rounded-xl border bg-gray-50 text-sm " +
+                                   "focus:outline-none focus:ring-2 focus:ring-teal-800/40 focus:border-teal-800"
+            })
+            @Html.ValidationMessageFor(m => m.titulo, "", new { @class = "text-red-500 text-xs mt-1 block" })
+        </div>
+
+        @* Descripción *@
+        <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">
+                Descripcion detallada
+            </label>
+            @Html.TextAreaFor(m => m.descripcion, 4, 0, new
+            {
+                placeholder = "Describe el requerimiento: especificaciones, normas, condiciones de entrega, etc.",
+                @class = "w-full px-4 py-3 rounded-xl border bg-gray-50 text-sm resize-none " +
+                                   "focus:outline-none focus:ring-2 focus:ring-teal-800/40 focus:border-teal-800"
+            })
+        </div>
+
+        @* Categoría + Cantidad *@
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">
+                    Categoria
+                </label>
+                @Html.DropDownListFor(m => m.categoria_id,
+                              (SelectList)ViewBag.Categorias,
+                              "Selecciona una categoria",
+                              new
+                              {
+                                  @class = "w-full px-4 py-3 rounded-xl border bg-gray-50 text-sm " +
+                                           "focus:outline-none focus:ring-2 focus:ring-teal-800/40 focus:border-teal-800"
+                              })
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">
+                    Cantidad estimada
+                </label>
+                @Html.TextBoxFor(m => m.cantidad_estimada, new
+                {
+                    placeholder = "Ej: 500 unidades, 3 cajas",
+                    @class = "w-full px-4 py-3 rounded-xl border bg-gray-50 text-sm " +
+                                       "focus:outline-none focus:ring-2 focus:ring-teal-800/40 focus:border-teal-800"
+                })
+            </div>
+        </div>
+
+        @* Fecha límite + Estado *@
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">
+                    Fecha limite
+                </label>
+                @Html.TextBoxFor(m => m.fecha_limite, "{0:yyyy-MM-dd}", new
+                {
+                    type = "date",
+                    @class = "w-full px-4 py-3 rounded-xl border bg-gray-50 text-sm " +
+                                       "focus:outline-none focus:ring-2 focus:ring-teal-800/40 focus:border-teal-800"
+                })
+            </div>
+        </div>
+
+        @* Botones de acción inferior *@
+        <div class="flex items-center justify-between gap-3 pt-6 border-t border-gray-50">
+            <div class="flex gap-3">
+                @* Botón Regresar (Index) *@
+                <a href="@Url.Action("Index")"
+                   class="px-5 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-200
+                  text-sm font-semibold text-gray-700 transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-1.5"></i>
+                    Regresar
+                </a>
+
+                @* BOTÓN NUEVO: Ir a Detalles *@
+                <a href="@Url.Action("Detalles", new { id = Model.id })"
+                   class="px-5 py-2.5 rounded-xl border border-teal-800 bg-teal-50 text-teal-800
+                  hover:bg-teal-800/20 text-sm font-semibold transition-colors flex items-center">
+                    <i class="fa-solid fa-eye mr-1.5"></i>
+                    Ver publicacion
+                </a>
+            </div>
+
+            @* Botón Guardar *@
+            <button type="submit"
+                    class="px-6 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800
+                   text-white text-sm font-semibold transition-colors shadow-md">
+                <i class="fa-solid fa-floppy-disk mr-1.5"></i>
+                Guardar cambios
+            </button>
+        </div>
+    }
+</div>
