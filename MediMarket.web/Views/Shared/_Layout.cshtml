@@ -19,10 +19,103 @@
                 @Html.ActionLink("PRECIOS", "Index", "Home", null, null, "PRECIOS", null, new { @class = "text-gray-700 font-semibold hover:text-teal-800 hover:translate-y-0.5 transition-all" })
             </div>
                 </nav>
-        <div class="bg-teal-700 rounded-full p-2 px-6 hover:bg-emerald-800 transition-colors hidden md:block">
-            @Html.ActionLink("COMENZAR", "Login", "Account", null, new { @class = "text-white font-semibold" })
+                @* --- Lógica de Autenticación en el Navbar --- *@
+@if (Request.IsAuthenticated)
+{
+    <div class="flex items-center gap-4">
+        
+        @* 1. NUEVO BOTÓN DEL MARKETPLACE (Solo visible con sesión) *@
+        <a href="@Url.Action("Index", "Shop")" 
+           class="flex items-center gap-2 text-teal-700 bg-teal-50 hover:translate-y-0.5 hover:border-teal-200 transition-all px-4 py-2 rounded-full font-semibold text-sm border border-teal-100 shadow-sm">
+            <i class="fa-solid fa-store"></i>
+            <span class="hidden sm:inline">Tienda</span>
+        </a>
 
+    <div class="relative" id="userMenuWrapper">
+        <button id="userMenuBtn" class="flex items-center gap-2 py-1.5 px-2 rounded-full hover:bg-gray-100 transition">
+            @{
+                // 1. Extraemos la identidad una sola vez para no repetir código
+                var identity = (System.Security.Claims.ClaimsIdentity)User.Identity;
+
+                // 2. Buscamos el nombre real (Google lo suele guardar en 'Name' o 'GivenName')
+                var userName = identity.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value 
+                               ?? identity.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value 
+                               ?? User.Identity.Name 
+                               ?? "Usuario";
+
+                // 3. Buscamos el correo de forma limpia
+                var userEmail = identity.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value 
+                                ?? "correo@no-encontrado.com";
+
+                // 4. Buscamos la foto en los posibles nombres que usa Google o tu BD
+                var fotoUrl = identity.FindFirst("foto_url")?.Value 
+                              ?? identity.FindFirst("picture")?.Value 
+                              ?? identity.FindFirst("urn:google:picture")?.Value;
+
+                // Si la URL no empieza con http, la anulamos para que muestre la inicial
+                if (!string.IsNullOrWhiteSpace(fotoUrl) && !fotoUrl.StartsWith("http"))
+                {
+                    fotoUrl = null;
+                }
+            }
+
+            @* Renderizado de la Foto (con escudo anti-errores) *@
+            <div class="relative w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-sm ring-2 ring-teal-400 overflow-hidden">
+                
+                @* 1. La inicial siempre está viva al fondo *@
+                <span class="absolute z-0">@(userName.Substring(0, 1).ToUpper())</span>
+
+                @* 2. La foto intenta cargarse por encima *@
+                @if (!string.IsNullOrWhiteSpace(fotoUrl))
+                {
+                    <img src="@fotoUrl" 
+                         alt="Perfil" 
+                         referrerpolicy="no-referrer"
+                         class="absolute z-10 w-full h-full object-cover"
+                         onerror="this.style.display='none'" />
+                }
+            </div>
+            <i class="fas fa-chevron-down text-xs text-gray-400 hidden md:block"></i>
+        </button>
+
+        @* Dropdown Menu *@
+        <div id="userMenuDropdown" class="hidden absolute right-0 top-full mt-2 w-52 bg-white border border-teal-200 rounded-xl shadow-2xl z-50 overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-100">
+                @* Aquí solo imprimimos las variables limpias *@
+                <p class="text-sm font-semibold text-gray-800 truncate">@userName</p>
+                <p class="text-xs text-gray-400 truncate">@userEmail</p>
+            </div>
+            <ul class="py-1">
+                <li>
+                    <a href="@Url.Action("Index", "Proveedores")" class="
+                    flex items-center 
+                    gap-2 px-4 py-2 
+                    text-sm text-gray-700 
+                    hover:translate-x-1 transition-transform">
+                        <i class="fas fa-tachometer-alt w-4 text-gray-400"></i> Mi Dashboard
+                    </a>
+                </li>
+                <li class="border-t border-gray-100 mt-1">
+                    <a href="@Url.Action("Logout", "Account")" class="
+                    flex items-center 
+                    gap-2 px-4 py-2 
+                    text-sm text-red-500 
+                    hover:translate-x-1 transition-transform">
+                        <i class="fas fa-sign-out-alt w-4"></i> Cerrar sesión
+                    </a>
+                </li>
+            </ul>
         </div>
+    </div>
+    </div>
+}
+else
+{
+    <a href="@Url.Action("Login", "Account")" class="px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-full transition-colors shadow-md">
+        COMENZAR
+    </a>
+}
+
         <button id="bars" class="md:hidden text-teal-700 focus:outline-none">
             <i class="fa-solid fa-bars"></i>
         </button>
@@ -60,6 +153,24 @@
                 mainNav.classList.add('hidden');
             }
         });
+
+        // Script para abrir/cerrar el dropdown del usuario en el Navbar
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userMenuDropdown = document.getElementById('userMenuDropdown');
+
+    if (userMenuBtn && userMenuDropdown) {
+        userMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userMenuDropdown.classList.toggle('hidden');
+        });
+
+        // Cerrar si se hace clic afuera
+        document.addEventListener('click', (e) => {
+            if (!userMenuBtn.contains(e.target) && !userMenuDropdown.contains(e.target)) {
+                userMenuDropdown.classList.add('hidden');
+            }
+        });
+    }
     </script>
 </body>
 </html>
