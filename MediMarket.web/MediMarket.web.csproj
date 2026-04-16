@@ -7,7 +7,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>
-    </ProductVersion>  
+    </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D92885DA-6FCF-4A04-B59D-1E50B61D808C}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
@@ -164,6 +164,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\ShopController.cs" />
     <Compile Include="Controllers\SolicitudesRfqController.cs" />
     <Compile Include="Models\administradores.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -266,6 +267,8 @@
     <Content Include="Views\MiCatalogo\Details.cshtml" />
     <Content Include="Views\MiCatalogo\Edit.cshtml" />
     <Content Include="Views\MiCatalogo\Delete.cshtml" />
+    <Content Include="Views\Shop\Index.cshtml" />
+    <Content Include="Views\Shared\_LayoutShop.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

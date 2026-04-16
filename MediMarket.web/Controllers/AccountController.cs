@@ -105,7 +105,7 @@ namespace MediMarket.web.Controllers
 
                 db.SaveChanges();
                 SignInUser(user); // ✅
-                return RedirectToAction("Index", "Proveedores");
+                return RedirectToAction("Index", "Shop");
             }
         }
 

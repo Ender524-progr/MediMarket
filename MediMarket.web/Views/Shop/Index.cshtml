@@ -1,0 +1,195 @@
+﻿@using MediMarket.web.Controllers
+@model ShopController.ShopIndexViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+    ViewBag.Title = "Marketplace";
+}
+
+@* ── Barra lateral + contenido ──────────────────────────────────── *@
+<div class="flex min-h-screen pt-16">
+
+    @* ── Sidebar de categorías ────────────────────────────────────── *@
+    <aside class="w-56 shrink-0 hidden lg:block sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto
+                  border-r border-gray-100 bg-white p-5">
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Categorías</p>
+        <ul class="space-y-1">
+            <li>
+                <a href="@Url.Action("Index", "Shop", new { q = Model.Busqueda })"
+                   class="flex items-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition
+                          @(Model.CategoriaFiltro == null ? "bg-teal-50 text-teal-700 font-semibold" : "text-gray-600 hover:bg-gray-100")">
+                    <i class="fas fa-th-large w-4 text-center"></i> Todas
+                </a>
+            </li>
+            @foreach (var cat in Model.TodasCategorias)
+            {
+                <li>
+                    <a href="@Url.Action("Index", "Shop", new { q = Model.Busqueda, categoriaId = cat.id })"
+                       class="flex items-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition
+                              @(Model.CategoriaFiltro == cat.id ? "bg-teal-50 text-teal-700 font-semibold" : "text-gray-600 hover:bg-gray-100")">
+                        <i class="fas fa-tag w-4 text-center text-gray-400"></i> @cat.nombre
+                    </a>
+                </li>
+            }
+        </ul>
+    </aside>
+
+    @* ── Contenido principal ──────────────────────────────────────── *@
+    <div class="flex-1 px-6 py-6 bg-gray-50">
+
+        @* Encabezado de resultados *@
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+            <div>
+                @if (!string.IsNullOrWhiteSpace(Model.Busqueda))
+                {
+                    <h2 class="text-xl font-bold text-gray-800">
+                        Resultados para <span class="text-teal-600">"@Model.Busqueda"</span>
+                    </h2>
+                    <a href="@Url.Action("Index", "Shop")" class="text-xs text-gray-400 hover:text-red-500">
+                        <i class="fas fa-times mr-1"></i>Limpiar búsqueda
+                    </a>
+                }
+                else
+                {
+                    <h2 class="text-xl font-bold text-gray-800">Marketplace Médico</h2>
+                    <p class="text-sm text-gray-400">Productos y suministros para centros de salud</p>
+                }
+            </div>
+            <p class="text-sm text-gray-400">
+                @(Model.Categorias.Sum(c => c.Productos.Count)) productos encontrados
+            </p>
+        </div>
+
+        @if (!Model.Categorias.Any())
+        {
+            @* Estado vacío *@
+            <div class="flex flex-col items-center justify-center py-24 text-gray-400">
+                <i class="fas fa-box-open text-7xl mb-4 opacity-30"></i>
+                <p class="text-xl font-semibold">No se encontraron productos</p>
+                <p class="text-sm mt-1">Intenta con otra búsqueda o categoría</p>
+                <a href="@Url.Action("Index", "Shop")"
+                   class="mt-5 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-6 rounded-full text-sm transition">
+                    Ver todos los productos
+                </a>
+            </div>
+        }
+        else
+        {
+            @* ── Secciones por categoría ──────────────────────────── *@
+            foreach (var seccion in Model.Categorias)
+            {
+                var nombreCat = seccion.Categoria?.nombre ?? "Otros productos";
+
+                <section class="mb-10">
+                    @* Header de sección *@
+                    <div class="flex items-center gap-3 mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">@nombreCat</h3>
+                        <span class="text-xs bg-teal-100 text-teal-700 font-semibold px-2 py-0.5 rounded-full">
+                            @seccion.Productos.Count
+                        </span>
+                        <div class="flex-1 h-px bg-gray-200"></div>
+                        @if (seccion.Categoria != null)
+                        {
+                            <a href="@Url.Action("Index", "Shop", new { categoriaId = seccion.Categoria.id })"
+                               class="text-xs text-teal-600 hover:underline whitespace-nowrap">
+                                Ver todo <i class="fas fa-chevron-right text-xs"></i>
+                            </a>
+                        }
+                    </div>
+
+                    @* Grid de tarjetas *@
+                    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                        @foreach (var producto in seccion.Productos)
+                        {
+                            var img = producto.producto_imagenes?.FirstOrDefault(i => i.es_principal)?.url
+                                   ?? producto.producto_imagenes?.FirstOrDefault()?.url
+                                   ?? "/Content/img/no-image.png";
+
+                            var proveedor = producto.proveedores;
+
+                            <a href="@Url.Action("Details", "Shop", new { id = producto.id })"
+                               class="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md
+                                      transition-all duration-200 flex flex-col overflow-hidden">
+
+                                @* Imagen *@
+                                <div class="relative overflow-hidden bg-gray-50 h-44">
+                                    <img src="@img" alt="@producto.nombre"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                    @if (producto.stock_disponible == 0)
+                                    {
+                                        <span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                            Agotado
+                                        </span>
+                                    }
+                                    else if (producto.stock_disponible <= 5)
+                                    {
+                                        <span class="absolute top-2 left-2 bg-amber-400 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                            Últimas @producto.stock_disponible
+                                        </span>
+                                    }
+                                </div>
+
+                                @* Info *@
+                                <div class="p-3 flex flex-col flex-1 gap-1">
+                                    <p class="text-xs text-gray-400 truncate">
+                                        <i class="fas fa-store text-gray-300 mr-1"></i>@(proveedor?.nombre_empresa ?? "—")
+                                    </p>
+                                    <h4 class="text-sm font-semibold text-gray-800 leading-snug line-clamp-2 min-h-[2.5rem]">
+                                        @producto.nombre
+                                    </h4>
+
+                                    <p class="text-xl font-bold text-gray-900 mt-auto">
+                                        $@producto.precio_unitario.ToString("N2")
+                                        <span class="text-xs font-normal text-gray-400">/@producto.unidad_medida</span>
+                                    </p>
+
+                                    @* Botón agregar al carrito CON LA CORRECCIÓN APLICADA *@
+                                    <button onclick="event.preventDefault(); agregarAlCarrito('@producto.id');"
+                                            @(producto.stock_disponible == 0 ? "disabled" : "")
+                                            class="mt-2 w-full py-2 rounded-lg text-sm font-semibold transition
+                                                   @(producto.stock_disponible == 0
+                                                       ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                                       : "bg-teal-600 hover:bg-teal-700 text-white active:scale-95")">
+                                        @if (producto.stock_disponible == 0)
+                                        {
+                                            <text>Sin stock</text>
+                                        }
+                                        else
+                                        {
+                                            <text><i class="fas fa-cart-plus mr-1"></i> Agregar</text>
+                                        }
+                                    </button>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                </section>
+            }
+        }
+    </div>
+</div>
+
+<script>
+    function agregarAlCarrito(productoId) {
+        // Placeholder — conectar con CarritoController cuando esté listo
+        fetch('/Carrito/Agregar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('input[name=__RequestVerificationToken]')?.value },
+            body: JSON.stringify({ productoId: productoId, cantidad: 1 })
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) mostrarToast('Producto agregado al carrito', 'success');
+                else mostrarToast(data.mensaje || 'Error al agregar', 'error');
+            })
+            .catch(() => mostrarToast('No se pudo conectar', 'error'));
+    }
+
+    function mostrarToast(msg, tipo) {
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-semibold transition-all
+            ${tipo === 'success' ? 'bg-teal-600' : 'bg-red-500'}`;
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+</script>
