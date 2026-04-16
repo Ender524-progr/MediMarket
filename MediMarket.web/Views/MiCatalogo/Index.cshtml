@@ -4,7 +4,7 @@
     ViewBag.Title = "Mi Catalogo";
 }
 
-<section class="w-full h-fit flex justify-between items-end gap-2 p-8">
+<section class="w-full h-fit flex justify-between items-end gap-2 py-8">
     <div class="w-fit h-fit flex flex-col items-start">
         <h1 class="text-4xl font-bold">Mi Catálogo de Productos y Servicios</h1>
         <p class="text-xl text-gray-500">Gestione su inventario médico, suministros y servicios para centros de salud.</p>
@@ -17,16 +17,51 @@
     </div>
 </section>
 
-<div class="w-full h-fit flex items-center gap-4 px-8 mb-4">
+<div class="w-full h-fit flex items-center gap-4 px-4 py-3 rounded-lg mb-4 bg-gray-200/50 shadow-sm">
     <input type="text" placeholder="Buscar productos..."
-           class="border rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-    <select name="categoria" id="categoria"
-            class="border rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <option value="">Todas las categorías</option>
-        <option value="medicamentos">Medicamentos</option>
-        <option value="insumos">Insumos</option>
-        <option value="servicios">Servicios</option>
-    </select>
+        class="bg-white w-full max-w-1/2 rounded-lg py-2 px-4 hover:ring-1 hover:ring-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm transition-all delay-25">
+
+    <div class="relative inline-block w-full max-w-1/4">
+        <select name="categoria" id="categoria" class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 hover:ring-1 hover:ring-teal-400
+            focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm
+            border border-gray-300 transition-all delay-25">
+            <option value="">Todas las categorías</option>
+            <option value="medicamentos">Medicamentos</option>
+            <option value="insumos">Insumos</option>
+            <option value="servicios">Servicios</option>
+        </select>
+
+        <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+            <i class="fa-solid fa-angle-down text-sm"></i>
+        </div>
+    </div>
+    <div class="relative inline-block w-full max-w-1/8">
+        <select name="estado" id="estado" class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 hover:ring-1 hover:ring-teal-400
+                    focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm
+                    border border-gray-300 transition-all delay-25">
+            <option value="">Estado</option>
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+            <i class="fa-solid fa-angle-down text-sm"></i>
+        </div>
+    </div>
+
+    <div class="relative inline-block w-full max-w-1/8">
+        <select name="ordenar" id="ordenar" class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 hover:ring-1 hover:ring-teal-400
+                        focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm
+                        border border-gray-300 transition-all delay-25">
+            <option value="">Ordenar por</option>
+            <option value="nombre_asc">Nombre (A-Z)</option>
+            <option value="nombre_desc">Nombre (Z-A)</option>
+            <option value="precio_asc">Precio (Menor a Mayor)</option>
+            <option value="precio_desc">Precio (Mayor a Menor)</option>
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+            <i class="fa-solid fa-angle-down text-sm"></i>
+        </div>
+    </div>
 </div>
 
 <section class="w-full h-fit flex flex-col gap-4 p-8">
@@ -38,9 +73,9 @@
                       ?? item.producto_imagenes?.FirstOrDefault()?.url
                       ?? "/Content/img/no-image.png";
 
-            <div class="w-full flex justify-between items-center gap-4 p-4 border rounded-lg">
+            <div class="w-full flex justify-between items-center gap-4 p-4 bg-gray-100/30 shadow-sm rounded-lg">
                 <div class="flex items-center gap-4">
-                    <img src="@imagen" alt="@item.nombre" class="w-16 h-16 object-cover rounded">
+                    <img src="@imagen" alt="@item.nombre" class="w-24 h-24 object-cover rounded">
                     <div>
                         <h2 class="text-xl font-bold">@item.nombre</h2>
                         <p class="text-gray-500">@item.descripcion</p>
@@ -57,16 +92,16 @@
                 <div class="flex items-center gap-2">
                     <a href="@Url.Action("Details", "MiCatalogo", new { id = item.id })"
                        class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">
-                        Ver
+                        <i class="fas fa-eye"></i>
                     </a>
                     <a href="@Url.Action("Edit", "MiCatalogo", new { id = item.id })"
-                       class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                        Editar
+                       class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded">
+                        <i class="fas fa-edit"></i> 
                     </a>
                     <a href="@Url.Action("Delete", "MiCatalogo", new { id = item.id })"
-                   class="flex-1 text-center py-2 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold transition">
-                    Eliminar
-                </a>
+                       class="flex-1 text-center py-2 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold transition">
+                        <i class="fas fa-trash"></i> 
+                    </a>
                 </div>
             </div>
         }
