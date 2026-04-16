@@ -25,6 +25,7 @@ namespace MediMarket.web.Models
         public virtual DbSet<suscripciones> suscripciones { get; set; }
         public virtual DbSet<usuarios> usuarios { get; set; }
         public virtual DbSet<solicitudes_rfq> solicitudes_rfq { get; set; }
+        public virtual DbSet<cotizaciones> cotizaciones { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

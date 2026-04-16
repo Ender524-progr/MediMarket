@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MediMarket.web.Models
 {
@@ -22,7 +23,12 @@ namespace MediMarket.web.Models
         public DateTime creado_en { get; set; }
 
         // Navegación
+       // Le decimos a EF: "Oye, para la tabla solicitudes_rfq, usa la columna rfq_id"
+        [ForeignKey("rfq_id")]
         public virtual solicitudes_rfq solicitudes_rfq { get; set; }
+
+        // Le decimos a EF: "Para la tabla proveedores, usa la columna proveedor_id"
+        [ForeignKey("proveedor_id")]
         public virtual proveedores proveedores { get; set; }
     }
 }
