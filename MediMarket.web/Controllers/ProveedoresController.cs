@@ -19,5 +19,10 @@ namespace MediMarket.web.Controllers
             ViewBag.FotoUrl = identity.FindFirst("foto_url")?.Value;
             return View();
         }
+
+         public ActionResult RFQs()
+        {
+            return RedirectToAction("Index", "SolicitudesRfq");
+        }
     }
 }
