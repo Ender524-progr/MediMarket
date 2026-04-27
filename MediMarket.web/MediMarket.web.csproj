@@ -167,6 +167,7 @@
     <Compile Include="Controllers\CarritoController.cs" />
     <Compile Include="Controllers\ClinicaController.cs" />
     <Compile Include="Controllers\ListaDeseosController.cs" />
+    <Compile Include="Controllers\RfqsController.cs" />
     <Compile Include="Controllers\ShopController.cs" />
     <Compile Include="Controllers\SolicitudesRfqController.cs" />
     <Compile Include="Models\administradores.cs" />
@@ -277,6 +278,8 @@
     <Content Include="Views\Shop\Details.cshtml" />
     <Content Include="Views\Carrito\Index.cshtml" />
     <Content Include="Views\ListaDeseos\Index.cshtml" />
+    <Content Include="Views\Rfqs\Index.cshtml" />
+    <Content Include="Views\Rfqs\Details.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
