@@ -17,51 +17,64 @@
     </div>
 </section>
 
-<div class="w-full h-fit flex items-center gap-4 px-4 py-3 rounded-lg mb-4 bg-gray-200/50 shadow-sm">
-    <input type="text" placeholder="Buscar productos..."
-        class="bg-white w-full max-w-1/2 rounded-lg py-2 px-4 hover:ring-1 hover:ring-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm transition-all delay-25">
+<div class="w-full flex items-center gap-4 px-4 py-3 rounded-lg mb-4 bg-gray-200/50 shadow-sm">
 
-    <div class="relative inline-block w-full max-w-1/4">
-        <select name="categoria" id="categoria" class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 hover:ring-1 hover:ring-teal-400
-            focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm
-            border border-gray-300 transition-all delay-25">
-            <option value="">Todas las categorías</option>
-            <option value="medicamentos">Medicamentos</option>
-            <option value="insumos">Insumos</option>
-            <option value="servicios">Servicios</option>
+    <!-- 🔍 Busqueda (50%) -->
+    <input id="busqueda" type="text" placeholder="Buscar productos..."
+        class="flex-5 bg-white rounded-lg py-2 px-4 hover:ring-1 hover:ring-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm transition-all">
+
+    <div class="relative flex-2">
+        <select id="categoria"
+            class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 border border-gray-300 shadow-sm
+                   hover:ring-1 hover:ring-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all">
+            <option value="">Categoría</option>
+            @foreach (var categoria in ViewBag.Categorias)
+            {
+                <option value="@categoria.id">@categoria.nombre</option>
+            }
         </select>
 
         <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
             <i class="fa-solid fa-angle-down text-sm"></i>
         </div>
     </div>
-    <div class="relative inline-block w-full max-w-1/8">
-        <select name="estado" id="estado" class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 hover:ring-1 hover:ring-teal-400
-                    focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm
-                    border border-gray-300 transition-all delay-25">
+    
+    <div class="relative flex-[1.5]">
+        <select id="estado"
+            class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 border border-gray-300 shadow-sm
+                   hover:ring-1 hover:ring-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all">
             <option value="">Estado</option>
             <option value="activo">Activo</option>
             <option value="inactivo">Inactivo</option>
         </select>
+
         <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
             <i class="fa-solid fa-angle-down text-sm"></i>
         </div>
     </div>
 
-    <div class="relative inline-block w-full max-w-1/8">
-        <select name="ordenar" id="ordenar" class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 hover:ring-1 hover:ring-teal-400
-                        focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm
-                        border border-gray-300 transition-all delay-25">
+    <div class="relative flex-[1.5]">
+        <select id="ordenar"
+            class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 border border-gray-300 shadow-sm
+                   hover:ring-1 hover:ring-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all">
             <option value="">Ordenar por</option>
             <option value="nombre_asc">Nombre (A-Z)</option>
             <option value="nombre_desc">Nombre (Z-A)</option>
             <option value="precio_asc">Precio (Menor a Mayor)</option>
             <option value="precio_desc">Precio (Mayor a Menor)</option>
         </select>
+
         <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
             <i class="fa-solid fa-angle-down text-sm"></i>
         </div>
     </div>
+
+    <button onclick="LimpiarFiltros()"
+        class="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm
+               hover:bg-gray-100 transition">
+        <i class="fa-solid fa-filter-circle-xmark text-gray-600"></i>
+    </button>
+
 </div>
 
 <section class="w-full h-fit flex flex-col gap-4 p-8">
@@ -73,11 +86,12 @@
                       ?? item.producto_imagenes?.FirstOrDefault()?.url
                       ?? "/Content/img/no-image.png";
 
-            <div class="w-full flex justify-between items-center gap-4 p-4 bg-gray-100/30 shadow-sm rounded-lg">
+            <div class="w-full flex justify-between items-center gap-4 p-4 bg-gray-100/30 shadow-sm rounded-lg producto-item"
+                 data-categoria="@item.categoria_id">
                 <div class="flex items-center gap-4">
                     <img src="@imagen" alt="@item.nombre" class="w-24 h-24 object-cover rounded">
                     <div>
-                        <h2 class="text-xl font-bold">@item.nombre</h2>
+                        <h2 class="text-xl font-bold producto-nombre">@item.nombre</h2>
                         <p class="text-gray-500">@item.descripcion</p>
                         <div class="flex gap-3 mt-1 text-sm text-gray-600">
                             <span>SKU: @(item.sku ?? "—")</span>
@@ -118,3 +132,83 @@
         </div>
     }
 </section>
+
+<script>
+    const busquedaInput = document.getElementById('busqueda');
+    const categoriaSelect = document.getElementById('categoria');
+    const estadoSelect = document.getElementById('estado');
+    const ordenarSelect = document.getElementById('ordenar');
+
+    const productosContainer = document.querySelector('section.w-full.h-fit.flex.flex-col.gap-4.p-8');
+
+    function aplicarFiltros() {
+        const query = busquedaInput.value.toLowerCase();
+        const categoria = categoriaSelect.value;
+        const estado = estadoSelect.value;
+
+        document.querySelectorAll('.producto-item').forEach(item => {
+            const nombre = item.querySelector('.producto-nombre').textContent.toLowerCase();
+            const itemCategoria = item.getAttribute('data-categoria');
+            const itemEstado = item.querySelector('.text-green-600, .text-red-500').textContent.trim().toLowerCase();
+
+            let coincideBusqueda = nombre.includes(query);
+            let coincideCategoria = (categoria === '' || itemCategoria === categoria);
+            let coincideEstado =
+                (estado === '') ||
+                (estado === 'activo' && itemEstado === 'activo') ||
+                (estado === 'inactivo' && itemEstado === 'inactivo');
+
+            item.style.display = (coincideBusqueda && coincideCategoria && coincideEstado) ? '' : 'none';
+        });
+    }
+
+    function aplicarOrden() {
+        const ordenar = ordenarSelect.value;
+        const productosArray = Array.from(document.querySelectorAll('.producto-item'));
+
+        productosArray.sort((a, b) => {
+            const nombreA = a.querySelector('.producto-nombre').textContent;
+            const nombreB = b.querySelector('.producto-nombre').textContent;
+
+            const precioA = parseFloat(a.querySelector('.text-sm span:nth-child(2)').textContent.replace('$', '').replace(',', ''));
+            const precioB = parseFloat(b.querySelector('.text-sm span:nth-child(2)').textContent.replace('$', '').replace(',', ''));
+
+            if (ordenar === 'nombre_asc') return nombreA.localeCompare(nombreB);
+            if (ordenar === 'nombre_desc') return nombreB.localeCompare(nombreA);
+            if (ordenar === 'precio_asc') return precioA - precioB;
+            if (ordenar === 'precio_desc') return precioB - precioA;
+
+            return 0;
+        });
+
+        productosArray.forEach(producto => productosContainer.appendChild(producto));
+    }
+
+    // Eventos
+    busquedaInput.addEventListener('input', () => {
+        aplicarFiltros();
+    });
+
+    categoriaSelect.addEventListener('change', () => {
+        aplicarFiltros();
+    });
+
+    estadoSelect.addEventListener('change', () => {
+        aplicarFiltros();
+    });
+
+    ordenarSelect.addEventListener('change', () => {
+        aplicarOrden();
+    });
+
+    function LimpiarFiltros() {
+        busquedaInput.value = '';
+        categoriaSelect.value = '';
+        estadoSelect.value = '';
+        ordenarSelect.value = '';
+
+        aplicarFiltros();
+        aplicarOrden();
+    }
+</script>
+
