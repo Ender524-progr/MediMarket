@@ -75,11 +75,14 @@
                          onerror="this.style.display='none'" />
                 }
             </div>
-            <i class="fas fa-chevron-down text-xs text-gray-400 hidden md:block"></i>
         </button>
 
         @* Dropdown Menu *@
-        <div id="userMenuDropdown" class="hidden absolute right-0 top-full mt-2 w-52 bg-white border border-teal-200 rounded-xl shadow-2xl z-50 overflow-hidden">
+        <div id="userMenuDropdown" 
+                     class="absolute right-0 top-full mt-2 w-52 
+                     bg-white border border-gray-200 
+                     rounded-xl shadow-2xl z-50 overflow-hidden 
+                     transition-all duration-200 ease-out origin-top-right transform scale-95 opacity-0 invisible">
             <div class="px-4 py-3 border-b border-gray-100">
                 @* Aquí solo imprimimos las variables limpias *@
                 <p class="text-sm font-semibold text-gray-800 truncate">@userName</p>
@@ -141,36 +144,25 @@ else
         </div>
     </footer>   
     <script>
-        const bars = document.getElementById('bars');
-        const mainNav = document.getElementById('mainNav');
-        // Toggle del menú al hacer clic en el ícono de barras
-        bars.addEventListener('click', () => {
-            mainNav.classList.toggle('hidden');
-        });
-        // Cerrar el menú al hacer clic en un otra parte de la página
-        document.addEventListener('click', (event) => {
-            if (!mainNav.contains(event.target) && !bars.contains(event.target)) {
-                mainNav.classList.add('hidden');
-            }
-        });
+                const btn = document.getElementById('userMenuBtn');
+        const dropdown = document.getElementById('userMenuDropdown');
 
-        // Script para abrir/cerrar el dropdown del usuario en el Navbar
-    const userMenuBtn = document.getElementById('userMenuBtn');
-    const userMenuDropdown = document.getElementById('userMenuDropdown');
-
-    if (userMenuBtn && userMenuDropdown) {
-        userMenuBtn.addEventListener('click', (e) => {
+        btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            userMenuDropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('invisible');
+            dropdown.classList.toggle('opacity-0');
+            dropdown.classList.toggle('scale-95');
+            dropdown.classList.toggle('opacity-100');
+            dropdown.classList.toggle('scale-100');
         });
 
-        // Cerrar si se hace clic afuera
-        document.addEventListener('click', (e) => {
-            if (!userMenuBtn.contains(e.target) && !userMenuDropdown.contains(e.target)) {
-                userMenuDropdown.classList.add('hidden');
-            }
+        // Cerrar al hacer clic afuera
+        document.addEventListener('click', () => {
+            dropdown.classList.add('invisible', 'opacity-0', 'scale-95');
+            dropdown.classList.remove('opacity-100', 'scale-100');
         });
-    }
+        
+        dropdown.addEventListener('click', (e) => e.stopPropagation());
     </script>
 </body>
 </html>

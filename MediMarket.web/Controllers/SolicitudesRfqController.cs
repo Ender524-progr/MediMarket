@@ -83,14 +83,14 @@ namespace MediMarket.web.Controllers
 
                 model.id = Guid.NewGuid();
                 model.clinica_id = clinicaId.Value;
-                model.estado = "en_revision"; 
+                model.estado = "abierta"; 
                 model.creado_en = DateTime.Now;
                 model.actualizado_en = DateTime.Now;
 
                 db.solicitudes_rfq.Add(model);
                 db.SaveChanges();
 
-                TempData["Exito"] = "Solicitud enviada a revisión.";
+                TempData["Exito"] = "Solicitud enviada.";
                 return RedirectToAction("Index");
             }
         }

@@ -1,9 +1,11 @@
 @model IEnumerable<MediMarket.web.Models.solicitudes_rfq>
 @{
     ViewBag.Title = "Mis Solicitudes (RFQ)";
-    Layout = "~/Views/Shared/_LayoutProveedores.cshtml";
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
 }
 
+<div class="pt-16">
+    
 @* ── Toast de éxito ─────────────────────────────────────────────────────── *@
 @if (TempData["Exito"] != null)
 {
@@ -18,6 +20,13 @@
 }
 
 <div class="p-8">
+
+    <a href="@Url.Action("Index", "Shop")" class="
+    inline-flex items-center gap-2 text-sm font-bold 
+    text-gray-400 hover:text-teal-600 
+    transition-colors mb-6 group">
+        <i class="fa-solid fa-arrow-left-long group-hover:-translate-x-1 transition-transform"></i> Seguir comprando
+    </a>
 
     @* ── Encabezado ─────────────────────────────────────────────────────────── *@
     <div class="flex items-center justify-between mb-8">
@@ -216,6 +225,7 @@
             }
         </div>
     </div>
+</div>
 </div>
 
 <script>

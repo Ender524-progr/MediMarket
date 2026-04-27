@@ -70,5 +70,77 @@ namespace MediMarket.web.Controllers
                 return View(vm);
             }
         }
+
+        // ─── DETAILS ─────────────────────────────────────────────────────────────
+        public ActionResult Details(Guid id)
+        {
+            using (var db = new ConexionModel())
+            {
+                // 1. Necesitamos saber si la clínica actual ya comentó
+                var userIdStr = ((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userIdStr != null)
+                {
+                    var userId = Guid.Parse(userIdStr);
+                    var miClinica = db.clinicas.FirstOrDefault(c => c.usuario_id == userId);
+                    ViewBag.MiClinicaId = miClinica?.id; // Mandamos su ID a la vista
+                }
+
+                // 2. Traemos el producto con sus comentarios reales
+                var producto = db.productos
+                    .Include("categorias")
+                    .Include("proveedores")
+                    .Include("producto_imagenes")
+                    .Include("producto_comentarios.clinicas") // <- Magia: Trae la info de quien comentó
+                    .FirstOrDefault(p => p.id == id && p.activo);
+
+                if (producto == null) return HttpNotFound("El producto no existe o ya no está disponible.");
+
+                return View(producto);
+            }
+        }
+
+        // ─── GUARDAR / EDITAR COMENTARIO ─────────────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult GuardarComentario(Guid producto_id, int calificacion, string comentario)
+        {
+            using (var db = new ConexionModel())
+            {
+                var userId = Guid.Parse(((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier).Value);
+                var clinica = db.clinicas.FirstOrDefault(c => c.usuario_id == userId);
+
+                if (clinica == null) return HttpNotFound("Debes tener un perfil de clínica para comentar.");
+
+                // Buscamos si esta clínica ya había opinado sobre este producto
+                var opinionExistente = db.producto_comentarios
+                    .FirstOrDefault(c => c.producto_id == producto_id && c.clinica_id == clinica.id);
+
+                if (opinionExistente != null)
+                {
+                    // Si ya existe, lo actualizamos (Editar)
+                    opinionExistente.calificacion = calificacion;
+                    opinionExistente.comentario = comentario;
+                    opinionExistente.actualizado_en = DateTime.Now;
+                }
+                else
+                {
+                    // Si no existe, lo creamos nuevo
+                    db.producto_comentarios.Add(new producto_comentarios
+                    {
+                        id = Guid.NewGuid(),
+                        producto_id = producto_id,
+                        clinica_id = clinica.id,
+                        calificacion = calificacion,
+                        comentario = comentario,
+                        creado_en = DateTime.Now,
+                        actualizado_en = DateTime.Now
+                    });
+                }
+
+                db.SaveChanges();
+                TempData["Exito"] = "Tu opinión se ha guardado correctamente.";
+                return RedirectToAction("Details", new { id = producto_id });
+            }
+        }
     }
 }
