@@ -17,6 +17,7 @@ namespace MediMarket.web.Controllers
 
             ViewBag.Nombre = identity.FindFirst(ClaimTypes.Name)?.Value;
             ViewBag.FotoUrl = identity.FindFirst("foto_url")?.Value;
+            ViewBag.Correo = identity.FindFirst(ClaimTypes.Email);
             return View();
         }
 
