@@ -11,7 +11,9 @@
 
     @* ── Header fijo ──────────────────────────────────────────────────── *@
     <header class="w-full h-16 fixed top-0 left-0 right-0 flex items-center gap-4
-                   bg-white border-b border-gray-100 shadow-sm z-50 px-4 md:px-8">
+                   bg-white border-b border-gray-100 shadow-sm z-50                   
+                    justify-between px-4 md:px-10 backdrop-blur-md
+                   ">
 
         @* Logo *@
         <a href="@Url.Action("Index", "Shop")"
@@ -25,10 +27,10 @@
             <div class="relative">
                 <input type="text" name="q" value="@ViewBag.Busqueda"
                        placeholder="Buscar productos, suministros, equipos..."
-                       class="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-full text-sm
-                              focus:outline-none focus:ring-2 focus:ring-teal-400 focus:bg-white transition" />
-                <button type="submit"
-                        class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 hover:text-teal-600">
+                       class="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 focus:bg-white transition" />
+                
+                @* ¡Esta es la lupa que borraste! jajaja *@
+                <button type="submit" class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 hover:text-teal-600">
                     <i class="fas fa-search text-sm"></i>
                 </button>
             </div>
@@ -36,25 +38,29 @@
 
         @* Navegación derecha *@
         <nav class="flex items-center gap-1 ml-auto shrink-0">
-            <a href="@Url.Action("Index", "Shop")"
-               class="hidden md:flex items-center gap-1.5 py-2 px-3 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition">
-                <i class="fas fa-store"></i>
-                <span>Productos</span>
-            </a>
             <a href="@Url.Action("Index", "Ordenes")"
-               class="hidden md:flex items-center gap-1.5 py-2 px-3 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition">
+               class="hidden md:flex items-center gap-1.5 py-2 px-3 rounded-lg text-sm 
+               text-gray-600 hover:bg-gray-200 transition-colors">
                 <i class="fas fa-box"></i>
-                <span>Mis pedidos</span>
+                <span>Mis Pedidos</span>
             </a>
 
             @* Carrito *@
             <a href="@Url.Action("Index", "Carrito")"
-               class="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition text-gray-600">
+               class="hidden md:flex items-center gap-1.5 py-2 px-3 rounded-lg text-sm 
+               text-gray-600 hover:bg-gray-200 transition-colors relative">
                 <i class="fas fa-shopping-cart"></i>
-                @* Badge — conéctalo dinámicamente cuando tengas el carrito *@
+                <span>Mi Carrito</span>
+                
+                @* Lógica para el número inicial del badge *@
+                @{
+                    var carritoSesion = Session["Carrito"] as List<MediMarket.web.Controllers.CarritoController.CarritoItem>;
+                    int itemsEnCarrito = carritoSesion != null ? carritoSesion.Sum(i => i.Cantidad) : 0;
+                }
                 <span id="carritoCount"
-                      class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-teal-600 text-white text-xs
-                             font-bold rounded-full flex items-center justify-center hidden">0</span>
+                      class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-teal-600 text-white text-[10px] font-bold rounded-full items-center justify-center @(itemsEnCarrito > 0 ? "flex" : "hidden")">
+                    @itemsEnCarrito
+                </span>
             </a>
 
             @* Notificaciones *@
@@ -64,64 +70,79 @@
 
             @* Menú de usuario *@
             <div class="relative" id="userMenuWrapper">
-                <button id="userMenuBtn"
-                        class="flex items-center gap-2 py-1.5 px-2 rounded-full hover:bg-gray-100 transition">
+                <button id="userMenuBtn" class="flex items-center gap-2 py-1.5 px-2 rounded-full hover:bg-gray-100 transition focus:outline-none">
                     @{
-                        var fotoUrl = ((System.Security.Claims.ClaimsIdentity)User.Identity)
-                            .FindFirst("foto_url")?.Value;
-                        var userName = User.Identity.Name;
+                        var identity = (System.Security.Claims.ClaimsIdentity)User.Identity;
+                        
+                        // 1. Nombre blindado
+                        var userName = identity.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value 
+                                       ?? identity.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value 
+                                       ?? User.Identity.Name 
+                                       ?? "Usuario";
+                        
+                        if(string.IsNullOrWhiteSpace(userName)) { userName = "Usuario"; }
+
+                        // 2. Correo
+                        var userEmail = identity.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value 
+                                        ?? "correo@no-encontrado.com";
+
+                        // 3. Foto de Google o BD
+                        var fotoUrl = identity.FindFirst("foto_url")?.Value 
+                                      ?? identity.FindFirst("picture")?.Value 
+                                      ?? identity.FindFirst("urn:google:picture")?.Value;
+
+                        if (!string.IsNullOrWhiteSpace(fotoUrl) && !fotoUrl.StartsWith("http"))
+                        {
+                            fotoUrl = null;
+                        }
                     }
-                    @if (!string.IsNullOrWhiteSpace(fotoUrl))
-                    {
-                        <img src="@fotoUrl" alt="@userName"
-                             class="w-8 h-8 rounded-full object-cover ring-2 ring-teal-400">
-                    }
-                    else
-                    {
-                        <div class="w-8 h-8 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-sm">
-                            @(userName?.Substring(0, 1)?.ToUpper() ?? "U")
-                        </div>
-                    }
-                    <i class="fas fa-chevron-down text-xs text-gray-400 hidden md:block"></i>
+
+                    @* Avatar con escudo anti-errores *@
+                    <div class="relative w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-sm ring-2 ring-teal-400 overflow-hidden">
+                        <span class="absolute z-0">@(userName.Substring(0, 1).ToUpper())</span>
+                        @if (!string.IsNullOrWhiteSpace(fotoUrl))
+                        {
+                            <img src="@fotoUrl" alt="Perfil" referrerpolicy="no-referrer" class="absolute z-10 w-full h-full object-cover" onerror="this.style.display='none'" />
+                        }
+                    </div>
                 </button>
 
-                @* Dropdown *@
-                <div id="userMenuDropdown"
-                     class="hidden absolute right-0 top-full mt-2 w-52 bg-white border border-gray-100
-                            rounded-xl shadow-lg z-50 overflow-hidden">
-                    <div class="px-4 py-3 border-b border-gray-100">
+                @* Dropdown (¡OJO a las clases de animación aquí!) *@
+                <div id="userMenuDropdown" 
+                     class="absolute right-0 top-full mt-2 w-52 
+                     bg-white border border-gray-200 
+                     rounded-xl shadow-2xl z-50 overflow-hidden 
+                     transition-all duration-200 ease-out origin-top-right transform scale-95 opacity-0 invisible">
+                    
+                    <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
                         <p class="text-sm font-semibold text-gray-800 truncate">@userName</p>
-                        <p class="text-xs text-gray-400 truncate">
-                            @((System.Security.Claims.ClaimsIdentity)User.Identity).FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
-                        </p>
+                        <p class="text-xs text-gray-400 truncate">@userEmail</p>
                     </div>
+                    
                     <ul class="py-1">
                         <li>
-                            <a href="@Url.Action("Index", "Proveedores")"
-                               class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                <i class="fas fa-tachometer-alt w-4 text-gray-400"></i> Mi Dashboard
+                            <a href="@Url.Action("MiPerfil", "Clinica")" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:translate-x-1 hover:text-teal-600 transition-all">
+                                <i class="fa-solid fa-house-medical w-4 text-gray-400"></i> Mi Clínica
                             </a>
                         </li>
                         <li>
-                            <a href="@Url.Action("Index", "SolicitudesRfq")"
-                               class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            <a href="@Url.Action("Index", "ListaDeseos")" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:translate-x-1 hover:text-teal-600 transition-all">
+                                <i class="fa-solid fa-heart w-4 text-gray-400"></i> Lista de Deseos
+                            </a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("Index", "SolicitudesRfq")" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:translate-x-1 hover:text-teal-600 transition-all">
                                 <i class="fa-solid fa-receipt w-4 text-gray-400"></i> Mis Solicitudes
                             </a>
                         </li>
-                        <li>
-                            <a href="@Url.Action("Index", "MiCatalogo")"
-                               class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                <i class="fas fa-box w-4 text-gray-400"></i> Mi Catálogo
-                            </a>
-                        </li>
                         <li class="border-t border-gray-100 mt-1">
-                            <a href="@Url.Action("Logout", "Account")"
-                               class="flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50">
+                            <a href="@Url.Action("Logout", "Account")" class="flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:translate-x-1 hover:bg-red-50 transition-all">
                                 <i class="fas fa-sign-out-alt w-4"></i> Cerrar sesión
                             </a>
                         </li>
                     </ul>
                 </div>
+            </div>
             </div>
         </nav>
     </header>
@@ -137,11 +158,81 @@
 
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('invisible');
+            dropdown.classList.toggle('opacity-0');
+            dropdown.classList.toggle('scale-95');
+            dropdown.classList.toggle('opacity-100');
+            dropdown.classList.toggle('scale-100');
         });
 
-        document.addEventListener('click', () => dropdown.classList.add('hidden'));
+        // Cerrar al hacer clic afuera
+        document.addEventListener('click', () => {
+            dropdown.classList.add('invisible', 'opacity-0', 'scale-95');
+            dropdown.classList.remove('opacity-100', 'scale-100');
+        });
+        
         dropdown.addEventListener('click', (e) => e.stopPropagation());
+  
+        // Función global para actualizar el numerito del carrito 
+        function actualizarContadorCarrito(cantidad) {
+            const badge = document.getElementById('carritoCount');
+            if (badge) {
+                badge.textContent = cantidad;
+                if (cantidad > 0) {
+                    badge.classList.remove('hidden');
+                    badge.classList.add('flex');
+                } else {
+                    badge.classList.add('hidden');
+                    badge.classList.remove('flex');
+                }
+            }
+        }
+
+    function agregarAlCarrito(productoId) {
+        // Usamos fetch para enviar los datos al controlador CarritoController
+        fetch('/Carrito/Agregar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productoId: productoId, cantidad: 1 })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok) {
+                // Si todo salió bien, mostramos el aviso y actualizamos el numerito rojo
+                mostrarToast('Producto agregado al carrito', 'success');
+                actualizarContadorCarrito(data.contador); 
+            } else {
+                mostrarToast(data.mensaje || 'Error al agregar', 'error');
+            }
+        })
+        .catch(() => mostrarToast('No se pudo conectar con el servidor', 'error'));
+    }
+
+    // Por si no tienes la función de los avisos en esta vista
+    function mostrarToast(msg, tipo) {
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-semibold transition-all ${tipo === 'success' ? 'bg-teal-600' : 'bg-red-50'}`;
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function agregarListaDeseos(productoId) {
+        fetch('/ListaDeseos/Agregar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productoId: productoId })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok) {
+                mostrarToast(data.mensaje, 'success');
+            } else {
+                mostrarToast(data.mensaje, 'error');
+            }
+        })
+        .catch(() => mostrarToast('Error de conexión', 'error'));
+    }
     </script>
 </body>
 </html>
