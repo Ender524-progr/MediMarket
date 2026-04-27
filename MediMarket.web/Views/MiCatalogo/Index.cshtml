@@ -5,65 +5,86 @@
 }
 
 <section class="w-full h-fit flex justify-between items-end gap-2 py-8">
-    <div class="w-fit h-fit flex flex-col items-start">
-        <h1 class="text-4xl font-bold">Mi Catálogo de Productos y Servicios</h1>
-        <p class="text-xl text-gray-500">Gestione su inventario médico, suministros y servicios para centros de salud.</p>
-    </div>
     <div>
-        <a href="@Url.Action("Create", "MiCatalogo")"
-           class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2 px-4 rounded">
-            Agregar Producto
-        </a>
+        <h1 class="text-4xl font-bold">Mi Catálogo</h1>
+        <p class="text-gray-500">Gestiona tus productos</p>
     </div>
+    <a href="@Url.Action("Create", "MiCatalogo")"
+       class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2 px-4 rounded">
+        Agregar Producto
+    </a>
 </section>
 
-<div class="w-full h-fit flex items-center gap-4 px-4 py-3 rounded-lg mb-4 bg-gray-200/50 shadow-sm">
-    <input type="text" placeholder="Buscar productos..."
-        class="bg-white w-full max-w-1/2 rounded-lg py-2 px-4 hover:ring-1 hover:ring-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm transition-all delay-25">
+<!-- 🔍 FILTROS -->
+<div class="w-full flex items-center gap-4 p-4 bg-gray-200/50 rounded-lg">
 
-    <div class="relative inline-block w-full max-w-1/4">
-        <select name="categoria" id="categoria" class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 hover:ring-1 hover:ring-teal-400
-            focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm
-            border border-gray-300 transition-all delay-25">
-            <option value="">Todas las categorías</option>
-            <option value="medicamentos">Medicamentos</option>
-            <option value="insumos">Insumos</option>
-            <option value="servicios">Servicios</option>
+    <!-- BUSQUEDA + AUTOCOMPLETE -->
+    <div class="relative flex-5">
+        <input id="busqueda" type="text" placeholder="Buscar..."
+               class="w-full bg-white rounded-lg py-2 px-4 shadow-sm">
+
+        <div id="autocomplete-list"
+             class="absolute top-full left-0 w-full bg-white shadow-lg rounded-lg mt-1 hidden z-50 max-h-60 overflow-y-auto">
+        </div>
+    </div>
+
+    <!-- CATEGORIA -->
+
+    <div class="relative flex-2">
+        <select id="categoria"
+            class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 border border-gray-300 shadow-sm
+                   hover:ring-1 hover:ring-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all">
+            <option value="">Categoría</option>
+            @foreach (var categoria in ViewBag.Categorias)
+            {
+                <option value="@categoria.id">@categoria.nombre</option>
+            }
         </select>
 
         <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
             <i class="fa-solid fa-angle-down text-sm"></i>
         </div>
     </div>
-    <div class="relative inline-block w-full max-w-1/8">
-        <select name="estado" id="estado" class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 hover:ring-1 hover:ring-teal-400
-                    focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm
-                    border border-gray-300 transition-all delay-25">
+
+    <div class="relative flex-[1.5]">
+        <select id="estado"
+            class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 border border-gray-300 shadow-sm
+                   hover:ring-1 hover:ring-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all">
             <option value="">Estado</option>
             <option value="activo">Activo</option>
             <option value="inactivo">Inactivo</option>
         </select>
+
         <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
             <i class="fa-solid fa-angle-down text-sm"></i>
         </div>
     </div>
 
-    <div class="relative inline-block w-full max-w-1/8">
-        <select name="ordenar" id="ordenar" class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 hover:ring-1 hover:ring-teal-400
-                        focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-sm
-                        border border-gray-300 transition-all delay-25">
+    <div class="relative flex-[1.5]">
+        <select id="ordenar"
+            class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 border border-gray-300 shadow-sm
+                   hover:ring-1 hover:ring-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all">
             <option value="">Ordenar por</option>
             <option value="nombre_asc">Nombre (A-Z)</option>
             <option value="nombre_desc">Nombre (Z-A)</option>
             <option value="precio_asc">Precio (Menor a Mayor)</option>
             <option value="precio_desc">Precio (Mayor a Menor)</option>
         </select>
+
         <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
             <i class="fa-solid fa-angle-down text-sm"></i>
         </div>
     </div>
+
+    <button onclick="LimpiarFiltros()"
+        class="w-10 h-10 flex items-center justify-center bg-white rounded-lg shadow-sm
+               hover:bg-gray-100 transition">
+        <i class="fa-solid fa-filter-circle-xmark text-gray-600"></i>
+    </button>
+
 </div>
 
+<!-- 📦 PRODUCTOS -->
 <section class="w-full h-fit flex flex-col gap-4 p-8">
     @if (Model != null && Model.Any())
     {
@@ -73,11 +94,14 @@
                       ?? item.producto_imagenes?.FirstOrDefault()?.url
                       ?? "/Content/img/no-image.png";
 
-            <div class="w-full flex justify-between items-center gap-4 p-4 bg-gray-100/30 shadow-sm rounded-lg">
+            <div class="w-full flex justify-between items-center gap-4 p-4 bg-gray-100/30 shadow-sm rounded-lg producto-item"
+                 data-categoria="@item.categoria_id"
+                 data-nombre="@item.nombre.ToLower()"
+                data-estado="@(item.activo ? "activo" : "inactivo")">
                 <div class="flex items-center gap-4">
                     <img src="@imagen" alt="@item.nombre" class="w-24 h-24 object-cover rounded">
                     <div>
-                        <h2 class="text-xl font-bold">@item.nombre</h2>
+                        <h2 class="text-xl font-bold producto-nombre">@item.nombre</h2>
                         <p class="text-gray-500">@item.descripcion</p>
                         <div class="flex gap-3 mt-1 text-sm text-gray-600">
                             <span>SKU: @(item.sku ?? "—")</span>
@@ -118,3 +142,265 @@
         </div>
     }
 </section>
+
+<!-- ❌ SIN RESULTADOS -->
+<div id="no-resultados" class="hidden text-center text-gray-400 py-10">
+    No se encontraron productos
+</div>
+
+<!-- 💡 SUGERENCIAS -->
+<div id="sugerencias" class="hidden flex-col gap-2 px-8">
+    <h3 class="text-gray-600 font-semibold">Quizás quisiste decir:</h3>
+</div>
+
+<script>
+const busquedaInput = document.getElementById('busqueda');
+const categoriaSelect = document.getElementById('categoria');
+const estadoSelect = document.getElementById('estado');
+const ordenarSelect = document.getElementById('ordenar');
+
+const noResultados = document.getElementById('no-resultados');
+const sugerenciasContainer = document.getElementById('sugerencias');
+const autocompleteList = document.getElementById('autocomplete-list');
+
+const productosContainer = document.querySelector('section.w-full.h-fit.flex.flex-col.gap-4.p-8');
+
+// 🔥 NORMALIZAR TEXTO
+function normalizar(texto) {
+    return texto
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // quitar acentos
+        .replace(/s\b/g, "") // quitar plural simple
+        .trim();
+}
+
+// 🔥 LEVENSHTEIN
+function levenshtein(a, b) {
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            matrix[i][j] = b[i - 1] === a[j - 1]
+                ? matrix[i - 1][j - 1]
+                : Math.min(matrix[i - 1][j - 1] + 1,
+                           matrix[i][j - 1] + 1,
+                           matrix[i - 1][j] + 1);
+        }
+    }
+    return matrix[b.length][a.length];
+}
+
+// 🔍 FILTROS
+function aplicarFiltros() {
+    const query = normalizar(busquedaInput.value);
+    const palabrasQuery = query.split(" ").filter(Boolean);
+
+    let visibles = 0;
+    let sugerencias = [];
+
+    document.querySelectorAll('.producto-item').forEach(item => {
+        const nombreRaw = item.dataset.nombre;
+        const nombre = normalizar(nombreRaw);
+
+        const categoria = item.dataset.categoria;
+        const estado = item.dataset.estado;
+
+        // ✔️ búsqueda por palabras
+        const coincideBusqueda = palabrasQuery.length === 0 ||
+            palabrasQuery.every(q => nombre.includes(q));
+
+        const match =
+            coincideBusqueda &&
+            (categoriaSelect.value === '' || categoria === categoriaSelect.value) &&
+            (estadoSelect.value === '' || estado === estadoSelect.value);
+
+        item.style.display = match ? '' : 'none';
+
+        if (match) visibles++;
+
+        // 💡 sugerencias inteligentes
+        if (!match && query) {
+            const palabrasNombre = nombre.split(" ");
+            let esSimilar = false;
+
+            for (let q of palabrasQuery) {
+                for (let n of palabrasNombre) {
+
+                    if (n.includes(q) || q.includes(n)) {
+                        esSimilar = true;
+                        break;
+                    }
+
+                    const dist = levenshtein(q, n);
+                    if (dist <= Math.max(2, n.length * 0.4)) {
+                        esSimilar = true;
+                        break;
+                    }
+                }
+                if (esSimilar) break;
+            }
+
+            if (esSimilar) {
+                sugerencias.push({ item, dist: 1 });
+            }
+        }
+    });
+
+    if (visibles === 0) {
+        noResultados.classList.remove('hidden');
+        mostrarSugerencias(sugerencias);
+    } else {
+        noResultados.classList.add('hidden');
+        sugerenciasContainer.classList.add('hidden');
+    }
+}
+
+// 💡 SUGERENCIAS
+function mostrarSugerencias(lista) {
+    sugerenciasContainer.innerHTML = '';
+
+    lista.sort((a, b) => a.dist - b.dist);
+    const sugeridos = lista.slice(0, 3);
+
+    if (sugeridos.length > 0) {
+
+        const titulo = document.createElement('h3');
+        titulo.className = "text-gray-600 font-semibold";
+        titulo.textContent = "Quizás quisiste decir:";
+        sugerenciasContainer.appendChild(titulo);
+
+        sugeridos.forEach(obj => {
+            const nombre = obj.item.querySelector('.producto-nombre').textContent;
+            const precio = obj.item.querySelector('.text-sm span:nth-child(2)').textContent;
+
+            const div = document.createElement('div');
+            div.className = "p-3 bg-white rounded-lg shadow-sm hover:bg-gray-100 cursor-pointer flex justify-between";
+
+            div.innerHTML = `<span>${nombre}</span><span>${precio}</span>`;
+
+            div.onclick = () => {
+                busquedaInput.value = nombre.toLowerCase();
+                sugerenciasContainer.classList.add('hidden');
+                aplicarFiltros();
+            };
+
+            sugerenciasContainer.appendChild(div);
+        });
+
+    } else {
+        const contenedor = document.createElement('div');
+        contenedor.className = "flex flex-col items-center justify-center py-6 text-gray-400 gap-3";
+
+        contenedor.innerHTML = `
+            <p>No hay productos similares.</p>
+            <a href="/MiCatalogo/Create"
+               class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2 px-4 rounded">
+               Agregar producto
+            </a>
+        `;
+
+        sugerenciasContainer.appendChild(contenedor);
+    }
+
+    sugerenciasContainer.classList.remove('hidden');
+}
+
+// 🔽 AUTOCOMPLETE
+busquedaInput.addEventListener('input', () => {
+    const query = normalizar(busquedaInput.value);
+    aplicarFiltros();
+
+    let lista = [];
+
+    document.querySelectorAll('.producto-item').forEach(item => {
+        const nombre = normalizar(item.dataset.nombre);
+
+        const palabrasNombre = nombre.split(" ");
+        const palabrasQuery = query.split(" ").filter(Boolean);
+
+        let score = 999;
+
+        palabrasQuery.forEach(q => {
+            palabrasNombre.forEach(n => {
+                const dist = levenshtein(q, n);
+                score = Math.min(score, dist);
+            });
+        });
+
+        if (nombre.includes(query) || score <= 2) {
+            lista.push({ nombre, score });
+        }
+    });
+
+    lista.sort((a, b) => a.score - b.score);
+    autocompleteList.innerHTML = '';
+
+    lista.slice(0, 5).forEach(r => {
+        const div = document.createElement('div');
+        div.className = "px-4 py-2 hover:bg-gray-100 cursor-pointer";
+        div.textContent = r.nombre;
+
+        div.onclick = () => {
+            busquedaInput.value = r.nombre;
+            autocompleteList.classList.add('hidden');
+            aplicarFiltros();
+        };
+
+        autocompleteList.appendChild(div);
+    });
+
+    autocompleteList.classList.toggle('hidden', lista.length === 0);
+});
+
+// 🔽 ORDENAMIENTO
+ordenarSelect.addEventListener('change', () => {
+    const tipo = ordenarSelect.value;
+    const items = Array.from(document.querySelectorAll('.producto-item'));
+
+    items.sort((a, b) => {
+        const nombreA = a.dataset.nombre;
+        const nombreB = b.dataset.nombre;
+
+        const precioA = parseFloat(a.querySelector('.text-sm span:nth-child(2)').textContent.replace('$','').replace(',',''));
+        const precioB = parseFloat(b.querySelector('.text-sm span:nth-child(2)').textContent.replace('$','').replace(',',''));
+
+        if (tipo === 'nombre_asc') return nombreA.localeCompare(nombreB);
+        if (tipo === 'nombre_desc') return nombreB.localeCompare(nombreA);
+        if (tipo === 'precio_asc') return precioA - precioB;
+        if (tipo === 'precio_desc') return precioB - precioA;
+
+        return 0;
+    });
+
+    items.forEach(i => productosContainer.appendChild(i));
+});
+
+// EVENTOS
+categoriaSelect.onchange = aplicarFiltros;
+estadoSelect.onchange = aplicarFiltros;
+
+// LIMPIAR
+function LimpiarFiltros() {
+    busquedaInput.value = '';
+    categoriaSelect.value = '';
+    estadoSelect.value = '';
+    ordenarSelect.value = '';
+    aplicarFiltros();
+}
+
+// CERRAR AUTOCOMPLETE
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('#busqueda') && !e.target.closest('#autocomplete-list')) {
+        autocompleteList.classList.add('hidden');
+    }
+});
+
+busquedaInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        autocompleteList.classList.add('hidden');
+    }
+});
+</script>

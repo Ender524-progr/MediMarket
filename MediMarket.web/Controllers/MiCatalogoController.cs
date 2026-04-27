@@ -69,6 +69,11 @@ namespace MediMarket.web.Controllers
                     .Where(p => p.proveedor_id == proveedor.id)
                     .OrderByDescending(p => p.creado_en)
                     .ToList();
+                //Categorias
+                var categorias = db.categorias
+                    .OrderBy(c => c.nombre)
+                    .ToList();
+                ViewBag.Categorias = categorias;
 
                 return View(productos);
             }

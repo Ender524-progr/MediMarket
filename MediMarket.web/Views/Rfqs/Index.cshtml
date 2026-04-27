@@ -1,0 +1,178 @@
+﻿@using MediMarket.web.Controllers
+@model RFQsController.RFQsIndexViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutProveedores.cshtml";
+    ViewBag.Title = "RFQs";
+}
+
+@* Helpers de color por estado *@
+@helper BadgeEstado(string estado)
+{
+    string cls;
+    string label;
+    switch (estado)
+    {
+        case "abierta": cls = "bg-emerald-100 text-emerald-700"; label = "ABIERTA"; break;
+        case "en_revision": cls = "bg-blue-100 text-blue-700"; label = "EN REVISIÓN"; break;
+        case "cerrada": cls = "bg-gray-200 text-gray-500"; label = "CERRADA"; break;
+        case "adjudicada": cls = "bg-purple-100 text-purple-700"; label = "ADJUDICADA"; break;
+        default: cls = "bg-gray-100 text-gray-500"; label = estado.ToUpper(); break;
+    }
+    <span class="text-xs font-bold px-2 py-0.5 rounded-full @cls">@label</span>
+}
+
+<div class="p-8">
+    @* Encabezado *@
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold">Solicitudes de Cotización</h1>
+        <p class="text-gray-500 mt-1">Revisa las RFQs abiertas de las clínicas y envía tu propuesta.</p>
+    </div>
+
+    @* Filtros *@
+    @using (Html.BeginForm("Index", "RFQs", FormMethod.Get,
+            new { @class = "flex flex-wrap items-center gap-3 mb-6 bg-white border rounded-xl p-3 shadow-sm" }))
+    {
+        @* Búsqueda *@
+        <div class="relative flex-1 min-w-48">
+            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                <i class="fas fa-search text-sm"></i>
+            </span>
+            <input type="text" name="q" value="@Model.FiltroBusqueda"
+                   placeholder="Filtrar por nombre o proveedor..."
+                   class="w-full pl-9 pr-4 py-2 bg-gray-50 border rounded-lg text-sm
+                          focus:outline-none focus:ring-2 focus:ring-teal-400 focus:bg-white transition" />
+        </div>
+
+        @* Categoría *@
+        <select name="categoriaId"
+                class="border rounded-lg py-2 px-3 text-sm text-gray-600
+                       focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white">
+            <option value="">Categoría</option>
+            @foreach (var cat in Model.Categorias)
+            {
+                <option value="@cat.id" @(Model.FiltroCategoria == cat.id ? "selected" : "")>
+                    @cat.nombre
+                </option>
+            }
+        </select>
+
+        @* Estado *@
+        <select name="estado"
+                class="border rounded-lg py-2 px-3 text-sm text-gray-600
+                       focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white">
+            <option value="">Estado</option>
+            <option value="abierta" @(Model.FiltroEstado == "abierta" ? "selected" : "")>Abierta</option>
+            <option value="en_revision" @(Model.FiltroEstado == "en_revision" ? "selected" : "")>En revisión</option>
+            <option value="adjudicada" @(Model.FiltroEstado == "adjudicada" ? "selected" : "")>Adjudicada</option>
+            <option value="cerrada" @(Model.FiltroEstado == "cerrada" ? "selected" : "")>Cerrada</option>
+        </select>
+
+        <button type="submit"
+                class="bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold
+                       py-2 px-4 rounded-lg transition">
+            Buscar
+        </button>
+
+        if (!string.IsNullOrWhiteSpace(Model.FiltroBusqueda) || Model.FiltroCategoria.HasValue || !string.IsNullOrWhiteSpace(Model.FiltroEstado))
+        {
+            <a href="@Url.Action("Index", "RFQs")"
+               class="text-sm text-gray-400 hover:text-red-500 transition">
+                <i class="fas fa-times"></i> Limpiar
+            </a>
+        }
+    }
+
+    @* Contador *@
+    <p class="text-sm text-gray-400 mb-4">
+        @Model.Solicitudes.Count solicitud(es) encontrada(s)
+    </p>
+
+    @* Lista *@
+    @if (!Model.Solicitudes.Any())
+    {
+        <div class="flex flex-col items-center justify-center py-24 text-gray-400">
+            <i class="fas fa-file-invoice text-7xl mb-4 opacity-20"></i>
+            <p class="text-xl font-semibold">No hay solicitudes disponibles</p>
+            <p class="text-sm mt-1">Cuando una clínica publique una RFQ aparecerá aquí</p>
+        </div>
+    }
+    else
+    {
+<div class="flex flex-col gap-3">
+    @foreach (var rfq in Model.Solicitudes)
+    {
+        @* Icono por categoría *@
+        @* Icono por categoría *@
+        string icono = "fa-file-medical";
+        string nombreCat = rfq.categorias?.nombre?.ToLower();
+
+        if (!string.IsNullOrEmpty(nombreCat))
+        {
+            if (nombreCat.Contains("lab")) { icono = "fa-flask"; }
+            else if (nombreCat.Contains("servicio")) { icono = "fa-tools"; }
+            else if (nombreCat.Contains("equipo")) { icono = "fa-x-ray"; }
+            else if (nombreCat.Contains("insumo")) { icono = "fa-box"; }
+        }
+
+        bool yaCotizo = rfq.cotizaciones?.Any() ?? false;
+        bool estaAbierta = rfq.estado == "abierta";
+
+        <div class="flex items-center gap-4 bg-white border border-gray-100 rounded-xl
+                            px-5 py-4 shadow-sm hover:shadow-md transition-all">
+
+            @* Icono *@
+            <div class="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center shrink-0">
+                <i class="fas @icono text-teal-600"></i>
+            </div>
+
+            @* Info principal *@
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="font-semibold text-gray-800 truncate">@rfq.titulo</h3>
+                    @BadgeEstado(rfq.estado)
+                    @if (yaCotizo)
+                    {
+                        <span class="text-xs font-semibold bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">
+                            <i class="fas fa-check mr-1"></i>Ya cotizaste
+                        </span>
+                    }
+                </div>
+                <div class="flex items-center gap-4 mt-1 text-xs text-gray-400 flex-wrap">
+                    <span>
+                        <i class="fas fa-layer-group mr-1"></i>
+                        Categoría: <span class="text-gray-600 font-medium">@(rfq.categorias?.nombre ?? "—")</span>
+                    </span>
+                    @if (rfq.fecha_limite.HasValue)
+                    {
+                        bool urgente = rfq.fecha_limite.Value <= DateTime.Today.AddDays(3);
+                        <span class="@(urgente ? "text-red-500 font-semibold" : "")">
+                            <i class="fas fa-calendar-alt mr-1"></i>
+                            Fecha límite:
+                            <span class="@(urgente ? "" : "text-gray-600 font-medium")">
+                                @rfq.fecha_limite.Value.ToString("dd MMM")
+                            </span>
+                        </span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(rfq.cantidad_estimada))
+                    {
+                        <span>
+                            <i class="fas fa-cubes mr-1"></i>
+                            Cantidad: <span class="text-gray-600 font-medium">@rfq.cantidad_estimada</span>
+                        </span>
+                    }
+                </div>
+            </div>
+
+            @* Acción *@
+            <a href="@Url.Action("Details", "RFQs", new { id = rfq.id })"
+               class="shrink-0 py-2 px-4 rounded-lg text-sm font-semibold transition border
+                              @(estaAbierta && !yaCotizo
+                                  ? "bg-teal-600 hover:bg-teal-700 text-white border-teal-600"
+                                  : "bg-white hover:bg-gray-50 text-gray-700 border-gray-200")">
+                @(yaCotizo ? "Ver detalle" : estaAbierta ? "Cotizar" : "Ver detalle")
+            </a>
+        </div>
+    }
+</div>
+    }
+</div>
