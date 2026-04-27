@@ -56,5 +56,7 @@ namespace MediMarket.web.Models
         public virtual ICollection<producto_imagenes> producto_imagenes { get; set; }
 
         public virtual proveedores proveedores { get; set; }
+
+        public virtual ICollection<producto_comentarios> producto_comentarios { get; set; }
     }
 }

@@ -178,9 +178,12 @@
         })
             .then(r => r.json())
             .then(data => {
-                if (data.ok) mostrarToast('Producto agregado al carrito', 'success');
-                else mostrarToast(data.mensaje || 'Error al agregar', 'error');
-            })
+        if (data.ok) {
+            mostrarToast('Producto agregado al carrito', 'success');
+            actualizarContadorCarrito(data.contador); // <--- Llama a la función del Layout
+        }
+        else mostrarToast(data.mensaje || 'Error al agregar', 'error');
+    })
             .catch(() => mostrarToast('No se pudo conectar', 'error'));
     }
 

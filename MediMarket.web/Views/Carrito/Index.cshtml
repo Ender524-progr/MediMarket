@@ -1,0 +1,137 @@
+﻿@model List<MediMarket.web.Controllers.CarritoController.CarritoItem>
+@{
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+    ViewBag.Title = "Carrito de Compras";
+
+    // ─── MATEMÁTICAS DEL CARRITO ───
+    var gruposPorProveedor = Model.GroupBy(i => i.Proveedor ?? "Otros").ToList();
+    int totalArticulos = Model.Sum(i => i.Cantidad);
+    decimal subtotal = Model.Sum(i => i.Subtotal);
+    decimal iva = subtotal * 0.16m; // 16% de IVA estándar en México
+    decimal totalPago = subtotal + iva;
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 bg-gray-50 min-h-screen">
+    
+<a href="@Url.Action("Index", "Shop")" class="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-teal-600 transition-colors mb-6 group">
+        <i class="fa-solid fa-arrow-left-long group-hover:-translate-x-1 transition-transform"></i> Seguir comprando
+    </a>
+
+    <div class="mb-8 flex items-baseline gap-3">
+        <h1 class="text-3xl font-bold text-gray-900">Carrito de Compras</h1>
+        <span class="text-gray-500 font-medium">(@totalArticulos artículos)</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        @* ── LADO IZQUIERDO: Lista de Productos por Proveedor ── *@
+        <div class="lg:col-span-2 space-y-6">
+
+            @if (!Model.Any())
+            {
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
+                    <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300 text-3xl">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Tu carrito está vacío</h3>
+                    <p class="text-sm text-gray-500 mb-6">Parece que aún no has agregado suministros médicos.</p>
+                    <a href="@Url.Action("Index", "Shop")" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 px-6 rounded-xl transition">
+                        Ir al Marketplace
+                    </a>
+                </div>
+            }
+            else
+            {
+                int envioActual = 1;
+                foreach (var grupo in gruposPorProveedor)
+                {
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                        @* Header del Proveedor *@
+                        <div class="bg-gray-50/50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <i class="fa-solid fa-store text-teal-700"></i>
+                                <span class="font-bold text-gray-800">@grupo.Key</span>
+                            </div>
+                            <span class="text-xs font-semibold text-gray-400 tracking-wider">ENVÍO @envioActual DE @gruposPorProveedor.Count</span>
+                        </div>
+
+                        @* Productos de este Proveedor *@
+                        @foreach (var item in grupo)
+                        {
+                            <div class="p-6 flex gap-6 border-b border-gray-50 last:border-b-0">
+                                <div class="w-28 h-28 shrink-0 bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
+                                    <img src="@item.Imagen" class="w-full h-full object-cover" />
+                                </div>
+                                <div class="flex-1 flex flex-col justify-between">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3 class="font-bold text-gray-900 text-lg">@item.Nombre</h3>
+                                            <p class="text-xs text-gray-500 mt-1">Precio unitario: $@item.Precio.ToString("N2")</p>
+                                        </div>
+                                        <span class="text-xl font-bold text-teal-700">$@item.Subtotal.ToString("N2")</span>
+                                    </div>
+                                    <div class="flex justify-between items-end mt-4">
+                                        <div class="flex items-center bg-gray-100 rounded-lg p-1">
+                                            <span class="px-3 text-center font-semibold text-sm text-gray-600">Cant: @item.Cantidad</span>
+                                        </div>
+                                        
+                                        @* Botón de Eliminar (Conecta con tu POST) *@
+                                        @using (Html.BeginForm("Eliminar", "Carrito", FormMethod.Post, new { @class = "inline" }))
+                                        {
+                                            <input type="hidden" name="productoId" value="@item.ProductoId" />
+                                            <button type="submit" class="text-sm font-semibold text-red-500 hover:text-red-600 flex items-center gap-1 transition-colors">
+                                                <i class="fa-solid fa-trash-can"></i> Eliminar
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    envioActual++;
+                }
+            }
+        </div>
+
+        @* ── LADO DERECHO: Resumen de Compra ── *@
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sticky top-24">
+                <h2 class="text-lg font-bold text-gray-900 mb-6">Resumen de Compra</h2>
+
+                <div class="space-y-4 text-sm text-gray-600 border-b border-gray-100 pb-6 mb-6">
+                    <div class="flex justify-between">
+                        <span>Subtotal (@totalArticulos artículos)</span>
+                        <span class="font-semibold text-gray-800">$@subtotal.ToString("N2")</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Envío (Estándar)</span>
+                        <span class="font-bold text-green-600">Por cotizar</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Impuestos (IVA 16%)</span>
+                        <span class="font-semibold text-gray-800">$@iva.ToString("N2")</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-end mb-8">
+                    <span class="font-bold text-gray-900 text-lg">Total estimado</span>
+                    <span class="text-3xl font-black text-teal-700">$@totalPago.ToString("N2")</span>
+                </div>
+
+                <button class="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-4 rounded-xl transition-colors shadow-md flex justify-center items-center gap-2 mb-6" @(totalArticulos == 0 ? "disabled" : "")>
+                    Proceder al Pago <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+                @* Badges de Confianza *@
+                <div class="bg-gray-50 rounded-xl p-4 flex gap-3 items-center border border-gray-100">
+                    <div class="text-green-600 text-xl"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div>
+                        <p class="text-xs font-bold text-gray-900">Transacción Segura</p>
+                        <p class="text-[10px] text-gray-500">Conexión encriptada SSL 256-bit</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
