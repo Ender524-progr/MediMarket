@@ -22,18 +22,25 @@
                 @* --- Lógica de Autenticación en el Navbar --- *@
 @if (Request.IsAuthenticated)
 {
+    // Tipo de usuario (Hibrido, Comprador, Proveedor)
+    var tipo = ((System.Security.Claims.ClaimsIdentity)User.Identity).FindFirst("tipo_usuario")?.Value;
+
     <div class="flex items-center gap-4">
         
-        @* 1. NUEVO BOTÓN DEL MARKETPLACE (Solo visible con sesión) *@
+        @if (tipo == "clinica" || tipo == "hibrido")
+        {
+        @* NUEVO BOTÓN DEL MARKETPLACE *@
         <a href="@Url.Action("Index", "Shop")" 
            class="flex items-center gap-2 text-teal-700 bg-teal-50 hover:translate-y-0.5 hover:border-teal-200 transition-all px-4 py-2 rounded-full font-semibold text-sm border border-teal-100 shadow-sm">
             <i class="fa-solid fa-store"></i>
             <span class="hidden sm:inline">Tienda</span>
         </a>
+        }
 
     <div class="relative" id="userMenuWrapper">
         <button id="userMenuBtn" class="flex items-center gap-2 py-1.5 px-2 rounded-full hover:bg-gray-100 transition">
-            @{
+            @{       
+
                 // 1. Extraemos la identidad una sola vez para no repetir código
                 var identity = (System.Security.Claims.ClaimsIdentity)User.Identity;
 
@@ -88,16 +95,16 @@
                 <p class="text-sm font-semibold text-gray-800 truncate">@userName</p>
                 <p class="text-xs text-gray-400 truncate">@userEmail</p>
             </div>
+            
             <ul class="py-1">
-                <li>
-                    <a href="@Url.Action("Index", "Proveedores")" class="
-                    flex items-center 
-                    gap-2 px-4 py-2 
-                    text-sm text-gray-700 
-                    hover:translate-x-1 transition-transform">
-                        <i class="fas fa-tachometer-alt w-4 text-gray-400"></i> Mi Dashboard
-                    </a>
-                </li>
+               @if (tipo == "hibrido" || tipo == "proveedor")
+                {
+                    <li>
+                        <a href="@Url.Action("Index", "Proveedores")" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:translate-x-1 hover:text-teal-600 transition-all">
+                            <i class="fas fa-toolbox w-4"></i> Mi dashboard
+                        </a>
+                    </li>
+                }
                 <li class="border-t border-gray-100 mt-1">
                     <a href="@Url.Action("Logout", "Account")" class="
                     flex items-center 
@@ -125,26 +132,29 @@ else
     </header>
     @RenderBody()
 
+
+@if (Request.IsAuthenticated)
+{
 @* --- BOTÓN FLOTANTE Y VENTANA DE CHAT DE POLA --- *@
 <div id="polaChatContainer" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
     
     @* Ventana del Chat (Oculta por defecto) *@
-    <div id="polaChatWindow" class="hidden mb-4 w-[350px] sm:w-[380px] h-[500px] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/40 bg-white/70 backdrop-blur-lg transition-all duration-300 origin-bottom-right scale-95 opacity-0">
+    <div id="polaChatWindow" class="hidden mb-4 w-[350px] sm:w-[340px] h-[600px] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/40 bg-white/70 backdrop-blur-lg transition-all duration-300 origin-bottom-right scale-95 opacity-0">
         
         @* Header Verde (Sin blur para que resalte) *@
-        <div class="bg-teal-700 px-5 py-4 flex justify-between items-center shrink-0">
+        <div class="bg-transparent px-5 py-4 flex justify-between items-center shrink-0">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">
+                <div class="w-10 h-10 rounded-full bg-white/60 flex items-center justify-center text-gray-600 font-bold">
                     <i class="fa-solid fa-user-nurse"></i>
                 </div>
                 <div>
-                    <h3 class="text-white font-bold text-base leading-tight">Pola</h3>
-                    <p class="text-teal-100 text-xs flex items-center gap-1">
-                        <span class="w-2 h-2 rounded-full bg-green-400"></span> En línea
+                    <h3 class="text-gray-600 font-bold text-base leading-tight">Pola</h3>
+                    <p class="text-teal-600 text-xs flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-teal-600"></span> En línea
                     </p>
                 </div>
             </div>
-            <button id="closePolaBtn" class="text-teal-100 hover:text-white transition">
+            <button id="closePolaBtn" class="text-gray-600 hover:text-teal-600 transition">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
         </div>
@@ -153,10 +163,10 @@ else
         <div id="polaChatMessages" class="flex-1 overflow-y-auto p-5 space-y-4 bg-transparent scroll-smooth">
             @* Mensaje de bienvenida de Pola *@
             <div class="flex items-end gap-2 w-full">
-                <div class="w-7 h-7 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 text-xs shrink-0">
+                <div class="w-7 h-7 rounded-full bg-white flex items-center justify-center text-gray-600 text-xs shrink-0">
                     <i class="fa-solid fa-user-nurse"></i>
                 </div>
-                <div class="bg-white/80 border border-gray-100 text-gray-700 text-sm py-2 px-4 rounded-2xl rounded-bl-none shadow-sm max-w-[85%]">
+                <div class="bg-white/80 border border-gray-200 text-gray-700 text-xs py-2 px-4 rounded-2xl rounded-bl-none shadow-md max-w-[85%]">
                     ¡Hola! Soy Pola, tu asistente de MediMarket. ¿En qué te puedo ayudar hoy? 😊
                 </div>
             </div>
@@ -171,7 +181,7 @@ else
         <div class="p-3 bg-white border-t border-gray-100 shrink-0">
             <div class="relative flex items-center">
                 <input type="text" id="polaInput" autocomplete="off" placeholder="Escribe tu mensaje..." 
-                       class="w-full bg-gray-50 text-sm text-gray-800 rounded-full pl-4 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 border border-transparent transition" />
+                       class="w-full bg-gray-50 text-sm text-gray-800 rounded-full pl-4 pr-12 py-2 focus:outline-none focus:ring-1 focus:ring-teal-700/50 border border-transparent transition" />
                 <button id="polaSendBtn" class="absolute right-2 w-8 h-8 rounded-full bg-teal-700 text-white flex items-center justify-center hover:bg-teal-800 transition">
                     <i class="fa-solid fa-paper-plane text-xs -ml-0.5 mt-0.5"></i>
                 </button>
@@ -184,6 +194,7 @@ else
         <i class="fa-regular fa-comments text-xl hidden group-hover:block transition-all"></i>
     </button>
 </div>
+}
 
     <footer class="w-full h-fit px-4 md:px-14 py-8 bg-white mt-16">
         <div class="w-full md:flex justify-between">
@@ -254,15 +265,15 @@ document.addEventListener('DOMContentLoaded', () => {
         msgDiv.className = `flex items-end gap-2 w-full ${isUser ? 'justify-end' : ''} mb-4`;
         
         let avatarHTML = isUser ? '' : `
-            <div class="w-7 h-7 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 text-xs shrink-0">
+            <div class="w-7 h-7 rounded-full bg-white flex items-center justify-center text-gray-700 text-xs shrink-0">
                 <i class="fa-solid fa-user-nurse"></i>
             </div>
         `;
 
         let bubbleHTML = `
-            <div class="text-sm py-2 px-4 shadow-sm max-w-[85%] 
-                ${isUser ? 'bg-teal-700 text-white rounded-2xl rounded-br-none' 
-                         : 'bg-white/80 border border-gray-100 text-gray-700 rounded-2xl rounded-bl-none'}">
+            <div class="text-xs py-2 px-4 shadow-md max-w-[85%] 
+                ${isUser ? 'bg-gray-300 text-gray-700 rounded-2xl rounded-br-none' 
+                         : 'bg-white/80 border border-gray-200 text-gray-700 rounded-2xl rounded-bl-none'}">
                 ${text.replace(/\n/g, '<br>')}
             </div>
         `;

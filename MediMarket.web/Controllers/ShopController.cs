@@ -70,20 +70,33 @@ namespace MediMarket.web.Controllers
                 return View(vm);
             }
         }
-
-        // ─── DETAILS ─────────────────────────────────────────────────────────────
+// ─── DETAILS ─────────────────────────────────────────────────────────────
         public ActionResult Details(Guid id)
+{
+    using (var db = new ConexionModel())
+    {
+        ViewBag.EnListaDeseos = false; // Por defecto
+
+        if (Request.IsAuthenticated)
         {
-            using (var db = new ConexionModel())
+            var userIdStr = ((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdStr != null)
             {
-                // 1. Necesitamos saber si la clínica actual ya comentó
-                var userIdStr = ((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (userIdStr != null)
+                var uId = Guid.Parse(userIdStr);
+                // OJO AQUÍ: Asegúrate de que esta consulta sí encuentre tu clínica
+                var miClinica = db.clinicas.FirstOrDefault(c => c.usuario_id == uId);
+                
+                if (miClinica != null)
                 {
-                    var userId = Guid.Parse(userIdStr);
-                    var miClinica = db.clinicas.FirstOrDefault(c => c.usuario_id == userId);
-                    ViewBag.MiClinicaId = miClinica?.id; // Mandamos su ID a la vista
+                    // DEBUG: Manda el ID a la vista para que verifiques que sea el correcto
+                    ViewBag.MiClinicaDebug = miClinica.id; 
+                    
+                    // Buscamos si existe el registro
+                    bool existe = db.lista_deseos.Any(l => l.producto_id == id && l.clinica_id == miClinica.id);
+                    ViewBag.EnListaDeseos = existe;
                 }
+            }
+        }
 
                 // 2. Traemos el producto con sus comentarios reales
                 var producto = db.productos

@@ -29,7 +29,7 @@
 
             @if (!Model.Any())
             {
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-400 p-12 text-center">
                     <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300 text-3xl">
                         <i class="fa-solid fa-cart-shopping"></i>
                     </div>
@@ -45,7 +45,7 @@
                 int envioActual = 1;
                 foreach (var grupo in gruposPorProveedor)
                 {
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-300 overflow-hidden">
                         @* Header del Proveedor *@
                         <div class="bg-gray-50/50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
                             <div class="flex items-center gap-3">
@@ -72,7 +72,7 @@
                                     </div>
                                     <div class="flex justify-between items-end mt-4">
                                         <div class="flex items-center bg-gray-100 rounded-lg p-1">
-                                            <span class="px-3 text-center font-semibold text-sm text-gray-600">Cant: @item.Cantidad</span>
+                                            <span class="px-3 text-center font-semibold text-sm text-gray-600">Cantidad: @item.Cantidad</span>
                                         </div>
                                         
                                         @* Botón de Eliminar (Conecta con tu POST) *@
@@ -95,7 +95,7 @@
 
         @* ── LADO DERECHO: Resumen de Compra ── *@
         <div class="lg:col-span-1">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sticky top-24">
+            <div class="bg-white rounded-2xl shadow-sm border-2 border-gray-300 p-6 sticky top-24">
                 <h2 class="text-lg font-bold text-gray-900 mb-6">Resumen de Compra</h2>
 
                 <div class="space-y-4 text-sm text-gray-600 border-b border-gray-100 pb-6 mb-6">
