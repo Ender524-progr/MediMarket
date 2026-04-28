@@ -45,14 +45,22 @@ namespace MediMarket.web.Controllers
             {
                 var usuarioExistente = db.usuarios.FirstOrDefault(u => u.email == email);
                 if (usuarioExistente != null)
-                {
-                    SignInUser(usuarioExistente); // ✅ firmamos sesión del usuario existente
-                    return RedirectToAction("Index", "Proveedores");
-                }
-                else
-                {
-                    return RedirectToAction("CompletarPerfil", "Account", new { correo = email, nombre = nombreCompleto, fotoUrl = foto });
-                }
+        {
+            SignInUser(usuarioExistente); 
+
+            if (usuarioExistente.tipo_usuario == "proveedor")
+            {
+                return RedirectToAction("Index", "Proveedores"); 
+            }
+            else
+            {               
+                return RedirectToAction("Index", "Shop");
+            }
+        }
+        else
+        {
+            return RedirectToAction("CompletarPerfil", "Account", new { correo = email, nombre = nombreCompleto, fotoUrl = foto });
+        }
             }
         }
 
@@ -147,7 +155,7 @@ namespace MediMarket.web.Controllers
                 });
 
                 db.SaveChanges();
-                SignInUser(user); // ✅
+                SignInUser(user); 
                 return RedirectToAction("Index", "Proveedores");
             }
         }
@@ -208,14 +216,14 @@ namespace MediMarket.web.Controllers
 
                 db.SaveChanges();
                 SignInUser(user); // ✅
-                return RedirectToAction("Index", "Proveedores");
+                return RedirectToAction("Index", "Shop");
             }
         }
 
         public ActionResult Logout()
         {
             HttpContext.GetOwinContext().Authentication.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-            return RedirectToAction("Login");
+            return RedirectToAction("Index", "Home");
         }
 
         private void SignInUser(usuarios user)
