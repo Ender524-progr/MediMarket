@@ -38,14 +38,23 @@ namespace MediMarket.web.Controllers
                     .Include("cotizaciones")
                     .AsQueryable();
 
+                // Filtro por búsqueda de texto
                 if (!string.IsNullOrWhiteSpace(q))
                     query = query.Where(r => r.titulo.Contains(q) || r.descripcion.Contains(q));
 
+                // Filtro por categoría
                 if (categoriaId.HasValue)
                     query = query.Where(r => r.categoria_id == categoriaId.Value);
 
+                // Filtro por estado de la COTIZACIÓN del proveedor actual
                 if (!string.IsNullOrWhiteSpace(estado))
-                    query = query.Where(r => r.estado == estado);
+                {
+                    var proveedor = GetProveedorActual(db);
+                    if (proveedor != null)
+                    {
+                        query = query.Where(r => r.cotizaciones.Any(c => c.proveedor_id == proveedor.id && c.estado == estado));
+                    }
+                }
 
                 var vm = new RFQsIndexViewModel
                 {
