@@ -38,6 +38,21 @@
 
         @* Navegación derecha *@
         <nav class="flex items-center gap-1 ml-auto shrink-0">
+
+            @{
+                // Tipo de usuario (Hibrido, Comprador, Proveedor)}
+            var tipo = ((System.Security.Claims.ClaimsIdentity)User.Identity).FindFirst("tipo_usuario")?.Value;
+            }
+
+            @if (tipo == "hibrido")
+            {
+                <a href="@Url.Action("Index", "Proveedores")" 
+                   class="hidden md:flex items-center gap-1.5 py-2 px-3 rounded-lg text-sm 
+                   text-gray-600 hover:bg-gray-200 transition-colors">
+                    <i class="fa-solid fa-toolbox"></i>
+                    <span>Mi dashboard</span>
+                </a>
+            }
             <a href="@Url.Action("Index", "Ordenes")"
                class="hidden md:flex items-center gap-1.5 py-2 px-3 rounded-lg text-sm 
                text-gray-600 hover:bg-gray-200 transition-colors">
@@ -74,7 +89,7 @@
                     @{
                         var identity = (System.Security.Claims.ClaimsIdentity)User.Identity;
                         
-                        // 1. Nombre blindado
+                        // 1. Nombre 
                         var userName = identity.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value 
                                        ?? identity.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value 
                                        ?? User.Identity.Name 
@@ -97,7 +112,7 @@
                         }
                     }
 
-                    @* Avatar con escudo anti-errores *@
+                    @* Avatar  *@
                     <div class="relative w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-sm ring-2 ring-teal-400 overflow-hidden">
                         <span class="absolute z-0">@(userName.Substring(0, 1).ToUpper())</span>
                         @if (!string.IsNullOrWhiteSpace(fotoUrl))
@@ -107,7 +122,7 @@
                     </div>
                 </button>
 
-                @* Dropdown (¡OJO a las clases de animación aquí!) *@
+                @* Dropdown*@
                 <div id="userMenuDropdown" 
                      class="absolute right-0 top-full mt-2 w-52 
                      bg-white border border-gray-200 
@@ -122,21 +137,21 @@
                     <ul class="py-1">
                         <li>
                             <a href="@Url.Action("MiPerfil", "Clinica")" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:translate-x-1 hover:text-teal-600 transition-all">
-                                <i class="fa-solid fa-house-medical w-4 text-gray-400"></i> Mi Clínica
+                                <i class="fa-solid fa-house-medical w-4"></i> Mi Clínica
                             </a>
                         </li>
                         <li>
                             <a href="@Url.Action("Index", "ListaDeseos")" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:translate-x-1 hover:text-teal-600 transition-all">
-                                <i class="fa-solid fa-heart w-4 text-gray-400"></i> Lista de Deseos
+                                <i class="fa-solid fa-heart w-4"></i> Lista de Deseos
                             </a>
                         </li>
                         <li>
                             <a href="@Url.Action("Index", "SolicitudesRfq")" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:translate-x-1 hover:text-teal-600 transition-all">
-                                <i class="fa-solid fa-receipt w-4 text-gray-400"></i> Mis Solicitudes
+                                <i class="fa-solid fa-receipt w-4"></i> Mis Solicitudes
                             </a>
                         </li>
                         <li class="border-t border-gray-100 mt-1">
-                            <a href="@Url.Action("Logout", "Account")" class="flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:translate-x-1 hover:bg-red-50 transition-all">
+                            <a href="@Url.Action("Logout", "Account")" class="flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:translate-x-1 transition-all">
                                 <i class="fas fa-sign-out-alt w-4"></i> Cerrar sesión
                             </a>
                         </li>
@@ -150,6 +165,66 @@
     <main>
         @RenderBody()
     </main>
+
+@* --- BOTÓN FLOTANTE Y VENTANA DE CHAT DE POLA --- *@
+<div id="polaChatContainer" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    
+    @* Ventana del Chat (Oculta por defecto) *@
+    <div id="polaChatWindow" class="hidden mb-4 w-[350px] sm:w-[340px] h-[600px] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/40 bg-white/70 backdrop-blur-lg transition-all duration-300 origin-bottom-right scale-95 opacity-0">
+        
+        @* Header Verde (Sin blur para que resalte) *@
+        <div class="bg-transparent px-5 py-4 flex justify-between items-center shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-white/60 flex items-center justify-center text-gray-600 font-bold">
+                    <i class="fa-solid fa-user-nurse"></i>
+                </div>
+                <div>
+                    <h3 class="text-gray-600 font-bold text-base leading-tight">Beimark</h3>
+                    <p class="text-teal-600 text-xs flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-teal-600"></span> En línea
+                    </p>
+                </div>
+            </div>
+            <button id="closePolaBtn" class="text-gray-600 hover:text-teal-600 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        @* Área de Mensajes *@
+        <div id="polaChatMessages" class="flex-1 overflow-y-auto p-5 space-y-4 bg-transparent scroll-smooth">
+            @* Mensaje de bienvenida de Pola *@
+            <div class="flex items-end gap-2 w-full">
+                <div class="w-7 h-7 rounded-full bg-white flex items-center justify-center text-gray-600 text-xs shrink-0">
+                    <i class="fa-solid fa-user-nurse"></i>
+                </div>
+                <div class="bg-white/80 border border-gray-200 text-gray-700 text-xs py-2 px-4 rounded-2xl rounded-bl-none shadow-md max-w-[85%]">
+                    Hola, soy Beimark, tu asistente clínico personal. Fui alertado de una necesidad de suministros en tu clínica. ¿En qué te puedo asesorar hoy? 🫣
+                </div>
+            </div>
+        </div>
+
+        @* Escribiendo... (Oculto por defecto) *@
+        <div id="polaTyping" class="hidden px-5 py-2 text-xs text-gray-400 font-medium italic bg-transparent">
+            Beimark está escribiendo...
+        </div>
+
+        @* Área de Input (Fondo sólido para que se vea claro lo que escribes) *@
+        <div class="p-3 bg-white border-t border-gray-100 shrink-0">
+            <div class="relative flex items-center">
+                <input type="text" id="polaInput" autocomplete="off" placeholder="Escribe tu mensaje..." 
+                       class="w-full bg-gray-50 text-sm text-gray-800 rounded-full pl-4 pr-12 py-2 focus:outline-none focus:ring-1 focus:ring-teal-700/50 border border-transparent transition" />
+                <button id="polaSendBtn" class="absolute right-2 w-8 h-8 rounded-full bg-teal-700 text-white flex items-center justify-center hover:bg-teal-800 transition">
+                    <i class="fa-solid fa-paper-plane text-xs -ml-0.5 mt-0.5"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @* Botón Flotante (FAB) *@
+    <button id="polaFabBtn" class="w-12 h-12 rounded-full bg-teal-700 text-white shadow-xl hover:bg-teal-800 hover:scale-105 transition-all flex items-center justify-center group focus:outline-none">
+        <i class="fa-regular fa-comments text-xl hidden group-hover:block transition-all"></i>
+    </button>
+</div>
 
     <script>
         // Toggle del menú de usuario
@@ -217,22 +292,94 @@
         setTimeout(() => toast.remove(), 3000);
     }
 
-    function agregarListaDeseos(productoId) {
-        fetch('/ListaDeseos/Agregar', {
+     // Lógica del Chat de Pola
+document.addEventListener('DOMContentLoaded', () => {
+    const fabBtn = document.getElementById('polaFabBtn');
+    const closeBtn = document.getElementById('closePolaBtn');
+    const chatWindow = document.getElementById('polaChatWindow');
+    const chatMessages = document.getElementById('polaChatMessages');
+    const chatInput = document.getElementById('polaInput');
+    const sendBtn = document.getElementById('polaSendBtn');
+    const typingIndicator = document.getElementById('polaTyping');
+
+    // Abrir/Cerrar chat con animación
+    const toggleChat = () => {
+        chatWindow.classList.toggle('hidden');
+        setTimeout(() => {
+            chatWindow.classList.toggle('scale-95');
+            chatWindow.classList.toggle('opacity-0');
+        }, 10);
+        if(!chatWindow.classList.contains('hidden')) chatInput.focus();
+    };
+
+    fabBtn.addEventListener('click', toggleChat);
+    closeBtn.addEventListener('click', toggleChat);
+
+    // Función para pintar burbujitas en el HTML
+    const addMessage = (text, isUser) => {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `flex items-end gap-2 w-full ${isUser ? 'justify-end' : ''} mb-4`;
+        
+        let avatarHTML = isUser ? '' : `
+            <div class="w-7 h-7 rounded-full bg-white flex items-center justify-center text-gray-700 text-xs shrink-0">
+                <i class="fa-solid fa-user-nurse"></i>
+            </div>
+        `;
+
+        let bubbleHTML = `
+            <div class="text-xs py-2 px-4 shadow-md max-w-[85%] 
+                ${isUser ? 'bg-gray-300 text-gray-700 rounded-2xl rounded-br-none' 
+                         : 'bg-white/80 border border-gray-200 text-gray-700 rounded-2xl rounded-bl-none'}">
+                ${text.replace(/\n/g, '<br>')}
+            </div>
+        `;
+
+        msgDiv.innerHTML = isUser ? bubbleHTML : avatarHTML + bubbleHTML;
+        chatMessages.appendChild(msgDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll pa' abajo
+    };
+
+    // Enviar mensaje al backend
+    const sendMessage = () => {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        // 1. Mostrar mensaje del usuario
+        addMessage(text, true);
+        chatInput.value = '';
+        
+        // 2. Mostrar "Escribiendo..."
+        typingIndicator.classList.remove('hidden');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // 3. Petición a tu controlador C#
+        fetch('/Chat/EnviarMensaje', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productoId: productoId })
+            body: JSON.stringify({ mensajeUsuario: text })
         })
         .then(r => r.json())
         .then(data => {
+            typingIndicator.classList.add('hidden');
             if (data.ok) {
-                mostrarToast(data.mensaje, 'success');
+                addMessage(data.respuesta, false);
             } else {
-                mostrarToast(data.mensaje, 'error');
+                addMessage("Ups, me desconecté un segundo. ¿Me lo repites? 🥺", false);
+                console.error(data.respuesta);
             }
         })
-        .catch(() => mostrarToast('Error de conexión', 'error'));
-    }
+        .catch(() => {
+            typingIndicator.classList.add('hidden');
+            addMessage("Parece que mi servidor está durmiendo. 💤 Intenta en un momento.", false);
+        });
+    };
+
+    // Eventos para enviar (Clic y Enter)
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+});
     </script>
 </body>
 </html>

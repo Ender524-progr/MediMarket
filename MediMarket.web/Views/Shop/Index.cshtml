@@ -107,7 +107,7 @@
                             var proveedor = producto.proveedores;
 
                             <a href="@Url.Action("Details", "Shop", new { id = producto.id })"
-                               class="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md
+                               class="group bg-white rounded-xl border-2 border-gray-300 shadow-sm hover:shadow-md
                                       transition-all duration-200 flex flex-col overflow-hidden">
 
                                 @* Imagen *@
@@ -155,7 +155,7 @@
                                         }
                                         else
                                         {
-                                            <text><i class="fas fa-cart-plus mr-1"></i> Agregar</text>
+                                            <text><i class="fas fa-shopping-cart"></i>  Agregar</text>
                                         }
                                     </button>
                                 </div>
