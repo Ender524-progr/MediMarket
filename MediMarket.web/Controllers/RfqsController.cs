@@ -32,6 +32,12 @@ namespace MediMarket.web.Controllers
         {
             using (var db = new ConexionModel())
             {
+                // 1. Obtenemos al proveedor actual desde el principio
+                var proveedor = GetProveedorActual(db);
+
+                // 2. Pasamos el ID a la vista
+                ViewBag.ProveedorId = proveedor?.id;
+
                 var query = db.solicitudes_rfq
                     .Include("clinicas")
                     .Include("categorias")
@@ -47,13 +53,9 @@ namespace MediMarket.web.Controllers
                     query = query.Where(r => r.categoria_id == categoriaId.Value);
 
                 // Filtro por estado de la COTIZACIÓN del proveedor actual
-                if (!string.IsNullOrWhiteSpace(estado))
+                if (!string.IsNullOrWhiteSpace(estado) && proveedor != null)
                 {
-                    var proveedor = GetProveedorActual(db);
-                    if (proveedor != null)
-                    {
-                        query = query.Where(r => r.cotizaciones.Any(c => c.proveedor_id == proveedor.id && c.estado == estado));
-                    }
+                    query = query.Where(r => r.cotizaciones.Any(c => c.proveedor_id == proveedor.id && c.estado == estado));
                 }
 
                 var vm = new RFQsIndexViewModel

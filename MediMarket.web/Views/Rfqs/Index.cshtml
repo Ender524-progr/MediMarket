@@ -3,6 +3,9 @@
 @{
     Layout = "~/Views/Shared/_LayoutProveedores.cshtml";
     ViewBag.Title = "RFQs";
+
+    // Agregamos esta línea para atrapar el ID:
+    var proveedorId = ViewBag.ProveedorId as Guid?;
 }
 
 @* Helpers de color por estado de la RFQ *@
@@ -30,13 +33,13 @@
 
     @* Filtros (Estilo Mi Catálogo) *@
     <form method="GET" action="@Url.Action("Index", "RFQs")" class="w-full flex flex-wrap items-center gap-4 p-4 bg-gray-200/50 rounded-lg mb-6">
-        
+
         <div class="relative flex-1 min-w-50">
             <input type="text" name="q" value="@Model.FiltroBusqueda" placeholder="Buscar por título o descripción..."
                    class="w-full bg-white rounded-lg py-2 pl-4 pr-10 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400">
             @if (!string.IsNullOrEmpty(Model.FiltroBusqueda))
             {
-                <a href="@Url.Action("Index", "RFQs", new { categoriaId = Model.FiltroCategoria, estado = Model.FiltroEstado })" 
+                <a href="@Url.Action("Index", "RFQs", new { categoriaId = Model.FiltroCategoria, estado = Model.FiltroEstado })"
                    class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
                     <i class="fas fa-times"></i>
                 </a>
@@ -45,7 +48,7 @@
 
         <div class="relative flex-1 min-w-37.5">
             <select name="categoriaId" onchange="this.form.submit()"
-                class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 border border-gray-300 shadow-sm
+                    class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 border border-gray-300 shadow-sm
                        hover:ring-1 hover:ring-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all text-gray-600">
                 <option value="">Todas las categorías</option>
                 @foreach (var cat in Model.Categorias)
@@ -62,7 +65,7 @@
 
         <div class="relative flex-1 min-w-37.5">
             <select name="estado" onchange="this.form.submit()"
-                class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 border border-gray-300 shadow-sm
+                    class="appearance-none w-full bg-white rounded-lg py-2 pl-4 pr-10 border border-gray-300 shadow-sm
                        hover:ring-1 hover:ring-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all text-gray-600">
                 <option value="">Todas las RFQs</option>
                 <option value="pendiente" @(Model.FiltroEstado == "pendiente" ? "selected" : "")>Mis cotizaciones Pendientes</option>
@@ -110,19 +113,19 @@
             @foreach (var rfq in Model.Solicitudes)
             {
                 @* Icono por categoría *@
-                string icono = "fa-file-medical";
-                string nombreCat = rfq.categorias?.nombre?.ToLower();
+            string icono = "fa-file-medical";
+            string nombreCat = rfq.categorias?.nombre?.ToLower();
 
-                if (!string.IsNullOrEmpty(nombreCat))
-                {
-                    if (nombreCat.Contains("lab")) { icono = "fa-flask"; }
-                    else if (nombreCat.Contains("servicio")) { icono = "fa-tools"; }
-                    else if (nombreCat.Contains("equipo")) { icono = "fa-x-ray"; }
-                    else if (nombreCat.Contains("insumo")) { icono = "fa-box"; }
-                }
+            if (!string.IsNullOrEmpty(nombreCat))
+            {
+                if (nombreCat.Contains("lab")) { icono = "fa-flask"; }
+                else if (nombreCat.Contains("servicio")) { icono = "fa-tools"; }
+                else if (nombreCat.Contains("equipo")) { icono = "fa-x-ray"; }
+                else if (nombreCat.Contains("insumo")) { icono = "fa-box"; }
+            }
 
-                bool yaCotizo = rfq.cotizaciones?.Any() ?? false;
-                bool estaAbierta = rfq.estado == "abierta";
+            bool yaCotizo = rfq.cotizaciones?.Any(c => proveedorId.HasValue && c.proveedor_id == proveedorId.Value) ?? false;
+            bool estaAbierta = rfq.estado == "abierta";
 
                 <div class="flex items-center gap-4 bg-white border border-gray-100 rounded-xl px-5 py-4 shadow-sm hover:shadow-md transition-all">
 
