@@ -97,3 +97,117 @@
         </div>
     </div>
 </div>
+
+@* ─── Sección de Opiniones con Filtros ───────────────────────────────── *@
+    <div class="mt-12 pt-8 border-t border-gray-200 pb-12">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-comments text-teal-600"></i> Opiniones de las clínicas
+            </h2>
+
+            @* Botonera de Filtros *@
+            @if (Model.producto_comentarios != null && Model.producto_comentarios.Any())
+            {
+                <div class="flex gap-2 overflow-x-auto pb-1">
+                    <button onclick="filtrarOpiniones('todas')" id="btn-filtro-todas" class="filtro-btn px-4 py-1.5 rounded-full text-sm font-bold bg-teal-600 text-white transition shadow-sm shrink-0 border border-teal-600">
+                        Todas
+                    </button>
+                    @for (int i = 5; i >= 1; i--)
+                    {
+                        <button onclick="filtrarOpiniones(@i)" id="btn-filtro-@i" class="filtro-btn px-3 py-1.5 rounded-full text-sm font-semibold bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 transition shadow-sm flex items-center gap-1 shrink-0">
+                            @i <i class="fas fa-star text-yellow-400 text-xs"></i>
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+
+        @if (Model.producto_comentarios != null && Model.producto_comentarios.Any())
+        {
+            var comentarios = Model.producto_comentarios.OrderByDescending(c => c.creado_en).ToList();
+
+            <div class="space-y-4" id="contenedor-opiniones">
+                @foreach (var comentario in comentarios)
+                {
+                    @* OJO AQUÍ: Agregamos class="opinion-card" y data-calificacion *@
+                    <div class="bg-gray-50 border border-gray-100 rounded-xl p-5 shadow-sm opinion-card" data-calificacion="@comentario.calificacion">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h4 class="font-bold text-gray-900">
+                                    @(comentario.clinicas?.nombre_clinica ?? "Clínica anónima")
+                                </h4>
+                                <div class="flex items-center mt-1 text-yellow-400 text-sm">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= comentario.calificacion) { <i class="fas fa-star"></i> }
+                                        else { <i class="far fa-star text-gray-300"></i> }
+                                    }
+                                    <span class="text-gray-500 text-xs ml-2 font-medium">@comentario.calificacion / 5</span>
+                                </div>
+                            </div>
+                            <span class="text-xs text-gray-400 font-medium bg-white px-2 py-1 rounded-md border border-gray-100">
+                                @comentario.creado_en.ToString("dd MMM yyyy")
+                            </span>
+                        </div>
+                        <p class="text-gray-600 text-sm leading-relaxed">"@comentario.comentario"</p>
+                    </div>
+                }
+
+                @* Mensaje cuando un filtro no tiene resultados *@
+                <div id="empty-filtro" class="hidden bg-gray-50 rounded-xl p-8 text-center border border-dashed border-gray-200">
+                    <i class="fas fa-filter text-3xl text-gray-300 mb-3"></i>
+                    <h3 class="text-gray-500 font-semibold mb-1">No hay opiniones con esta calificación</h3>
+                    <p class="text-sm text-gray-400">Prueba seleccionando otra cantidad de estrellas.</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="bg-gray-50 rounded-xl p-8 text-center border border-dashed border-gray-200">
+                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-gray-300">
+                    <i class="far fa-comment-dots text-2xl"></i>
+                </div>
+                <h3 class="text-gray-500 font-semibold mb-1">Sin opiniones todavía</h3>
+                <p class="text-sm text-gray-400">Cuando las clínicas compren y califiquen este producto, sus opiniones aparecerán aquí.</p>
+            </div>
+        }
+    </div>
+
+<script>
+    function filtrarOpiniones(calificacion) {
+        // 1. Resetear el diseño de todos los botones
+        document.querySelectorAll('.filtro-btn').forEach(btn => {
+            btn.classList.remove('bg-teal-600', 'text-white', 'border-teal-600');
+            btn.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
+        });
+
+        // 2. Pintar de color "activo" el botón que el usuario clickeó
+        const btnActivo = document.getElementById('btn-filtro-' + calificacion);
+        btnActivo.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
+        btnActivo.classList.add('bg-teal-600', 'text-white', 'border-teal-600');
+
+        // 3. Filtrar las tarjetas de opiniones
+        const tarjetas = document.querySelectorAll('.opinion-card');
+        let tarjetasVisibles = 0;
+
+        tarjetas.forEach(tarjeta => {
+            const califTarjeta = tarjeta.getAttribute('data-calificacion');
+            
+            if (calificacion === 'todas' || califTarjeta == calificacion) {
+                tarjeta.style.display = 'block'; // Mostrar
+                tarjetasVisibles++;
+            } else {
+                tarjeta.style.display = 'none'; // Ocultar
+            }
+        });
+
+        // 4. Mostrar el mensaje de "No hay opiniones" si todo se ocultó
+        const emptyState = document.getElementById('empty-filtro');
+        if (tarjetasVisibles === 0) {
+            emptyState.classList.remove('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+        }
+    }
+</script>

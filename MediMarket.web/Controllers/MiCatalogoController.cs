@@ -147,6 +147,8 @@ namespace MediMarket.web.Controllers
 
         // ─── DETAILS ─────────────────────────────────────────────────────────────
 
+        // ─── DETAILS ─────────────────────────────────────────────────────────────
+
         public ActionResult Details(Guid id)
         {
             using (var db = new ConexionModel())
@@ -155,6 +157,8 @@ namespace MediMarket.web.Controllers
                 var producto = db.productos
                     .Include("categorias")
                     .Include("producto_imagenes")
+                    .Include("producto_comentarios")          
+                    .Include("producto_comentarios.clinicas") 
                     .FirstOrDefault(p => p.id == id && p.proveedor_id == proveedor.id);
 
                 if (producto == null) return HttpNotFound();

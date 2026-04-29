@@ -98,16 +98,70 @@
 
         @* Acciones *@
         <div class="flex justify-end gap-3 pt-4 border-t">
-            <a href="@Url.Action("Index", "MiCatalogo")"
-               class="py-2 px-6 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold">
-                Cancelar
-            </a>
-            <button type="submit"
-                    class="py-2 px-6 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold">
-                Guardar producto
-            </button>
-        </div>
+    <a href="@Url.Action("Index", "MiCatalogo")"
+       class="py-2 px-6 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold">
+        Cancelar
+    </a>
+    
+    <button type="button" onclick="generarPreview()"
+            class="py-2 px-6 rounded-lg bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 font-bold transition">
+        <i class="fas fa-eye mr-1"></i> Preview
+    </button>
+
+    <button type="submit"
+            class="py-2 px-6 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold">
+        Guardar producto
+    </button>
+</div>
     }
+</div>
+
+<div id="modalPreview" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 hidden">
+    <div class="bg-white rounded-2xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-y-auto relative shadow-2xl">
+        <button type="button" onclick="cerrarPreview()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center transition">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <div class="p-8">
+            <div class="text-xs text-gray-400 mb-6 flex gap-2">
+                <span>Marketplace</span> › <span id="p_cat_bread">Categoría</span> › <span id="p_nom_bread" class="font-semibold text-gray-700">Producto</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div>
+                    <div class="border border-gray-200 rounded-xl overflow-hidden aspect-[4/3] flex items-center justify-center p-4 bg-gray-50">
+                        <img id="p_img" src="/Content/img/no-image.png" class="max-h-full object-contain" />
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span id="p_cat_tag" class="bg-gray-100 text-gray-600 text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">CATEGORÍA</span>
+                        <span class="text-teal-600 text-sm font-bold flex items-center gap-1"><i class="fas fa-check-circle"></i> Proveedor Verificado</span>
+                    </div>
+
+                    <h2 id="p_nombre" class="text-3xl font-extrabold text-gray-900 mt-1">Nombre del Producto</h2>
+                    <p id="p_desc" class="text-gray-500 mt-2 text-sm leading-relaxed whitespace-pre-line">Descripción aquí...</p>
+
+                    <div class="mt-6 flex items-baseline gap-2">
+                        <span id="p_precio" class="text-4xl font-extrabold text-teal-700">$0.00</span>
+                        <span class="text-sm font-semibold text-gray-500">MXN/<span id="p_unidad">pieza</span></span>
+                    </div>
+
+                    <p class="text-sm text-gray-500 mt-2 font-medium">En Stock (<span id="p_stock">0</span> disponibles)</p>
+
+                    <div class="bg-gray-50 rounded-xl p-5 mt-8 border border-gray-100">
+                        <h3 class="font-bold text-gray-900 mb-4 text-sm">Especificaciones Rápidas</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between border-b border-gray-200 pb-2"><span class="text-gray-500">SKU</span><span id="p_sku" class="font-bold text-gray-900">---</span></div>
+                            <div class="flex justify-between border-b border-gray-200 pb-2"><span class="text-gray-500">Unidad</span><span id="p_unidad_spec" class="font-bold text-gray-900">---</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">Proveedor</span><span class="font-bold text-gray-900">Tu Empresa</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -126,4 +180,50 @@
             reader.readAsDataURL(file);
         });
     });
+
+    function generarPreview() {
+        // 1. Obtener valores de los inputs del formulario
+        // Nota: Los IDs que genera ASP.NET suelen ser el nombre de la propiedad
+        const nombre = document.getElementById('Nombre').value || "Nombre del Producto";
+        const desc = document.getElementById('Descripcion').value || "Sin descripción disponible.";
+        const precio = document.getElementById('PrecioUnitario').value || "0.00";
+        const unidad = document.getElementById('UnidadMedida').value;
+        const stock = document.getElementById('StockDisponible').value || "0";
+        const sku = document.getElementById('Sku').value || "N/A";
+        
+        // Para la categoría obtenemos el TEXTO de la opción seleccionada, no el ID
+        const catSelect = document.getElementById('CategoriaId');
+        const catTexto = catSelect.options[catSelect.selectedIndex].text.replace('---', '').trim() || "General";
+
+        // 2. Inyectar valores en el Modal
+        document.getElementById('p_nombre').innerText = nombre;
+        document.getElementById('p_nom_bread').innerText = nombre;
+        document.getElementById('p_desc').innerText = desc;
+        document.getElementById('p_precio').innerText = '$' + parseFloat(precio).toLocaleString('en-US', {minimumFractionDigits: 2});
+        document.getElementById('p_unidad').innerText = unidad;
+        document.getElementById('p_unidad_spec').innerText = unidad;
+        document.getElementById('p_stock').innerText = stock;
+        document.getElementById('p_sku').innerText = sku;
+        document.getElementById('p_cat_tag').innerText = catTexto;
+        document.getElementById('p_cat_bread').innerText = catTexto;
+
+        // 3. Manejar la Imagen (usar la primera seleccionada en el input file)
+        const fileInput = document.querySelector('input[type="file"]');
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('p_img').src = e.target.result;
+            }
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            document.getElementById('p_img').src = "/Content/img/no-image.png";
+        }
+
+        // 4. Mostrar Modal
+        document.getElementById('modalPreview').classList.remove('hidden');
+    }
+
+    function cerrarPreview() {
+        document.getElementById('modalPreview').classList.add('hidden');
+    }
 </script>
