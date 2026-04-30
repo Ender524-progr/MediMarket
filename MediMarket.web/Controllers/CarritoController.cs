@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using MediMarket.web.Models;
+using System.Threading.Tasks;
+using System.Net.Mail;
+using System.Net;
+using System.Configuration;
 
 namespace MediMarket.web.Controllers
 {
@@ -174,7 +178,6 @@ public JsonResult ActualizarCantidad(Guid productoId, int cantidad)
                 };
                 db.pedidos.Add(nuevoPedido);
 
-                // ---> NUEVO: Creamos una lista "inteligente" para guardar IDs sin repetirlos
                 var proveedoresInvolucrados = new HashSet<Guid>();
 
                 // 4. Crear los Detalles del Pedido y Restar Stock
@@ -190,18 +193,15 @@ public JsonResult ActualizarCantidad(Guid productoId, int cantidad)
                     };
                     db.detalle_pedidos.Add(detalle);
 
-                    // Buscamos el producto en la BD para restar stock y sacar el ID de su proveedor
                     var productoDB = db.productos.Find(item.ProductoId);
                     if (productoDB != null)
                     {
                         productoDB.stock_disponible -= item.Cantidad;
-
-                        // Guardamos a este proveedor en nuestra lista
                         proveedoresInvolucrados.Add(productoDB.proveedor_id);
                     }
                 }
 
-                // ---> NUEVO: 5. Crear Notificaciones para los proveedores involucrados
+                // 5. Crear Notificaciones para los proveedores involucrados
                 foreach (var provId in proveedoresInvolucrados)
                 {
                     var nuevaNotificacion = new notificaciones_proveedores
@@ -214,31 +214,156 @@ public JsonResult ActualizarCantidad(Guid productoId, int cantidad)
                         leida = false,
                         creado_en = DateTime.Now
                     };
-
                     db.notificaciones_proveedores.Add(nuevaNotificacion);
                 }
 
-                // 6. Guardar en SQL todo de un solo golpe (pedido, detalles, stock y notificaciones)
+                var notiClinica = new notificaciones_clinicas
+                {
+                    id = Guid.NewGuid(),
+                    clinica_id = miClinica.id,
+                    titulo = "¡Pedido Confirmado!",
+                    mensaje = $"Tu orden #{nuevoPedido.numero_pedido} se ha generado con éxito por un total de ${totalPago.ToString("N2")}.",
+                    tipo = "orden",
+                    leida = false,
+                    creado_en = DateTime.Now
+                };
+                db.notificaciones_clinicas.Add(notiClinica);
+
+                // 6. Guardar en SQL
                 db.SaveChanges();
 
-                // Vaciar carrito
+                // 7. Vaciar carrito
                 Session.Remove("Carrito");
 
-                // Mandar datos a la pantalla final
-                TempData["NumeroOrden"] = numOrden;
-                TempData["TotalPago"] = totalPago;
+                // 8. Enviar correo en segundo plano
+                var correoUsuario = ((System.Security.Claims.ClaimsIdentity)User.Identity).FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "correo@destino.com";
+                var articulosComprados = carrito.ToList(); 
+                var idPedido = nuevoPedido.id;
+
+                Task.Run(() => EnviarCorreoConfirmacion(correoUsuario, numOrden, totalPago.ToString("N2"), miClinica.nombre_clinica, articulosComprados, idPedido));
+
+                // 9. Pasar ID a la vista de éxito
+                TempData["PedidoId"] = nuevoPedido.id;
 
                 return RedirectToAction("Exito");
             }
         }
 
-        // La vista que carga tu diseño de éxito
+        // ─── LA NUEVA VISTA DE ÉXITO (Con datos de la clínica) ───
         public ActionResult Exito()
-{
-    // Si entran de chismosos sin haber comprado, los pateamos a la tienda
-    if (TempData["NumeroOrden"] == null) return RedirectToAction("Index", "Shop");
-    
-    return View();
-}
+        {
+            if (TempData["PedidoId"] == null) return RedirectToAction("Index", "Shop");
+
+            Guid pedidoId = (Guid)TempData["PedidoId"];
+            using (var db = new ConexionModel())
+            {
+                var pedido = db.pedidos.Include("clinicas").FirstOrDefault(p => p.id == pedidoId);
+                return View(pedido);
+            }
+        }
+
+        // ─── MÉTODO PARA MANDAR EL CORREO 
+        private void EnviarCorreoConfirmacion(string destinatario, string numOrden, string total, string nombreClinica, List<CarritoItem> articulos, Guid pedidoId)
+        {
+            try
+            {
+                string miCorreo = ConfigurationManager.AppSettings["EmailSoporte"];
+                string miPassword = ConfigurationManager.AppSettings["EmailPassword"];
+
+                if (string.IsNullOrEmpty(miCorreo) || string.IsNullOrEmpty(miPassword)) return; 
+
+                // 1. Armamos las filas de los productos con un ciclo
+                string filasProductos = "";
+                foreach(var item in articulos)
+                {
+                    filasProductos += $@"
+                    <tr>
+                        <td style='padding: 12px 0; border-bottom: 1px solid #f3f4f6;'>
+                            <strong style='color: #111827; font-size: 14px;'>{item.Nombre}</strong><br>
+                            <span style='color: #6b7280; font-size: 11px;'>Vendido por: {item.Proveedor}</span>
+                        </td>
+                        <td style='padding: 12px 0; border-bottom: 1px solid #f3f4f6; text-align: center; color: #4b5563; font-size: 14px;'>
+                            {item.Cantidad}
+                        </td>
+                        <td style='padding: 12px 0; border-bottom: 1px solid #f3f4f6; text-align: right; color: #111827; font-size: 14px; font-weight: bold;'>
+                            ${item.Subtotal.ToString("N2")}
+                        </td>
+                    </tr>";
+                }
+
+                // OJO: Cambia este puerto (44341) si tu Visual Studio usa uno diferente
+                string urlBoton = $"https://localhost:44341/Shop/MisPedidos"; 
+
+                MailMessage mail = new MailMessage();
+                mail.From = new MailAddress(miCorreo, "MediMarket");
+                mail.To.Add(destinatario);
+                mail.Subject = $"Confirmación de Orden #{numOrden} - MediMarket";
+                mail.IsBodyHtml = true;
+
+                // 2. Maquetación del correo con tabla y botón
+                mail.Body = $@"
+                <div style='font-family: Arial, sans-serif; background-color: #f9fafb; padding: 40px 20px; color: #374151;'>
+                    <div style='max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;'>
+                        
+                        <!-- Header Verde -->
+                        <div style='background-color: #0f766e; padding: 40px; color: white;'>
+                            <p style='margin: 0; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #99f6e4;'>Recibo de compra</p>
+                            <h1 style='margin: 10px 0; font-size: 24px;'>Orden #{numOrden}</h1>
+                            <p style='margin: 0; font-size: 14px; color: #ccfbf1;'>Tu pedido ha sido procesado con éxito.</p>
+                        </div>
+
+                        <!-- Cuerpo del recibo -->
+                        <div style='padding: 40px;'>
+                            <h3 style='margin-top: 0; color: #111827; font-size: 16px; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;'>Enviar a:</h3>
+                            <p style='margin: 5px 0 25px 0; font-size: 16px;'><strong>{nombreClinica}</strong></p>
+                            
+                            <!-- Tabla de productos -->
+                            <table style='width: 100%; border-collapse: collapse; margin-bottom: 25px;'>
+                                <thead>
+                                    <tr>
+                                        <th style='text-align: left; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb; color: #9ca3af; font-size: 10px; text-transform: uppercase;'>Producto</th>
+                                        <th style='text-align: center; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb; color: #9ca3af; font-size: 10px; text-transform: uppercase;'>Cant.</th>
+                                        <th style='text-align: right; padding-bottom: 10px; border-bottom: 2px solid #e5e7eb; color: #9ca3af; font-size: 10px; text-transform: uppercase;'>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filasProductos}
+                                </tbody>
+                            </table>
+
+                            <!-- Total -->
+                            <div style='background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin-bottom: 35px;'>
+                                <p style='margin: 0; display: flex; justify-content: space-between; align-items: center;'>
+                                    <span style='color: #6b7280; font-weight: bold;'>TOTAL PAGADO:</span> 
+                                    <strong style='color: #0f766e;'>${total} MXN</strong>
+                                </p>
+                            </div>
+
+                            <!-- Botón de acción -->
+                            <div style='text-align: center;'>
+                                <a href='{urlBoton}' style='display: inline-block; background-color: #0f766e; color: #ffffff; text-decoration: none; font-weight: bold; padding: 14px 28px; border-radius: 8px; font-size: 14px;'>
+                                    Ver estatus del pedido
+                                </a>
+                            </div>
+                            
+                            <p style='font-size: 11px; color: #9ca3af; margin-top: 40px; text-align: center;'>
+                                Este documento sirve como comprobante de tu solicitud en la plataforma MediMarket.
+                            </p>
+                        </div>
+                    </div>
+                </div>";
+
+                using (SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587))
+                {
+                    smtp.Credentials = new NetworkCredential(miCorreo, miPassword);
+                    smtp.EnableSsl = true;
+                    smtp.Send(mail);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error al enviar correo: " + ex.Message);
+            }
+        }
     }
 }

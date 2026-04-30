@@ -131,6 +131,25 @@ namespace MediMarket.web.Controllers
                     });
                 }
 
+                var rfq = db.solicitudes_rfq.Find(rfqId);
+                
+                if (rfq != null)
+                {
+                    bool esActualizacion = existente != null; // Para saber si editó o es nueva
+
+                    var notiRfq = new notificaciones_clinicas
+                    {
+                        id = Guid.NewGuid(),
+                        clinica_id = rfq.clinica_id,
+                        titulo = esActualizacion ? "Cotización Actualizada" : "¡Nueva Oferta Recibida!",
+                        mensaje = $"El proveedor {proveedor.nombre_empresa} ha {(esActualizacion ? "actualizado su" : "enviado una")} propuesta por ${monto.ToString("N2")} para tu solicitud '{rfq.titulo}'.",
+                        tipo = "rfq",
+                        leida = false,
+                        creado_en = DateTime.Now
+                    };
+                    db.notificaciones_clinicas.Add(notiRfq);
+                }
+
                 db.SaveChanges();
                 TempData["Exito"] = "Cotización enviada correctamente.";
                 return RedirectToAction("Details", new { id = rfqId });

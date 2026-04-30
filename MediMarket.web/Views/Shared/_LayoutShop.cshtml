@@ -9,6 +9,43 @@
 </head>
 <body class="bg-white min-h-screen">
 
+      @{
+        var tipo = ((System.Security.Claims.ClaimsIdentity)User.Identity).FindFirst("tipo_usuario")?.Value;
+        var carritoSesion = Session["Carrito"] as List<MediMarket.web.Controllers.CarritoController.CarritoItem>;
+        int itemsEnCarrito = carritoSesion != null ? carritoSesion.Sum(i => i.Cantidad) : 0;
+        
+        var identity = (System.Security.Claims.ClaimsIdentity)User.Identity;
+        var userEmail = identity.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "correo@no-encontrado.com";
+        var fotoUrl = identity.FindFirst("foto_url")?.Value ?? identity.FindFirst("picture")?.Value ?? identity.FindFirst("urn:google:picture")?.Value;
+        var userName = identity.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? identity.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? User.Identity.Name ?? "Usuario";
+
+        // NOTIFICACIONES GLOBALES
+        var db = new MediMarket.web.Models.ConexionModel();
+        var misNotificaciones = new List<MediMarket.web.Models.notificaciones_clinicas>();
+        int totalSinLeer = 0;
+
+        if (Request.IsAuthenticated)
+        {
+            var uidStr = identity.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(uidStr))
+            {
+                var uid = Guid.Parse(uidStr);
+                var mClinica = db.clinicas.FirstOrDefault(c => c.usuario_id == uid);
+                if (mClinica != null)
+                {
+                    // Traemos las últimas 10 notificaciones de esta clínica
+                    misNotificaciones = db.notificaciones_clinicas
+                                          .Where(n => n.clinica_id == mClinica.id)
+                                          .OrderByDescending(n => n.creado_en)
+                                          .Take(10)
+                                          .ToList();
+                    
+                    totalSinLeer = misNotificaciones.Count(n => !n.leida);
+                }
+            }
+        }
+    }
+
     @* ── Header fijo ──────────────────────────────────────────────────── *@
     <header class="w-full h-16 fixed top-0 left-0 right-0 flex items-center gap-4
                    bg-white border-b border-gray-100 shadow-sm z-50                   
@@ -29,7 +66,6 @@
                        placeholder="Buscar productos, suministros, equipos..."
                        class="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 focus:bg-white transition" />
                 
-                @* ¡Esta es la lupa que borraste! jajaja *@
                 <button type="submit" class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 hover:text-teal-600">
                     <i class="fas fa-search text-sm"></i>
                 </button>
@@ -38,11 +74,6 @@
 
         @* Navegación derecha *@
         <nav class="flex items-center gap-1 ml-auto shrink-0">
-
-            @{
-                // Tipo de usuario (Hibrido, Comprador, Proveedor)}
-            var tipo = ((System.Security.Claims.ClaimsIdentity)User.Identity).FindFirst("tipo_usuario")?.Value;
-            }
 
             @if (tipo == "hibrido")
             {
@@ -66,12 +97,7 @@
                text-gray-600 hover:bg-gray-200 transition-colors relative">
                 <i class="fas fa-shopping-cart"></i>
                 <span>Mi Carrito</span>
-                
-                @* Lógica para el número inicial del badge *@
-                @{
-                    var carritoSesion = Session["Carrito"] as List<MediMarket.web.Controllers.CarritoController.CarritoItem>;
-                    int itemsEnCarrito = carritoSesion != null ? carritoSesion.Sum(i => i.Cantidad) : 0;
-                }
+
                 <span id="carritoCount"
                       class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-teal-600 text-white text-[10px] font-bold rounded-full items-center justify-center @(itemsEnCarrito > 0 ? "flex" : "hidden")">
                     @itemsEnCarrito
@@ -79,32 +105,77 @@
             </a>
 
             @* Notificaciones *@
-            <button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition text-gray-600">
-                <i class="fas fa-bell"></i>
-            </button>
+            <div class="relative flex items-center ml-2">
+                <button id="ToggleNotifications" class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition text-gray-600 focus:outline-none relative">
+                    <i class="fas fa-bell text-lg"></i>
+                    @* Usamos la nueva variable totalSinLeer *@
+                    @if (totalSinLeer > 0)
+                    {
+                        <span class="absolute top-1.5 right-1.5 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
+                            @totalSinLeer
+                        </span>
+                    }
+                </button>
+
+                <div id="notificationsDropdown" class="hidden absolute top-12 -right-4 w-80 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 overflow-hidden transform scale-95 opacity-0 transition-all duration-200 ease-out origin-top-right">
+                    
+                    @* Cabecera con botón de Marcar Todas *@
+                    <div class="px-4 py-3 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                        <h3 class="font-bold text-gray-800 text-sm">Notificaciones</h3>
+                        @if (totalSinLeer > 0)
+                        {
+                            <button onclick="marcarTodasNotis()" class="text-[10px] font-bold text-teal-600 hover:text-teal-800 uppercase tracking-wider transition">
+                                <i class="fas fa-check-double mr-1"></i> Marcar todas
+                            </button>
+                        }
+                    </div>
+
+                    <div class="max-h-72 overflow-y-auto divide-y divide-gray-50">
+                        @if (misNotificaciones.Any())
+                        {
+                            foreach (var noti in misNotificaciones)
+                            {
+                                @* Le agregamos un ID y la clase group para el hover *@
+                                <div id="noti_@noti.id" class="relative p-4 transition @(noti.leida ? "opacity-60 bg-white" : "bg-teal-50/40 hover:bg-teal-50") group">
+                                    
+                                    @* Botón minimalista de palomita (solo sale si no está leída) *@
+                                    @if (!noti.leida)
+                                    {
+                                        <button onclick="marcarNotiLeida('@noti.id')" class="absolute top-4 right-4 text-gray-300 hover:text-teal-600 transition opacity-0 group-hover:opacity-100" title="Marcar como leída">
+                                            <i class="fas fa-check-circle text-lg"></i>
+                                        </button>
+                                    }
+
+                                    <p class="text-xs font-bold pr-6 @(noti.leida ? "text-gray-500" : "text-teal-800")">
+                                        @noti.titulo
+                                    </p>
+                                    <p class="text-[11px] text-gray-500 mt-1 leading-tight pr-2">
+                                        @noti.mensaje
+                                    </p>
+                                    <p class="text-[9px] text-gray-400 mt-2 font-medium">
+                                        @noti.creado_en.ToString("dd MMM HH:mm")
+                                    </p>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="flex flex-col items-center justify-center py-8 px-4 text-center">
+                                <i class="fas fa-bell-slash text-3xl text-gray-200 mb-3"></i>
+                                <p class="text-sm font-bold text-gray-400">Todo al día</p>
+                                <p class="text-xs text-gray-400 mt-1">No tienes alertas nuevas por ahora.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
 
             @* Menú de usuario *@
             <div class="relative" id="userMenuWrapper">
                 <button id="userMenuBtn" class="flex items-center gap-2 py-1.5 px-2 rounded-full hover:bg-gray-100 transition focus:outline-none">
                     @{
-                        var identity = (System.Security.Claims.ClaimsIdentity)User.Identity;
-                        
-                        // 1. Nombre 
-                        var userName = identity.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value 
-                                       ?? identity.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value 
-                                       ?? User.Identity.Name 
-                                       ?? "Usuario";
-                        
+  
                         if(string.IsNullOrWhiteSpace(userName)) { userName = "Usuario"; }
-
-                        // 2. Correo
-                        var userEmail = identity.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value 
-                                        ?? "correo@no-encontrado.com";
-
-                        // 3. Foto de Google o BD
-                        var fotoUrl = identity.FindFirst("foto_url")?.Value 
-                                      ?? identity.FindFirst("picture")?.Value 
-                                      ?? identity.FindFirst("urn:google:picture")?.Value;
 
                         if (!string.IsNullOrWhiteSpace(fotoUrl) && !fotoUrl.StartsWith("http"))
                         {
@@ -124,16 +195,36 @@
 
                 @* Dropdown*@
                 <div id="userMenuDropdown" 
-                     class="absolute right-0 top-full mt-2 w-52 
+                     class="absolute right-0 top-full mt-2 w-72 
                      bg-white border border-gray-200 
                      rounded-xl shadow-2xl z-50 overflow-hidden 
                      transition-all duration-200 ease-out origin-top-right transform scale-95 opacity-0 invisible">
                     
-                    <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                        <p class="text-sm font-semibold text-gray-800 truncate">@userName</p>
-                        <p class="text-xs text-gray-400 truncate">@userEmail</p>
+                    @* 1. Información del Usuario (Diseño Josue adaptado a tus variables) *@
+                    <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-3">
+                        @* Tu avatar inteligente con inicial de respaldo *@
+                        <div class="relative w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-sm ring-2 ring-teal-100 overflow-hidden shrink-0">
+                            <span class="absolute z-0">@(userName.Substring(0, 1).ToUpper())</span>
+                            @if (!string.IsNullOrWhiteSpace(fotoUrl))
+                            {
+                                <img src="@fotoUrl" referrerpolicy="no-referrer" class="absolute z-10 w-full h-full object-cover" onerror="this.style.display='none'" />
+                            }
+                        </div>
+                        <div class="overflow-hidden">
+                            <p class="font-bold text-gray-800 truncate leading-tight">@userName</p>
+                            <p class="text-xs text-gray-500 truncate">@userEmail</p>
+                        </div>
                     </div>
                     
+                    @* 2. Información de la Clínica *@
+                    <div class="px-5 py-3 bg-slate-50 border-b border-gray-100">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Clínica actual</p>
+                        @* Cambié NombreEmpresa por NombreClinica para que tenga sentido en tu contexto *@
+                        <p class="font-bold text-teal-700 truncate text-sm">@(ViewBag.NombreClinica ?? "Mi Clínica")</p>
+                        <p class="text-xs text-gray-500 truncate">RFC: @(ViewBag.RfcClinica ?? "Sin registrar")</p>
+                    </div>
+                    
+                    @* 3. Tus enlaces originales *@
                     <ul class="py-1">
                         <li>
                             <a href="@Url.Action("MiPerfil", "Clinica")" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:translate-x-1 hover:text-teal-600 transition-all">
@@ -380,6 +471,66 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Enter') sendMessage();
     });
 });
+
+// Toggle del menú de Notificaciones
+        const notiBtn = document.getElementById('ToggleNotifications');
+        const notiDropdown = document.getElementById('notificationsDropdown');
+
+        notiBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notiDropdown.classList.toggle('hidden');
+            setTimeout(() => {
+                notiDropdown.classList.toggle('opacity-0');
+                notiDropdown.classList.toggle('scale-95');
+            }, 10);
+            
+            // Si abro notificaciones, cierro el menú de usuario
+            dropdown.classList.add('invisible', 'opacity-0', 'scale-95');
+            dropdown.classList.remove('opacity-100', 'scale-100');
+        });
+
+        document.addEventListener('click', () => {
+            notiDropdown.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => notiDropdown.classList.add('hidden'), 200);
+        });
+
+        notiDropdown.addEventListener('click', (e) => e.stopPropagation());
+
+        btn.addEventListener('click', (e) => {
+            notiDropdown.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => notiDropdown.classList.add('hidden'), 200);
+        });
+
+        function marcarNotiLeida(id) {
+        fetch(`/Notificaciones/MarcarLeida?id=${id}`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if(data.ok) {
+                const div = document.getElementById('noti_' + id);
+                div.classList.remove('bg-teal-50/40', 'hover:bg-teal-50');
+                div.classList.add('opacity-60', 'bg-white');
+                
+                const btn = div.querySelector('button');
+                if(btn) btn.remove();
+
+                const titulo = div.querySelector('p.font-bold');
+                titulo.classList.remove('text-teal-800');
+                titulo.classList.add('text-gray-500');
+
+                location.reload(); 
+            }
+        });
+    }
+
+    function marcarTodasNotis() {
+        fetch(`/Notificaciones/MarcarTodas`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if(data.ok) {
+                location.reload();
+            }
+        });
+    }
     </script>
 </body>
 </html>

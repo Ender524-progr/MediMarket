@@ -1,49 +1,72 @@
-﻿@{
+﻿@model MediMarket.web.Models.pedidos
+@{
     Layout = "~/Views/Shared/_LayoutShop.cshtml";
     ViewBag.Title = "Pedido Exitoso";
-    
-    // Rescatamos los datos que nos mandó el controlador
-    string numeroOrden = TempData["NumeroOrden"]?.ToString();
-    decimal totalPago = TempData["TotalPago"] != null ? (decimal)TempData["TotalPago"] : 0;
 }
 
-<div class="min-h-[80vh] flex items-center justify-center bg-gray-50 px-4">
+<div class="min-h-[80vh] flex items-center justify-center bg-gray-50 px-4 pt-28 pb-10">
     
     @* Tarjeta principal *@
-    <div class="bg-white rounded-[2rem] shadow-2xl shadow-gray-200 w-full max-w-lg p-10 text-center">
+    <div class="bg-white rounded-[2rem] shadow-xl shadow-gray-400 w-full max-w-xl p-10 text-center relative overflow-hidden">
         
+        @* Decoración de fondo opcional *@
+        <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-green-50/50 to-transparent"></div>
+
         @* Ícono verde *@
-        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i class="fa-solid fa-check text-green-700 text-4xl"></i>
+        <div class="relative w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-green-200">
+            <i class="fa-solid fa-check text-green-600 text-4xl"></i>
         </div>
 
         @* Textos principales *@
-        <h1 class="text-4xl font-extrabold text-teal-800 mb-4 leading-tight">
+        <h1 class="relative text-4xl font-extrabold text-teal-800 mb-4 leading-tight">
             ¡Pedido realizado con<br>éxito!
         </h1>
-        <p class="text-gray-600 text-sm mb-8 px-4 leading-relaxed">
+        <p class="relative text-gray-600 text-sm mb-8 px-4 leading-relaxed">
             Hemos recibido tu solicitud y nuestro equipo clínico está procesando los artículos. Recibirás un correo electrónico de confirmación en breve.
         </p>
 
+        @* ── NUEVA TARJETA: "Enviar a" (Inspirado en el diseño de tu amigo) ── *@
+        <div class="rounded-2xl p-6 text-left mb-6">
+            <h3 class="text-xs font-bold text-teal-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-truck-fast"></i> Detalles de Envío
+            </h3>
+            <p class="font-bold text-gray-900 text-lg mb-1">@Model.clinicas.nombre_clinica</p>
+            <p class="text-xs text-gray-500 font-medium mb-4">@Model.clinicas.especialidad</p>
+            
+            <div class="space-y-2 text-sm text-gray-600">
+                <p class="flex items-start gap-3">
+                    <i class="fa-solid fa-location-dot mt-1 text-teal-600 w-4 text-center"></i> 
+                    <span>@Model.clinicas.direccion<br>@Model.clinicas.ciudad, @Model.clinicas.estado. C.P. @Model.clinicas.cp</span>
+                </p>
+                <p class="flex items-center gap-3">
+                    <i class="fa-solid fa-phone text-teal-600 w-4 text-center"></i> 
+                    @Model.clinicas.telefono
+                </p>
+                <p class="flex items-center gap-3">
+                    <i class="fa-solid fa-id-card text-teal-600 w-4 text-center"></i> 
+                    RFC: <span class="uppercase">@Model.clinicas.rfc</span>
+                </p>
+            </div>
+        </div>
+
         @* Caja gris de resumen *@
-        <div class="bg-gray-100 rounded-2xl p-6 flex justify-between items-center mb-8 text-left border-l-4 border-teal-700">
+        <div class="bg-gray-200 rounded-2xl p-6 flex justify-between items-center mb-8 text-left">
             <div>
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Número de orden</p>
-                <p class="font-bold text-gray-900">#@numeroOrden</p>
+                <p class="font-bold text-gray-900">#@Model.numero_pedido</p>
             </div>
             <div class="text-right">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total a facturar</p>
-                <p class="text-xl font-black text-teal-700">$@totalPago.ToString("N2")</p>
+                <p class="text-2xl font-black text-teal-700">$@Model.total.ToString("N2")</p>
             </div>
         </div>
 
         @* Botones *@
-        <div class="flex flex-col sm:flex-row gap-3">
-            
-            <a href="@Url.Action("MisPedidos", "Shop")" class="flex-1 bg-teal-800 hover:bg-teal-900 text-white font-bold py-3.5 px-4 rounded-xl transition-colors flex justify-center items-center gap-2 text-sm">
+        <div class="flex flex-col sm:flex-row gap-3 relative">
+            <a href="@Url.Action("MisPedidos", "Shop")" class="flex-1 bg-teal-700 hover:bg-teal-800 text-white font-bold py-3.5 px-4 rounded-xl transition-colors flex justify-center items-center gap-2 text-sm shadow-md">
                 <i class="fa-solid fa-receipt"></i> Ver mis pedidos
             </a>
-            <a href="@Url.Action("Index", "Shop")" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3.5 px-4 rounded-xl transition-colors flex justify-center items-center gap-2 text-sm">
+            <a href="@Url.Action("Index", "Shop")" class="flex-1 bg-white border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3.5 px-4 rounded-xl transition-colors flex justify-center items-center gap-2 text-sm">
                 <i class="fa-solid fa-store"></i> Volver al Marketplace
             </a>
         </div>

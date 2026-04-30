@@ -27,6 +27,7 @@ namespace MediMarket.web.Models
         public virtual DbSet<solicitudes_rfq> solicitudes_rfq { get; set; }
         public virtual DbSet<cotizaciones> cotizaciones { get; set; }
         public virtual DbSet<producto_comentarios> producto_comentarios { get; set; }
+        public virtual DbSet<notificaciones_clinicas> notificaciones_clinicas { get; set; }
 
 
         public virtual DbSet<notificaciones_proveedores> notificaciones_proveedores { get; set; }
