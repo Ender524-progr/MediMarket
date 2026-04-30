@@ -1,4 +1,209 @@
-﻿@{
+﻿@model MediMarket.web.Controllers.ProveedoresController.DashboardViewModel
+@{
     Layout = "~/Views/Shared/_LayoutProveedores.cshtml";
-    ViewBag.Title = "Principal";   
+    ViewBag.Title = "Resumen";
 }
+
+@* Importamos Chart.js para las gráficas *@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="p-8 max-w-7xl mx-auto space-y-6">
+
+    @* Saludo *@
+    <div class="flex justify-between items-end mb-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">¡Hola, @ViewBag.Nombre! 👋</h1>
+            <p class="text-gray-500 mt-1">Este es el resumen de tu negocio en MediMarket.</p>
+        </div>
+        <a href="@Url.Action("Create", "MiCatalogo")" class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-sm transition">
+            <i class="fas fa-plus mr-1"></i> Nuevo Producto
+        </a>
+    </div>
+
+    @* Tarjetas de Resumen (KPIs) *@
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        @* Tarjeta 1: Va a Analisis *@
+        <a href="@Url.Action("Index", "Analisis")" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md hover:border-teal-200 hover:-translate-y-1 transition-all group">
+            <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-gray-400 uppercase tracking-wide group-hover:text-teal-600 transition-colors">Ingresos Totales</p>
+                <p class="text-2xl font-black text-gray-800">$@Model.IngresosTotales.ToString("N2")</p>
+            </div>
+        </a>
+
+        @* Tarjeta 2: Va directo a las órdenes filtradas por "confirmado" (pendientes) *@
+        <a href="@Url.Action("Index", "Ordenes", new { estado = "confirmado" })" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md hover:border-blue-200 hover:-translate-y-1 transition-all group">
+            <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                <i class="fas fa-box-open"></i>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-gray-400 uppercase tracking-wide group-hover:text-blue-600 transition-colors">Pedidos Pendientes</p>
+                <p class="text-2xl font-black text-gray-800">@Model.PedidosPendientes</p>
+            </div>
+        </a>
+
+        @* Tarjeta 3: Va al catálogo *@
+        <a href="@Url.Action("Index", "MiCatalogo")" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md hover:border-purple-200 hover:-translate-y-1 transition-all group">
+            <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                <i class="fas fa-tags"></i>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-gray-400 uppercase tracking-wide group-hover:text-purple-600 transition-colors">Productos Activos</p>
+                <p class="text-2xl font-black text-gray-800">@Model.ProductosActivos</p>
+            </div>
+        </a>
+
+        @* Tarjeta 4: Va al catálogo (ya que ahí están las reseñas de cada producto) *@
+        <a href="@Url.Action("Index", "MiCatalogo")" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md hover:border-yellow-200 hover:-translate-y-1 transition-all group">
+            <div class="w-12 h-12 rounded-xl bg-yellow-100 text-yellow-500 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                <i class="fas fa-star"></i>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-gray-400 uppercase tracking-wide group-hover:text-yellow-600 transition-colors">Calificación Global</p>
+                <p class="text-2xl font-black text-gray-800">@Model.CalificacionPromedio.ToString("0.0") <span class="text-sm text-gray-400 font-medium">/ 5</span></p>
+            </div>
+        </a>
+    </div>
+
+    @* Gráfica y Tabla de Alertas *@
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        @* Gráfica de Ventas *@
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h3 class="font-bold text-gray-800 mb-4"><i class="fas fa-chart-line text-teal-600 mr-2"></i>Ventas de los últimos 6 meses</h3>
+            <div class="h-72">
+                <canvas id="ventasChart"></canvas>
+            </div>
+        </div>
+
+        @* Alertas de Poco Stock *@
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h3 class="font-bold text-gray-800 mb-4"><i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>Poco Inventario</h3>
+
+            @if (!Model.ProductosPocoStock.Any())
+            {
+                <div class="text-center py-10">
+                    <i class="fas fa-check-circle text-4xl text-emerald-200 mb-2"></i>
+                    <p class="text-sm text-gray-500 font-medium">Inventario saludable.</p>
+                </div>
+            }
+            else
+            {
+                <div class="space-y-4">
+                    @foreach (var prod in Model.ProductosPocoStock)
+                    {
+                        <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <div class="overflow-hidden">
+                                <p class="text-sm font-bold text-gray-800 truncate" title="@prod.nombre">@prod.nombre</p>
+                                <p class="text-xs text-gray-400">SKU: @(prod.sku ?? "N/A")</p>
+                            </div>
+                            <span class="shrink-0 bg-red-100 text-red-600 font-bold px-2.5 py-1 rounded-full text-xs">
+                                @prod.stock_disponible disp.
+                            </span>
+                        </div>
+                    }
+                </div>
+                <a href="@Url.Action("Index", "MiCatalogo")" class="block text-center text-sm font-bold text-teal-600 hover:text-teal-700 mt-4">
+                    Ver catálogo
+                </a>
+            }
+        </div>
+    </div>
+
+    @* Últimos Pedidos *@
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="font-bold text-gray-800"><i class="fas fa-shopping-bag text-teal-600 mr-2"></i>Últimas Órdenes</h3>
+            <a href="@Url.Action("Index", "Ordenes")" class="text-sm font-bold text-teal-600 hover:text-teal-700">Ver todas</a>
+        </div>
+
+        @if (!Model.UltimosPedidos.Any())
+        {
+            <div class="text-center py-12 text-gray-400">
+                <p>Todavía no tienes pedidos recientes.</p>
+            </div>
+        }
+        else
+        {
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                    <tr>
+                        <th class="px-6 py-3 font-semibold">Pedido</th>
+                        <th class="px-6 py-3 font-semibold">Clínica</th>
+                        <th class="px-6 py-3 font-semibold">Fecha</th>
+                        <th class="px-6 py-3 font-semibold">Estado</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach (var pedido in Model.UltimosPedidos)
+                    {
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 font-bold text-teal-700">
+                                <a href="@Url.Action("Details", "Ordenes", new { id = pedido.id })">#@pedido.numero_pedido</a>
+                            </td>
+                            <td class="px-6 py-4 font-semibold text-gray-800">@(pedido.clinicas?.nombre_clinica ?? "Clínica anónima")</td>
+                            <td class="px-6 py-4 text-sm text-gray-500">@pedido.creado_en.ToString("dd MMM yyyy")</td>
+                            <td class="px-6 py-4">
+                                <span class="text-xs font-bold px-2 py-1 rounded-full uppercase
+                                    @(pedido.estado == "confirmado" ? "bg-yellow-100 text-yellow-700" :
+                                      pedido.estado == "enviado" ? "bg-purple-100 text-purple-700" :
+                                      pedido.estado == "entregado" ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700")">
+                                    @pedido.estado.Replace("_", " ")
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@* Script para la gráfica *@
+<script>
+    const ctx = document.getElementById('ventasChart').getContext('2d');
+
+    // Traemos los datos de C# a JavaScript
+    const meses = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Meses));
+    const ventas = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.VentasPorMes));
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: meses,
+            datasets: [{
+                label: 'Ingresos MXN',
+                data: ventas,
+                borderColor: '#0d9488', // color teal-600
+                backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                borderWidth: 3,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#0d9488',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                fill: true,
+                tension: 0.3 // Hace que la línea sea curva
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f1f5f9', borderDash: [5, 5] },
+                    ticks: { callback: function(value) { return '$' + value; } }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+</script>

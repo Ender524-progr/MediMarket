@@ -1,0 +1,161 @@
+﻿@model MediMarket.web.Controllers.AnalisisController.AnalisisViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutProveedores.cshtml";
+    ViewBag.Title = "Análisis de Ventas";
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="p-8 max-w-6xl mx-auto">
+
+    @* Encabezado y botón PDF *@
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
+        <div>
+            <a href="@Url.Action("Index", "Proveedores")" class="text-sm text-gray-400 hover:text-teal-600 mb-2 inline-block transition"><i class="fas fa-arrow-left mr-1"></i> Volver al Inicio</a>
+            <h1 class="text-3xl font-bold text-gray-800">Análisis Detallado</h1>
+            <p class="text-gray-500 mt-1">Rendimiento histórico de tus productos en el marketplace.</p>
+        </div>
+
+        <a href="@Url.Action("DescargarReportePdf", "Analisis")" target="_blank" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-xl font-bold shadow-sm transition flex items-center gap-2">
+            <i class="fas fa-file-pdf text-red-400"></i> Descargar Reporte PDF
+        </a>
+    </div>
+
+    @* Minijuego de tarjetas rápidas *@
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-gradient-to-r from-teal-600 to-teal-800 p-6 rounded-2xl shadow-md text-white">
+            <p class="text-teal-100 uppercase tracking-wide text-sm font-semibold mb-1">Total Generado</p>
+            <p class="text-4xl font-black">$@Model.TotalIngresos.ToString("N2")</p>
+        </div>
+        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
+            <p class="text-gray-400 uppercase tracking-wide text-sm font-semibold mb-1">Volumen de ventas</p>
+            <p class="text-4xl font-black text-gray-800">@Model.TotalArticulosVendidos <span class="text-lg text-gray-500 font-medium">unidades</span></p>
+        </div>
+    </div>
+
+    @* NUEVO: Gráfica de Barras Mensual *@
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+        <h3 class="font-bold text-gray-800 mb-4"><i class="fas fa-chart-column text-teal-600 mr-2"></i>Evolución Mensual (Ingresos)</h3>
+        <div class="h-80">
+            <canvas id="barChartMensual"></canvas>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        @* Top Productos *@
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                    <h3 class="font-bold text-gray-800"><i class="fas fa-trophy text-yellow-500 mr-2"></i>Top 10 Productos Más Vendidos</h3>
+                </div>
+                <table class="w-full text-left">
+                    <thead class="text-xs uppercase text-gray-400 bg-white border-b border-gray-100">
+                        <tr>
+                            <th class="px-6 py-3">Producto</th>
+                            <th class="px-6 py-3 text-center">Cantidad</th>
+                            <th class="px-6 py-3 text-right">Ingresos</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @foreach (var item in Model.TopProductos)
+                        {
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <p class="font-bold text-gray-800">@item.Nombre</p>
+                                    <p class="text-xs text-gray-400">SKU: @(item.Sku ?? "N/A")</p>
+                                </td>
+                                <td class="px-6 py-4 text-center font-semibold text-gray-600">@item.CantidadVendida</td>
+                                <td class="px-6 py-4 text-right font-bold text-teal-700">$@item.IngresosGenerados.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @* NUEVO: Tabla de Resumen Mensual *@
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                    <h3 class="font-bold text-gray-800"><i class="fas fa-calendar-alt text-blue-500 mr-2"></i>Reporte Mensual (Últimos 6 meses)</h3>
+                </div>
+                <table class="w-full text-left">
+                    <thead class="text-xs uppercase text-gray-400 bg-white border-b border-gray-100">
+                        <tr>
+                            <th class="px-6 py-3">Mes</th>
+                            <th class="px-6 py-3 text-center">Artículos</th>
+                            <th class="px-6 py-3 text-right">Total Generado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @foreach (var mes in Model.VentasPorMes.OrderByDescending(m => m.Mes))
+                        {
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 font-bold text-gray-800">@mes.Mes</td>
+                                <td class="px-6 py-4 text-center font-semibold text-gray-600">@mes.Articulos uds.</td>
+                                <td class="px-6 py-4 text-right font-bold text-teal-700">$@mes.Total.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @* Ingresos por categoría *@
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden h-fit">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                <h3 class="font-bold text-gray-800"><i class="fas fa-chart-pie text-purple-500 mr-2"></i>Ventas por Categoría</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                @foreach (var cat in Model.VentasCategoria)
+                {
+                    <div class="flex justify-between items-center pb-3 border-b border-gray-50 last:border-0 last:pb-0">
+                        <span class="font-semibold text-gray-700">@cat.Categoria</span>
+                        <span class="font-bold text-gray-900">$@cat.Total.ToString("N2")</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const ctxBar = document.getElementById('barChartMensual').getContext('2d');
+
+    // Obtenemos los meses y los totales mapeando el modelo en JS
+    const datosMensuales = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.VentasPorMes));
+    const etiquetas = datosMensuales.map(d => d.Mes);
+    const valores = datosMensuales.map(d => d.Total);
+
+    new Chart(ctxBar, {
+        type: 'bar', // Gráfica de barras
+        data: {
+            labels: etiquetas,
+            datasets: [{
+                label: 'Ingresos Mensuales',
+                data: valores,
+                backgroundColor: 'rgba(13, 148, 136, 0.8)', // teal-600
+                hoverBackgroundColor: 'rgba(15, 118, 110, 1)', // teal-700
+                borderRadius: 6, // bordes redondeados
+                barThickness: 40 // grosor de la barra
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f1f5f9', borderDash: [5, 5] },
+                    ticks: { callback: function(value) { return '$' + value.toLocaleString(); } }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+</script>

@@ -1,0 +1,84 @@
+﻿@model IEnumerable<MediMarket.web.Models.pedidos>
+@{
+    Layout = "~/Views/Shared/_LayoutProveedores.cshtml";
+    ViewBag.Title = "Mis Órdenes";
+    string filtroEstado = ViewBag.FiltroEstado as string;
+}
+
+@helper BadgeEstado(string estado)
+{
+    string cls, label;
+    switch (estado?.ToLower())
+    {
+        case "confirmado": cls = "bg-yellow-100 text-yellow-700"; label = "CONFIRMADO"; break;
+        case "en_proceso": cls = "bg-blue-100 text-blue-700"; label = "EN PROCESO"; break;
+        case "enviado": cls = "bg-purple-100 text-purple-700"; label = "ENVIADO"; break;
+        case "entregado": cls = "bg-emerald-100 text-emerald-700"; label = "ENTREGADO"; break;
+        case "cancelado": cls = "bg-red-100 text-red-700"; label = "CANCELADO"; break;
+        case "borrador": cls = "bg-gray-100 text-gray-500"; label = "BORRADOR"; break;
+        default: cls = "bg-gray-100 text-gray-500"; label = (estado ?? "DESC").ToUpper(); break;
+    }
+    <span class="text-xs font-bold px-2.5 py-1 rounded-full @cls">@label</span>
+}
+
+<div class="p-8">
+    <div class="mb-6 flex justify-between items-end">
+        <div>
+            <h1 class="text-3xl font-bold">Órdenes de Compra</h1>
+            <p class="text-gray-500 mt-1">Gestiona los pedidos que las clínicas te han hecho.</p>
+        </div>
+    </div>
+
+    @* Filtros *@
+    <div class="flex gap-2 mb-6 border-b border-gray-200 pb-4 overflow-x-auto">
+        <a href="@Url.Action("Index")" class="px-4 py-2 rounded-lg text-sm font-semibold transition @(string.IsNullOrEmpty(filtroEstado) ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200")">Todas</a>
+        <a href="@Url.Action("Index", new { estado = "confirmado" })" class="px-4 py-2 rounded-lg text-sm font-semibold transition @(filtroEstado == "confirmado" ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200")">Nuevas (Confirmadas)</a>
+        <a href="@Url.Action("Index", new { estado = "en_proceso" })" class="px-4 py-2 rounded-lg text-sm font-semibold transition @(filtroEstado == "en_proceso" ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200")">En Proceso</a>
+        <a href="@Url.Action("Index", new { estado = "enviado" })" class="px-4 py-2 rounded-lg text-sm font-semibold transition @(filtroEstado == "enviado" ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200")">Enviados</a>
+        <a href="@Url.Action("Index", new { estado = "entregado" })" class="px-4 py-2 rounded-lg text-sm font-semibold transition @(filtroEstado == "entregado" ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200")">Entregados</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="flex flex-col items-center justify-center py-24 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+            <i class="fas fa-box-open text-6xl mb-4 opacity-50"></i>
+            <p class="text-xl font-semibold text-gray-500">No hay órdenes por aquí</p>
+            <p class="text-sm mt-1">Cuando una clínica compre tus productos, aparecerán en esta lista.</p>
+        </div>
+    }
+    else
+    {
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
+                        <th class="p-4 font-semibold">Pedido</th>
+                        <th class="p-4 font-semibold">Clínica</th>
+                        <th class="p-4 font-semibold">Fecha</th>
+                        <th class="p-4 font-semibold">Estado</th>
+                        <th class="p-4 font-semibold text-right">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach (var pedido in Model)
+                    {
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="p-4 font-bold text-teal-700">#@pedido.numero_pedido</td>
+                            <td class="p-4">
+                                <p class="font-semibold text-gray-800">@(pedido.clinicas?.nombre_clinica ?? "Clínica anónima")</p>
+                                <p class="text-xs text-gray-400">@(pedido.clinicas?.estado), @(pedido.clinicas?.ciudad)</p>
+                            </td>
+                            <td class="p-4 text-sm text-gray-600">@(pedido.creado_en.ToString("dd MMM yyyy"))</td>
+                            <td class="p-4">@BadgeEstado(pedido.estado)</td>
+                            <td class="p-4 text-right">
+                                <a href="@Url.Action("Details", new { id = pedido.id })" class="text-teal-600 bg-teal-50 hover:bg-teal-600 hover:text-white px-4 py-2 rounded-lg text-sm font-semibold transition border border-teal-100 hover:border-teal-600 inline-block">
+                                    Ver orden
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

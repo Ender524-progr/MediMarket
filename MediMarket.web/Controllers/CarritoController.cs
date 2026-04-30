@@ -139,77 +139,101 @@ public JsonResult ActualizarCantidad(Guid productoId, int cantidad)
         }
 
         [HttpPost]
-public ActionResult ProcesarPagoFalso()
-{
-    var carrito = Session["Carrito"] as List<CarritoItem>;
-    if (carrito == null || !carrito.Any()) return RedirectToAction("Index", "Shop");
-
-    using (var db = new ConexionModel())
-    {
-        // 1. Identificar a la clínica
-        var userIdStr = ((System.Security.Claims.ClaimsIdentity)User.Identity).FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        var uId = Guid.Parse(userIdStr);
-        var miClinica = db.clinicas.FirstOrDefault(c => c.usuario_id == uId);
-
-        if (miClinica == null) return RedirectToAction("Index", "Shop");
-
-        // 2. Matemáticas finales
-        int totalArticulos = carrito.Sum(i => i.Cantidad);
-        decimal subtotal = carrito.Sum(i => i.Subtotal);
-        decimal envio = 50 * totalArticulos;
-        decimal totalPago = subtotal + envio;
-
-        // Generamos un número de orden estilo tu diseño: #ORD-7842-MC
-        string numOrden = $"ORD-{new Random().Next(1000, 9999)}-MC";
-
-        // 3. Crear el Pedido Principal
-        var nuevoPedido = new pedidos
+        public ActionResult ProcesarPagoFalso()
         {
-            id = Guid.NewGuid(),
-            clinica_id = miClinica.id,
-            numero_pedido = numOrden,
-            estado = "confirmado", // Ya está pagado en nuestra simulación
-            total = totalPago,
-            metodo_pago = "Simulación Efectivo",
-            creado_en = DateTime.Now
-        };
-        db.pedidos.Add(nuevoPedido);
+            var carrito = Session["Carrito"] as List<CarritoItem>;
+            if (carrito == null || !carrito.Any()) return RedirectToAction("Index", "Shop");
 
-        // 4. Crear los Detalles del Pedido y Restar Stock
-        foreach (var item in carrito)
-        {
-            var detalle = new detalle_pedidos
+            using (var db = new ConexionModel())
             {
-                id = Guid.NewGuid(),
-                pedido_id = nuevoPedido.id,
-                producto_id = item.ProductoId,
-                cantidad = item.Cantidad,
-                precio_unitario = item.Precio
-            };
-            db.detalle_pedidos.Add(detalle);
+                // 1. Identificar a la clínica
+                var userIdStr = ((System.Security.Claims.ClaimsIdentity)User.Identity).FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                var uId = Guid.Parse(userIdStr);
+                var miClinica = db.clinicas.FirstOrDefault(c => c.usuario_id == uId);
 
-            // ¡Magia! Restamos el stock del inventario
-            var productoDB = db.productos.Find(item.ProductoId);
-            if (productoDB != null)
-            {
-                productoDB.stock_disponible -= item.Cantidad;
+                if (miClinica == null) return RedirectToAction("Index", "Shop");
+
+                // 2. Matemáticas finales
+                int totalArticulos = carrito.Sum(i => i.Cantidad);
+                decimal subtotal = carrito.Sum(i => i.Subtotal);
+                decimal envio = 50 * totalArticulos;
+                decimal totalPago = subtotal + envio;
+
+                string numOrden = $"ORD-{new Random().Next(1000, 9999)}-MC";
+
+                // 3. Crear el Pedido Principal
+                var nuevoPedido = new pedidos
+                {
+                    id = Guid.NewGuid(),
+                    clinica_id = miClinica.id,
+                    numero_pedido = numOrden,
+                    estado = "confirmado",
+                    total = totalPago,
+                    metodo_pago = "Simulación Efectivo",
+                    creado_en = DateTime.Now
+                };
+                db.pedidos.Add(nuevoPedido);
+
+                // ---> NUEVO: Creamos una lista "inteligente" para guardar IDs sin repetirlos
+                var proveedoresInvolucrados = new HashSet<Guid>();
+
+                // 4. Crear los Detalles del Pedido y Restar Stock
+                foreach (var item in carrito)
+                {
+                    var detalle = new detalle_pedidos
+                    {
+                        id = Guid.NewGuid(),
+                        pedido_id = nuevoPedido.id,
+                        producto_id = item.ProductoId,
+                        cantidad = item.Cantidad,
+                        precio_unitario = item.Precio
+                    };
+                    db.detalle_pedidos.Add(detalle);
+
+                    // Buscamos el producto en la BD para restar stock y sacar el ID de su proveedor
+                    var productoDB = db.productos.Find(item.ProductoId);
+                    if (productoDB != null)
+                    {
+                        productoDB.stock_disponible -= item.Cantidad;
+
+                        // Guardamos a este proveedor en nuestra lista
+                        proveedoresInvolucrados.Add(productoDB.proveedor_id);
+                    }
+                }
+
+                // ---> NUEVO: 5. Crear Notificaciones para los proveedores involucrados
+                foreach (var provId in proveedoresInvolucrados)
+                {
+                    var nuevaNotificacion = new notificaciones_proveedores
+                    {
+                        id = Guid.NewGuid(),
+                        proveedor_id = provId,
+                        titulo = "¡Nueva Orden Recibida!",
+                        mensaje = $"La clínica acaba de generar un pedido (#{nuevoPedido.numero_pedido}). Revisa tu panel para prepararlo.",
+                        tipo = "orden",
+                        leida = false,
+                        creado_en = DateTime.Now
+                    };
+
+                    db.notificaciones_proveedores.Add(nuevaNotificacion);
+                }
+
+                // 6. Guardar en SQL todo de un solo golpe (pedido, detalles, stock y notificaciones)
+                db.SaveChanges();
+
+                // Vaciar carrito
+                Session.Remove("Carrito");
+
+                // Mandar datos a la pantalla final
+                TempData["NumeroOrden"] = numOrden;
+                TempData["TotalPago"] = totalPago;
+
+                return RedirectToAction("Exito");
             }
         }
 
-        // 5. Guardar en SQL y vaciar carrito
-        db.SaveChanges();
-        Session.Remove("Carrito");
-
-        // 6. Mandar datos a la pantalla final usando TempData (vive por 1 sola recarga)
-        TempData["NumeroOrden"] = numOrden;
-        TempData["TotalPago"] = totalPago;
-
-        return RedirectToAction("Exito");
-    }
-}
-
-// La vista que carga tu diseño de éxito
-public ActionResult Exito()
+        // La vista que carga tu diseño de éxito
+        public ActionResult Exito()
 {
     // Si entran de chismosos sin haber comprado, los pateamos a la tienda
     if (TempData["NumeroOrden"] == null) return RedirectToAction("Index", "Shop");

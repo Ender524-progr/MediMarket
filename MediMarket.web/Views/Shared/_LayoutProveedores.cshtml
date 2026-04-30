@@ -6,22 +6,26 @@
     var foto     = identity.FindFirst("foto_url")?.Value;
     var currentController = ViewContext.RequestContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RequestContext.RouteData.Values["action"]?.ToString();
-    
+
 
     var dashboardActive = (currentController == "Proveedores" && currentAction == "Index")
         ? "bg-green-500/50 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
         : "hover:bg-gray-400";
 
-    var rfqsActive = (currentController == "Proveedores" && currentAction == "Cotizaciones")
-        ? "bg-gray-400 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
+    var rfqsActive = (currentController == "Rfqs" && currentAction == "Index")
+        ? "bg-green-500/50 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
         : "hover:bg-gray-400";
 
     var catalogoActive = (currentController == "MiCatalogo" && currentAction == "Index")
         ? "bg-green-500/50 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
         : "hover:bg-gray-400";
 
-    var ordenesActive = (currentController == "Proveedores" && currentAction == "Ordenes")
-        ? "bg-gray-400 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
+    var ordenesActive = (currentController == "Ordenes" && currentAction == "Index")
+        ? "bg-green-500/50 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
+        : "hover:bg-gray-400";
+
+    var analisisActive = (currentController == "Analisis" && currentAction == "Index")
+        ? "bg-green-500/50 font-semibold border-r-4 border-green-600 hover:bg-green-600/50"
         : "hover:bg-gray-400";
 }
 <!DOCTYPE html>
@@ -56,7 +60,7 @@
                    class="w-full flex items-center gap-2 py-2 px-3 rounded @dashboardActive">
                     <i class="fas fa-tachometer-alt shrink-0 w-5 text-center"></i>
                     <p class="txtNavbar max-w-0 opacity-0 overflow-hidden whitespace-nowrap
-                              transition-[max-width,opacity] duration-200">Dashboard</p>
+                              transition-[max-width,opacity] duration-200">Resumen</p>
                 </a>
             </li>
             <li class="mb-2">
@@ -76,11 +80,19 @@
                 </a>
             </li>
             <li class="mb-2">
-                <a href="@Url.Action("Ordenes", "Proveedores")"
+                <a href="@Url.Action("Index", "Ordenes")"
                    class="w-full flex items-center gap-2 py-2 px-3 rounded @ordenesActive">
                     <i class="fas fa-shopping-cart shrink-0 w-5 text-center"></i>
                     <p class="txtNavbar max-w-0 opacity-0 overflow-hidden whitespace-nowrap
                               transition-[max-width,opacity] duration-200">Ordenes</p>
+                </a>
+            </li>
+            <li class="mb-2">
+                <a href="@Url.Action("Index", "Analisis")"
+                   class="w-full flex items-center gap-2 py-2 px-3 rounded @analisisActive">
+                    <i class="fas fa-chart-pie shrink-0 w-5 text-center"></i>
+                    <p class="txtNavbar max-w-0 opacity-0 overflow-hidden whitespace-nowrap
+                              transition-[max-width,opacity] duration-200">Análisis</p>
                 </a>
             </li>
         </ul>
@@ -94,36 +106,115 @@
         <input type="text" placeholder="Buscar..." class="px-3 py-1 rounded-md bg-gray-400/50 focus:outline-none focus:ring-2 focus:ring-green-600/50 w-full" />
     </div>
     <div class="flex items-center gap-4">
-        <div class="relative">
-            <button id="ToggleNotifications" class="text-gray-700 focus:outline-none cursor-pointer">
-                <i class="fa-solid fa-bell"></i>
+        <!-- Dropdown Notificaciones -->
+        <div class="relative flex items-center">
+            <button id="ToggleNotifications" class="text-gray-700 focus:outline-none cursor-pointer relative">
+                <i class="fa-solid fa-bell text-xl hover:text-teal-600 transition-colors"></i>
+
+                @* El globito rojo del contador *@
+                @if (ViewBag.TotalNotificaciones != null && ViewBag.TotalNotificaciones > 0)
+                {
+                    <span class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-gray-200">
+                        @ViewBag.TotalNotificaciones
+                    </span>
+                }
             </button>
-            <span id="notifications"
-           class="w-64 hidden absolute top-12 right-2 rounded-lg bg-gray-100 shadow-sm before:w-0 before:h-0 before:border-r-0 before:border-r-transparent before:border-l-24 before:border-l-transparent before:border-b-24 before:border-b-gray-100 before:-top-3 before:right-1  before:absolute">
-           <div class="flex flex-col items-start w-full h-fit overflow-hidden ">
-        <div class="w-full h-fit px-4 py-2 flex flex-col justify-center border-b border-b-gray-300">
-            <h3>Notificaciones</h3>
-            </div>
-            <div class="flex flex-col items-center w-full h-fit overflow-hidden px-4 py-2">
-                <p class="text-sm text-gray-500">No tienes nuevas notificaciones.</p>
+
+            <div id="notifications"
+                 class="w-80 hidden absolute top-10 -right-2 rounded-xl bg-white shadow-xl border border-gray-200 before:w-0 before:h-0 before:border-r-0 before:border-r-transparent before:border-l-24 before:border-l-transparent before:border-b-24 before:border-b-white before:-top-3 before:right-4 before:absolute z-50">
+
+                @* ENVOLTORIO INTERNO CON ROUNDED (Para que no se salgan las esquinas cuadradas) *@
+                <div class="flex flex-col w-full h-fit overflow-hidden rounded-xl relative z-10 bg-white">
+
+                    @* Cabecera del Modal (Cambiado a bg-white para que coincida con el triangulito) *@
+                    <div class="w-full px-5 py-3 flex justify-between items-center border-b border-gray-100 bg-white">
+                        <h3 class="font-bold text-gray-800 text-sm">Notificaciones</h3>
+                    </div>
+
+                    @* Lista de notificaciones *@
+                    <div class="w-full max-h-72 overflow-y-auto divide-y divide-gray-50">
+                        @if (ViewBag.Notificaciones != null && ((IEnumerable<MediMarket.web.Models.notificaciones_proveedores>)ViewBag.Notificaciones).Any())
+                        {
+                            foreach (var noti in ViewBag.Notificaciones)
+                            {
+                                <div class="px-5 py-3 hover:bg-gray-50 transition cursor-pointer flex gap-3 group">
+                                    @* Icono dinámico según el tipo *@
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0
+                                         @(noti.tipo == "rfq" ? "bg-blue-100 text-blue-600" :
+                                           noti.tipo == "orden" ? "bg-emerald-100 text-emerald-600" :
+                                           "bg-red-100 text-red-600")">
+                                        <i class="fas @(noti.tipo == "rfq" ? "fa-file-invoice" : noti.tipo == "orden" ? "fa-box-open" : "fa-exclamation-triangle") text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-gray-800 leading-tight mb-0.5 group-hover:text-teal-700 transition-colors">@noti.titulo</p>
+                                        <p class="text-xs text-gray-500 leading-snug">@noti.mensaje</p>
+                                        <p class="text-[10px] text-gray-400 mt-1 font-medium">@noti.creado_en.ToString("dd MMM, HH:mm")</p>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            @* Estado Vacío *@
+                            <div class="flex flex-col items-center justify-center py-8 px-4 text-center">
+                                <i class="fas fa-bell-slash text-3xl text-gray-200 mb-3"></i>
+                                <p class="text-sm font-bold text-gray-400">Todo al día</p>
+                                <p class="text-xs text-gray-400 mt-1">No tienes notificaciones nuevas por ahora.</p>
+                            </div>
+                        }
+                    </div>
+
+                    @* Footer del Modal *@
+                    <a href="#" class="w-full block text-center py-2.5 text-xs font-bold text-teal-600 hover:text-teal-700 hover:bg-teal-50 border-t border-gray-100 transition">
+                        Ver todo el historial
+                    </a>
+                </div>
             </div>
         </div>
-            </span>
-        </div>
+        <!-- Dropdown Perfil -->
         <div class="relative flex items-center gap-2">
             <button id="TogglePerfil" class="text-gray-700 focus:outline-none cursor-pointer">
-            <img src="@ViewBag.FotoUrl" alt="Foto de perfil" class="w-8 h-8 rounded-full object-cover ring-2 ring-teal-400">
-        </button>
-        <span id="PerfilInfo"
-    class="w-64 hidden absolute top-12 right-2 rounded-lg bg-gray-100 shadow-sm before:w-0 before:h-0 before:border-r-0 before:border-r-transparent before:border-l-24 before:border-l-transparent before:border-b-24 before:border-b-gray-100 before:-top-3 before:right-1  before:absolute">
-    <div class="flex flex-col items-start w-full h-fit overflow-hidden ">
-        <div class="w-full h-fit px-4 py-2 flex flex-col justify-center border-b border-b-gray-300">
-            <h3>@nombre</h3>
-            <small class="text-gray-500">@correo</small>
-        </div>
-        <a href="@Url.Action("Logout", "Account")" class="w-full h-fit px-4 py-2 block text-red-500 hover:text-red-700 hover:bg-red-300/50 rounded-b-lg">Cerrar sesión</a>
-    </div>
-  </span>
+                @* Nota: Cambié ViewBag.FotoUrl por la variable 'foto' que ya extraes de los claims arriba *@
+                <img src="@(foto ?? "/Content/img/default-user.png")" alt="Foto de perfil" class="w-8 h-8 rounded-full object-cover ring-2 ring-teal-400">
+            </button>
+
+            <div id="PerfilInfo"
+                 class="w-72 hidden absolute top-12 right-0 rounded-xl bg-white shadow-lg border border-gray-100 before:w-0 before:h-0 before:border-r-0 before:border-r-transparent before:border-l-24 before:border-l-transparent before:border-b-24 before:border-b-white before:-top-3 before:right-2 before:absolute">
+
+                @* 1. Información del Usuario *@
+                <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-3">
+                    <img src="@(foto ?? "/Content/img/default-user.png")" class="w-10 h-10 rounded-full object-cover ring-2 ring-teal-100">
+                    <div class="overflow-hidden">
+                        <p class="font-bold text-gray-800 truncate leading-tight">@nombre</p>
+                        <p class="text-xs text-gray-500 truncate">@correo</p>
+                    </div>
+                </div>
+
+                @* 2. Información de la Empresa *@
+                <div class="px-5 py-3 bg-slate-50 border-b border-gray-100">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Empresa actual</p>
+                    @* Estos datos los pasaremos desde el controlador *@
+                    <p class="font-bold text-teal-700 truncate text-sm">@(ViewBag.NombreEmpresa ?? "Mi Empresa")</p>
+                    <p class="text-xs text-gray-500 truncate">RFC: @(ViewBag.RfcEmpresa ?? "Sin registrar")</p>
+                </div>
+
+                @* 3. Opciones / Enlaces rápidos *@
+                <div class="py-2 border-b border-gray-100">
+                    <a href="@Url.Action("MiEmpresa", "Proveedores")" class="flex items-center gap-3 px-5 py-2 text-sm text-gray-600 hover:bg-teal-50 hover:text-teal-700 transition">
+                        <i class="fas fa-building w-4 text-center"></i> Perfil de Empresa
+                    </a>
+                    <a href="@Url.Action("Configuracion", "Proveedores")" class="flex items-center gap-3 px-5 py-2 text-sm text-gray-600 hover:bg-teal-50 hover:text-teal-700 transition">
+                        <i class="fas fa-cog w-4 text-center"></i> Configuración
+                    </a>
+                </div>
+
+                @* 4. Cerrar sesión *@
+                <div class="py-2">
+                    <a href="@Url.Action("Logout", "Account")" class="flex items-center gap-3 px-5 py-2 text-sm text-red-500 hover:bg-red-50 hover:text-red-700 transition font-medium">
+                        <i class="fas fa-sign-out-alt w-4 text-center"></i> Cerrar sesión
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
     

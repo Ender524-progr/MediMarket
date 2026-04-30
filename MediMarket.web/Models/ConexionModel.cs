@@ -28,6 +28,10 @@ namespace MediMarket.web.Models
         public virtual DbSet<cotizaciones> cotizaciones { get; set; }
         public virtual DbSet<producto_comentarios> producto_comentarios { get; set; }
 
+
+        public virtual DbSet<notificaciones_proveedores> notificaciones_proveedores { get; set; }
+
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<categorias>()
@@ -128,6 +132,22 @@ namespace MediMarket.web.Models
                 .HasOptional(e => e.categorias)
                 .WithMany()
                 .HasForeignKey(e => e.categoria_id);
+
+            // ─── CONFIGURACIÓN DE NOTIFICACIONES PROVEEDORES ───
+            modelBuilder.Entity<proveedores>()
+                .HasMany(e => e.notificaciones_proveedores)
+                .WithRequired(e => e.proveedores)
+                .HasForeignKey(e => e.proveedor_id)
+                .WillCascadeOnDelete(false); // Evita errores en SQL Server
+
+            // Le decimos que estos campos usan NVARCHAR (Unicode)
+            modelBuilder.Entity<notificaciones_proveedores>()
+                .Property(e => e.titulo)
+                .IsUnicode(true);
+
+            modelBuilder.Entity<notificaciones_proveedores>()
+                .Property(e => e.mensaje)
+                .IsUnicode(true);
         }
     }
 }

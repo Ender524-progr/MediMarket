@@ -1,0 +1,126 @@
+﻿@model MediMarket.web.Models.pedidos
+@{
+    Layout = "~/Views/Shared/_LayoutProveedores.cshtml";
+    ViewBag.Title = "Orden #" + Model.numero_pedido;
+
+    // Recuperamos los datos filtrados que mandamos desde el controlador
+    var misDetalles = ViewBag.MisDetalles as List<MediMarket.web.Models.detalle_pedidos>;
+    var miSubtotal = (decimal)ViewBag.MiSubtotal;
+}
+
+<div class="p-8 max-w-5xl mx-auto">
+    <a href="@Url.Action("Index")" class="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 mb-6">
+        <i class="fas fa-arrow-left text-xs"></i> Volver a mis órdenes
+    </a>
+
+    @if (TempData["Exito"] != null)
+    {
+        <div class="mb-6 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 text-sm font-medium">
+            <i class="fas fa-check-circle text-lg"></i> @TempData["Exito"]
+        </div>
+    }
+
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-bold">Orden <span class="text-teal-700">#@Model.numero_pedido</span></h1>
+            <p class="text-sm text-gray-500 mt-1">Recibida el @Model.creado_en.ToString("dd MMMM yyyy, HH:mm")</p>
+        </div>
+        <span class="px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider border
+              @(Model.estado == "confirmado" ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
+                Model.estado == "enviado" ? "bg-purple-50 text-purple-700 border-purple-200" :
+                Model.estado == "entregado" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                Model.estado == "cancelado" ? "bg-red-50 text-red-700 border-red-200" :
+                "bg-blue-50 text-blue-700 border-blue-200")">
+            ESTADO: @(Model.estado?.Replace("_", " "))
+        </span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        @* ─── COLUMNA IZQ: PRODUCTOS (2/3) ────────────────────────── *@
+        <div class="md:col-span-2 space-y-6">
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-gray-50 px-5 py-4 border-b border-gray-200">
+                    <h2 class="font-bold text-gray-800">Productos que debes enviar</h2>
+                </div>
+
+                <div class="divide-y divide-gray-100">
+                    @foreach (var det in misDetalles)
+                    {
+                        var img = det.productos?.producto_imagenes?.FirstOrDefault(i => i.es_principal)?.url ?? "/Content/img/no-image.png";
+                        <div class="p-5 flex gap-4 items-center">
+                            <img src="@img" class="w-16 h-16 object-cover rounded-lg border border-gray-200" />
+                            <div class="flex-1">
+                                <h4 class="font-bold text-gray-900">@det.productos.nombre</h4>
+                                <p class="text-xs text-gray-500 mt-0.5">SKU: @(det.productos.sku ?? "N/A")</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm text-gray-500">@det.cantidad x $@det.precio_unitario.ToString("N2")</p>
+                                <p class="font-bold text-gray-900 mt-0.5">$@((det.cantidad * det.precio_unitario).ToString("N2"))</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="bg-gray-50 px-5 py-4 border-t border-gray-200 flex justify-between items-center">
+                    <span class="font-bold text-gray-600">Total a pagarte (Tus productos):</span>
+                    <span class="text-xl font-black text-teal-700">$@miSubtotal.ToString("N2")</span>
+                </div>
+            </div>
+        </div>
+
+        @* ─── COLUMNA DER: ENVÍO Y ACCIONES (1/3) ─────────────────── *@
+    <div class="space-y-6">
+        @* Acciones de estado *@
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+            <h3 class="font-bold text-gray-800 mb-4 text-sm uppercase tracking-wide">Actualizar Orden</h3>
+
+            @using (Html.BeginForm("CambiarEstado", "Ordenes", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.id" />
+
+                <select name="nuevoEstado" class="w-full border border-gray-300 rounded-lg py-2.5 px-3 mb-3 text-sm focus:ring-2 focus:ring-teal-500 outline-none">
+                    <option value="confirmado" @(Model.estado == "confirmado" ? "selected" : "")>Confirmado</option>
+                    <option value="en_proceso" @(Model.estado == "en_proceso" ? "selected" : "")>En Proceso</option>
+                    <option value="enviado" @(Model.estado == "enviado" ? "selected" : "")>Enviado</option>
+                    <option value="entregado" @(Model.estado == "entregado" ? "selected" : "")>Entregado</option>
+                    <option value="cancelado" @(Model.estado == "cancelado" ? "selected" : "")>Cancelado</option>
+                </select>
+
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+            }
+        </div>
+
+        @* Dirección de la Clínica *@
+        <div class="bg-teal-50 border border-teal-100 rounded-xl shadow-sm p-5">
+            <h3 class="font-bold text-teal-900 mb-3 flex items-center gap-2">
+                <i class="fas fa-shipping-fast text-teal-600"></i> Enviar a
+            </h3>
+            <p class="font-bold text-teal-800 text-lg mb-1">@(Model.clinicas?.nombre_clinica)</p>
+            <p class="text-sm text-teal-700">@(Model.clinicas?.especialidad)</p>
+
+            <div class="mt-4 pt-4 border-t border-teal-200/50 space-y-2 text-sm text-teal-800">
+                <p><i class="fas fa-map-marker-alt w-5 text-teal-600"></i> @(Model.clinicas?.direccion)</p>
+                <p><i class="fas fa-city w-5 text-teal-600"></i> @(Model.clinicas?.ciudad), @(Model.clinicas?.estado), CP @(Model.clinicas?.cp)</p>
+                <p><i class="fas fa-phone w-5 text-teal-600"></i> @(Model.clinicas?.telefono)</p>
+                <p><i class="fas fa-id-card w-5 text-teal-600"></i> RFC: @(Model.clinicas?.rfc)</p>
+            </div>
+        </div>
+        @* Botón Generar PDF de Envío *@
+        <div class="mt-6">
+            <a href="@Url.Action("GenerarGuiaEnvio", "Ordenes", new { id = Model.id })"
+               target="_blank"
+               class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-sm border border-slate-700">
+                <i class="fas fa-file-pdf text-red-400"></i> Descargar Hoja de Remisión
+            </a>
+            <p class="text-xs text-gray-400 mt-2 text-center">
+                Imprime este PDF para adjuntarlo a tu paquete de envío.
+            </p>
+        </div>
+    </div>
+
+    </div>
+</div>

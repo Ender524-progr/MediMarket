@@ -1,0 +1,128 @@
+﻿@model MediMarket.web.Models.proveedores
+@{
+    Layout = "~/Views/Shared/_LayoutProveedores.cshtml";
+    ViewBag.Title = "Perfil de Empresa";
+}
+
+<div class="p-8 max-w-5xl mx-auto">
+
+    @if (TempData["Exito"] != null)
+    {
+        <div class="mb-6 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 text-sm font-medium">
+            <i class="fas fa-check-circle text-lg"></i> @TempData["Exito"]
+        </div>
+    }
+
+    @* Formulario principal (OJO con el enctype, es obligatorio para subir fotos) *@
+    @using (Html.BeginForm("MiEmpresa", "Proveedores", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.id)
+
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-8">
+
+            @* ─── CABECERA: BANNER Y LOGO ────────────────────────────── *@
+            <div class="relative group">
+                @* Banner *@
+                <div class="w-full h-48 bg-gray-200 relative overflow-hidden">
+                    @if (!string.IsNullOrEmpty(Model.banner_url))
+                    {
+                        <img src="@Model.banner_url" class="w-full h-full object-cover" />
+                    }
+                    else
+                    {
+                        <div class="w-full h-full bg-gradient-to-r from-teal-700 to-slate-800 flex items-center justify-center">
+                            <i class="fas fa-image text-white/30 text-5xl"></i>
+                        </div>
+                    }
+
+                    @* Botón para subir Banner *@
+                    <label class="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-gray-800 text-xs font-bold px-4 py-2 rounded-lg cursor-pointer shadow transition backdrop-blur-sm">
+                        <i class="fas fa-camera mr-1"></i> Cambiar Banner
+                        <input type="file" name="bannerFile" accept="image/*" class="hidden" />
+                    </label>
+                </div>
+
+                @* Logo superpuesto *@
+                <div class="absolute -bottom-10 left-8 flex items-end">
+                    <div class="relative">
+                        <div class="w-28 h-28 rounded-2xl bg-white p-1.5 shadow-md border border-gray-100">
+                            @if (!string.IsNullOrEmpty(Model.logo_url))
+                            {
+                                <img src="@Model.logo_url" class="w-full h-full object-cover rounded-xl" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full rounded-xl bg-teal-50 flex items-center justify-center text-teal-600">
+                                    <i class="fas fa-store text-3xl"></i>
+                                </div>
+                            }
+                        </div>
+
+                        @* Botón para subir Logo *@
+                        <label class="absolute -bottom-2 -right-2 bg-teal-600 hover:bg-teal-700 text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer shadow-sm transition ring-4 ring-white">
+                            <i class="fas fa-pen text-xs"></i>
+                            <input type="file" name="logoFile" accept="image/*" class="hidden" />
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            @* ─── DATOS PRINCIPALES DE LA MARCA ──────────────────────── *@
+            <div class="pt-16 pb-8 px-8 border-b border-gray-100">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nombre Comercial</label>
+                        @Html.TextBoxFor(m => m.nombre_empresa, new { @class = "w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-2 focus:ring-teal-500 font-bold text-gray-800 text-lg", placeholder = "Ej. Distribuidora Médica del Sur" })
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Eslogan (Opcional)</label>
+                        @Html.TextBoxFor(m => m.eslogan, new { @class = "w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-2 focus:ring-teal-500 text-gray-600", placeholder = "Ej. Tu salud es nuestra prioridad" })
+                    </div>
+                </div>
+            </div>
+
+            @* ─── DETALLES OPERATIVOS Y LEGALES ──────────────────────── *@
+            <div class="p-8 bg-gray-50/50">
+                <h3 class="font-bold text-gray-800 mb-5"><i class="fas fa-building text-teal-600 mr-2"></i>Detalles Operativos y Fiscales</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">RFC</label>
+                        @Html.TextBoxFor(m => m.rfc, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500 uppercase", placeholder = "ABC123456T78" })
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Categoría Principal</label>
+                        @Html.TextBoxFor(m => m.categoria_principal, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500" })
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Registro Sanitario</label>
+                        @Html.TextBoxFor(m => m.registro_sanitario, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500" })
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Dirección completa</label>
+                        @Html.TextBoxFor(m => m.direccion, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500" })
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Código Postal</label>
+                        @Html.TextBoxFor(m => m.cp, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500" })
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Teléfono de contacto</label>
+                        @Html.TextBoxFor(m => m.telefono, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500" })
+                    </div>
+                </div>
+            </div>
+
+            @* ─── BOTÓN DE GUARDAR ───────────────────────────────────── *@
+            <div class="px-8 py-5 border-t border-gray-100 flex justify-end bg-white">
+                <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-6 rounded-lg transition shadow-sm">
+                    <i class="fas fa-save mr-2"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    }
+</div>
