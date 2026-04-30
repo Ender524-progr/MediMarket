@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using System.Security.Claims;
@@ -206,25 +207,70 @@ namespace MediMarket.web.Controllers
         }
 
         [HttpPost]
-[ValidateAntiForgeryToken]
-public ActionResult CambiarEstado(Guid id, string nuevoEstado)
-{
-    using (var db = new ConexionModel())
-    {
-        var clinicaId = GetClinicaId(db);
-        var rfq = db.solicitudes_rfq.FirstOrDefault(r => r.id == id && r.clinica_id == clinicaId);
+        [ValidateAntiForgeryToken]
+        public ActionResult CambiarEstado(Guid id, string nuevoEstado)
+        {
+            using (var db = new ConexionModel())
+            {
+                var clinicaId = GetClinicaId(db);
+                var rfq = db.solicitudes_rfq.FirstOrDefault(r => r.id == id && r.clinica_id == clinicaId);
 
-        if (rfq == null) return HttpNotFound();
+                if (rfq == null) return HttpNotFound();
 
-        // Actualizamos solo el estado y la fecha
-        rfq.estado = nuevoEstado;
-        rfq.actualizado_en = DateTime.Now;
+                // Actualizamos solo el estado y la fecha
+                rfq.estado = nuevoEstado;
+                rfq.actualizado_en = DateTime.Now;
 
-        db.SaveChanges();
+                db.SaveChanges();
 
-        TempData["Exito"] = "Estado de la solicitud actualizado.";
-        return RedirectToAction("Detalles", new { id = rfq.id });
-    }
-}
+                TempData["Exito"] = "Estado de la solicitud actualizado.";
+                return RedirectToAction("Detalles", new { id = rfq.id });
+            }
+        }
+
+        // ─── ACEPTAR COTIZACIÓN ──────────────────────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AceptarCotizacion(Guid cotizacionId, Guid rfqId)
+        {
+            using (var db = new ConexionModel())
+            {
+                var clinicaId = GetClinicaId(db);
+                // 1. Validar que la cotización y la RFQ existan y pertenezcan a la clínica
+                var rfq = db.solicitudes_rfq.FirstOrDefault(r => r.id == rfqId && r.clinica_id == clinicaId);
+                var cotizacion = db.cotizaciones.FirstOrDefault(c => c.id == cotizacionId && c.rfq_id == rfqId);
+
+                if (cotizacion == null || rfq == null) return HttpNotFound();
+
+                // 2. Cambiar los estados
+                cotizacion.estado = "aceptada";
+                rfq.estado = "cerrada";
+
+                // Rechazar todas las demás cotizaciones de esta misma RFQ
+                var otrasCotizaciones = db.cotizaciones.Where(c => c.rfq_id == rfqId && c.id != cotizacionId).ToList();
+                foreach (var otra in otrasCotizaciones)
+                {
+                    otra.estado = "rechazada";
+                }
+
+                // 3. Crear notificación para el proveedor ganador
+                var noti = new notificaciones_proveedores
+                {
+                    id = Guid.NewGuid(),
+                    proveedor_id = cotizacion.proveedor_id,
+                    titulo = "¡Cotización Aceptada!",
+                    mensaje = $"Tu oferta para la solicitud '{rfq.titulo}' fue aceptada. Contacta a la clínica para coordinar.",
+                    tipo = "rfq",
+                    leida = false,
+                    creado_en = DateTime.Now
+                };
+                db.notificaciones_proveedores.Add(noti);
+
+                db.SaveChanges();
+                
+                TempData["Exito"] = "Cotización aceptada. La solicitud ha sido cerrada.";
+                return RedirectToAction("Detalles", new { id = rfqId });
+            }
+        }
     }
 }

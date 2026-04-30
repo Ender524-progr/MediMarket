@@ -349,6 +349,7 @@
     <Compile Include="Controllers\ChatController.cs" />
     <Compile Include="Controllers\ClinicaController.cs" />
     <Compile Include="Controllers\ListaDeseosController.cs" />
+    <Compile Include="Controllers\NotificacionesController.cs" />
     <Compile Include="Controllers\OrdenesController.cs" />
     <Compile Include="Controllers\RfqsController.cs" />
     <Compile Include="Controllers\ShopController.cs" />
@@ -369,6 +370,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\lista_deseos.cs" />
+    <Compile Include="Models\notificaciones_clinicas.cs" />
     <Compile Include="Models\notificaciones_proveedores.cs" />
     <Compile Include="Models\producto_comentarios.cs" />
     <Compile Include="Models\solicitudes_rfq.cs" />
@@ -482,6 +484,7 @@
     <Folder Include="App_Data\" />
     <Folder Include="Views\BaseProovedores\" />
     <Folder Include="Views\Chat\" />
+    <Folder Include="Views\Notificaciones\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

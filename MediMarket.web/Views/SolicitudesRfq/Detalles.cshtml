@@ -93,23 +93,86 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 @foreach (var cot in Model.cotizaciones.OrderBy(c => c.monto))
                 {
-                    <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all">
+                    <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col">
                         <div class="flex justify-between items-start mb-4">
                             <div class="flex items-center gap-3">
-                                <img src="@cot.proveedores.usuarios.foto_url" class="size-10 rounded-full object-cover bg-gray-100" />
+                                @* Le puse el ? por seguridad para que no truene si no hay foto *@
+                                <img src="@(cot.proveedores?.usuarios?.foto_url ?? "/Content/img/no-image.png")" class="size-10 rounded-full object-cover bg-gray-100" />
                                 <div>
                                     <p class="font-bold text-gray-800">@cot.proveedores.nombre_empresa</p>
-                                    <p class="text-[10px] text-green-600 font-bold uppercase tracking-wider">Verificado</p>
+                                    @if (cot.proveedores.usuarios != null && cot.proveedores.usuarios.estado_verificacion == "verificado")
+{
+    <p class="text-[10px] text-green-600 font-bold uppercase tracking-wider flex items-center gap-1">
+        <i class="fas fa-shield-check"></i> Verificado
+    </p>
+}   
                                 </div>
                             </div>
                             <p class="text-xl font-black text-gray-800">@cot.monto.ToString("C")</p>
                         </div>
-                        <p class="text-xs text-gray-500 mb-4 italic">"@cot.notas"</p>
-                        <div class="flex gap-2">
-                            <button class="flex-1 py-2.5 bg-teal-800 text-white rounded-xl font-bold text-sm hover:bg-teal-900 transition-colors">Aceptar</button>
-                            <button class="px-4 py-2.5 bg-gray-100 text-gray-400 rounded-xl hover:bg-gray-200 transition-colors">
+                        
+                        <p class="text-xs text-gray-500 mb-4 italic line-clamp-2">"@cot.notas"</p>
+                        
+                        @* Botones de Acción *@
+                        <div class="flex gap-2 mt-auto">
+                            @if (Model.estado == "abierta" && cot.estado != "rechazada")
+                            {
+                                using (Html.BeginForm("AceptarCotizacion", "SolicitudesRfq", FormMethod.Post, new { @class = "flex-1" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="cotizacionId" value="@cot.id" />
+                                    <input type="hidden" name="rfqId" value="@Model.id" />
+                                    <button type="submit" class="w-full py-2.5 bg-teal-800 text-white rounded-xl font-bold text-sm hover:bg-teal-900 transition-colors">
+                                        Aceptar
+                                    </button>
+                                }
+                            }
+                            else
+                            {
+                                <div class="flex-1 text-center py-2.5 rounded-xl bg-gray-50 border border-gray-200">
+                                    <span class="text-xs font-bold uppercase tracking-wider @(cot.estado == "aceptada" ? "text-emerald-600" : cot.estado == "rechazada" ? "text-red-500" : "text-gray-400")">
+                                        @cot.estado
+                                    </span>
+                                </div>
+                            }
+
+                            <button type="button" onclick="abrirModalCotizacion('@cot.id')" class="px-4 py-2.5 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-colors">
                                 <i class="fa-solid fa-eye"></i>
                             </button>
+                        </div>
+                    </div>
+
+                    @* ── MODAL FLOTANTE (Oculto) para Ver Detalles ── *@
+                    <div id="modal_@cot.id" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity">
+                        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform scale-95 transition-transform duration-200" id="modalContent_@cot.id">
+                            
+                            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                                <h3 class="font-bold text-gray-800">Detalles de la Oferta</h3>
+                                <button type="button" onclick="cerrarModalCotizacion('@cot.id')" class="text-gray-400 hover:text-red-500 transition-colors">
+                                    <i class="fa-solid fa-xmark text-lg"></i>
+                                </button>
+                            </div>
+
+                            <div class="p-6 space-y-4">
+                                <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+                                    <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Proveedor</span>
+                                    <span class="font-semibold text-gray-800">@cot.proveedores.nombre_empresa</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+                                    <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Monto</span>
+                                    <span class="text-lg font-black text-teal-800">@cot.monto.ToString("C")</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+                                    <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Tiempo de Entrega</span>
+                                    <span class="font-medium text-gray-600">@(string.IsNullOrEmpty(cot.tiempo_entrega) ? "No especificado" : cot.tiempo_entrega)</span>
+                                </div>
+                                <div class="pt-2">
+                                    <span class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">Notas del proveedor</span>
+                                    <p class="text-sm text-gray-600 bg-gray-50 p-4 rounded-2xl border border-gray-100 leading-relaxed italic">
+                                        @(string.IsNullOrEmpty(cot.notas) ? "Sin notas adicionales." : cot.notas)
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 }
@@ -117,5 +180,34 @@
         }
     </div>
 </div>
-</div>
-</div>
+
+<script>
+    function abrirModalCotizacion(id) {
+        const modal = document.getElementById('modal_' + id);
+        const content = document.getElementById('modalContent_' + id);
+        if(modal) {
+            modal.classList.remove('hidden');
+            setTimeout(() => content.classList.remove('scale-95'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function cerrarModalCotizacion(id) {
+        const modal = document.getElementById('modal_' + id);
+        const content = document.getElementById('modalContent_' + id);
+        if(modal) {
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }, 200);
+        }
+    }
+
+    // Cerrar al dar clic afuera del cuadrito blanco
+    document.addEventListener('click', function(e) {
+        if (e.target.id && e.target.id.startsWith('modal_')) {
+            cerrarModalCotizacion(e.target.id.split('_')[1]);
+        }
+    });
+</script>

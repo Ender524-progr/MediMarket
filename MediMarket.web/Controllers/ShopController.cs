@@ -26,6 +26,32 @@ namespace MediMarket.web.Controllers
             public List<productos> Productos { get; set; }
         }
 
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            base.OnActionExecuting(filterContext);
+
+            if (Request.IsAuthenticated)
+            {
+                var userIdStr = ((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                
+                if (!string.IsNullOrEmpty(userIdStr))
+                {
+                    var uId = Guid.Parse(userIdStr);
+                    using (var db = new ConexionModel())
+                    {
+                        var miClinica = db.clinicas.FirstOrDefault(c => c.usuario_id == uId);
+                        
+                        if (miClinica != null)
+                        {
+                            // Estos ViewBags ahora vivirán en todas las pantallas del Shop
+                            ViewBag.NombreClinica = miClinica.nombre_clinica;
+                            ViewBag.RfcClinica = string.IsNullOrEmpty(miClinica.rfc) ? "Sin registrar" : miClinica.rfc;
+                        }
+                    }
+                }
+            }
+        }
+
         public ActionResult Index(string q = null, Guid? categoriaId = null)
         {
             using (var db = new ConexionModel())

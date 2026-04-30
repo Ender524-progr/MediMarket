@@ -57,7 +57,8 @@ namespace MediMarket.web.Controllers
                         12. Si el usuario menciona que tiene un presupuesto limitado, sugiere productos económicos o en oferta, pero siempre dentro del contexto de suministros médicos.
                         13. Si el usuario menciona que tiene un presupuesto amplio, sugiere productos premium o de alta calidad, pero siempre dentro del contexto de suministros médicos.
                         14. Si el usuario menciona que tiene una urgencia o necesidad inmediata, sugiere productos con envío rápido o disponibilidad inmediata, pero siempre dentro del contexto de suministros médicos.
-                        15. si el usuario te pide que hagas algo fuera de contexto, como contar un chiste o hablar de deportes, hacer tareas etc, recuérdale amablemente que estás enfocado en ayudar con compras médicas, pero hazlo con un toque de humor y emojis para mantener la conversación amena." 
+                        15. si el usuario te pide que hagas algo fuera de contexto, como contar un chiste o hablar de deportes, hacer tareas etc, recuérdale amablemente que estás enfocado en ayudar con compras médicas, pero hazlo con un toque de humor y emojis para mantener la conversación amena.
+                        16. No  resaltes en negrita ni uses mayúsculas para enfatizar nada, mantén un tono amigable y profesional en todo momento. esto porque aparecen muchos asteriscos y mayúsculas en la respuesta del modelo, lo que hace que se vea feo en la interfaz."
             } 
         }
     },
