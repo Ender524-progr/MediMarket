@@ -53,7 +53,7 @@
                     <span>Mi dashboard</span>
                 </a>
             }
-            <a href="@Url.Action("Index", "Ordenes")"
+            <a href="@Url.Action("MisPedidos", "Shop")"
                class="hidden md:flex items-center gap-1.5 py-2 px-3 rounded-lg text-sm 
                text-gray-600 hover:bg-gray-200 transition-colors">
                 <i class="fas fa-box"></i>
@@ -283,10 +283,10 @@
         .catch(() => mostrarToast('No se pudo conectar con el servidor', 'error'));
     }
 
-    // Por si no tienes la función de los avisos en esta vista
     function mostrarToast(msg, tipo) {
         const toast = document.createElement('div');
-        toast.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-semibold transition-all ${tipo === 'success' ? 'bg-teal-600' : 'bg-red-50'}`;
+        toast.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-semibold transition-all
+            ${tipo === 'success' ? 'bg-teal-600' : tipo === 'info' ? 'bg-gray-600' : 'bg-red-500'} `;
         toast.textContent = msg;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);

@@ -10,13 +10,13 @@
 
     @* ── Sidebar de categorías ────────────────────────────────────── *@
     <aside class="w-56 shrink-0 hidden lg:block sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto
-                  border-r border-gray-100 bg-white p-5">
+        border-r border-gray-100 bg-white p-5">
         <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Categorías</p>
         <ul class="space-y-1">
             <li>
                 <a href="@Url.Action("Index", "Shop", new { q = Model.Busqueda })"
-                   class="flex items-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition
-                          @(Model.CategoriaFiltro == null ? "bg-teal-50 text-teal-700 font-semibold" : "text-gray-600 hover:bg-gray-100")">
+                       class="flex items-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition
+                    @(Model.CategoriaFiltro == null ? "bg-teal-50 text-teal-700 font-semibold" : "text-gray-600 hover:bg-gray-100")">
                     <i class="fas fa-th-large w-4 text-center"></i> Todas
                 </a>
             </li>
@@ -24,8 +24,8 @@
             {
                 <li>
                     <a href="@Url.Action("Index", "Shop", new { q = Model.Busqueda, categoriaId = cat.id })"
-                       class="flex items-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition
-                              @(Model.CategoriaFiltro == cat.id ? "bg-teal-50 text-teal-700 font-semibold" : "text-gray-600 hover:bg-gray-100")">
+                           class="flex items-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition
+                        @(Model.CategoriaFiltro == cat.id ? "bg-teal-50 text-teal-700 font-semibold" : "text-gray-600 hover:bg-gray-100")">
                         <i class="fas fa-tag w-4 text-center text-gray-400"></i> @cat.nombre
                     </a>
                 </li>
@@ -67,7 +67,7 @@
                 <p class="text-xl font-semibold">No se encontraron productos</p>
                 <p class="text-sm mt-1">Intenta con otra búsqueda o categoría</p>
                 <a href="@Url.Action("Index", "Shop")"
-                   class="mt-5 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-6 rounded-full text-sm transition">
+                       class="mt-5 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-6 rounded-full text-sm transition">
                     Ver todos los productos
                 </a>
             </div>
@@ -90,7 +90,7 @@
                         @if (seccion.Categoria != null)
                         {
                             <a href="@Url.Action("Index", "Shop", new { categoriaId = seccion.Categoria.id })"
-                               class="text-xs text-teal-600 hover:underline whitespace-nowrap">
+                                   class="text-xs text-teal-600 hover:underline whitespace-nowrap">
                                 Ver todo <i class="fas fa-chevron-right text-xs"></i>
                             </a>
                         }
@@ -106,9 +106,8 @@
 
                             var proveedor = producto.proveedores;
 
-                            <a href="@Url.Action("Details", "Shop", new { id = producto.id })"
-                               class="group bg-white rounded-xl border-2 border-gray-300 shadow-sm hover:shadow-md
-                                      transition-all duration-200 flex flex-col overflow-hidden">
+                            <a href="@Url.Action("Details", "Shop", new { id = producto.id })" class="group bg-white rounded-xl shadow-gray-400 shadow-sm hover:shadow-lg
+                                transition-all duration-200 flex flex-col overflow-hidden">
 
                                 @* Imagen *@
                                 <div class="relative overflow-hidden bg-gray-50 h-44">
@@ -116,13 +115,15 @@
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                     @if (producto.stock_disponible == 0)
                                     {
-                                        <span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                        <span
+                                            class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                                             Agotado
                                         </span>
                                     }
                                     else if (producto.stock_disponible <= 5)
                                     {
-                                        <span class="absolute top-2 left-2 bg-amber-400 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                        <span
+                                            class="absolute top-2 left-2 bg-amber-400 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                                             Últimas @producto.stock_disponible
                                         </span>
                                     }
@@ -142,22 +143,38 @@
                                         <span class="text-xs font-normal text-gray-400">/@producto.unidad_medida</span>
                                     </p>
 
-                                    @* Botón agregar al carrito CON LA CORRECCIÓN APLICADA *@
-                                    <button onclick="event.preventDefault(); agregarAlCarrito('@producto.id');"
+                                    <div class="flex flex-row gap-2 mt-2">
+                                        @* Botón Carrito *@
+                                        <button onclick="event.preventDefault(); agregarAlCarrito('@producto.id');"
                                             @(producto.stock_disponible == 0 ? "disabled" : "")
-                                            class="mt-2 w-full py-2 rounded-lg text-sm font-semibold transition
-                                                   @(producto.stock_disponible == 0
-                                                       ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                                       : "bg-teal-600 hover:bg-teal-700 text-white active:scale-95")">
-                                        @if (producto.stock_disponible == 0)
-                                        {
-                                            <text>Sin stock</text>
+                                                class="flex-1 py-2 rounded-lg text-sm font-semibold transition lg:w-5/6
+                                            @(producto.stock_disponible == 0 ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-teal-600 hover:bg-teal-700 text-white active:scale-95")">
+                                            @if (producto.stock_disponible == 0)
+                                            {
+                                                <text>Sin stock</text>
+                                            }
+                                            else
+                                            {
+                                                <text><i class="fas fa-shopping-cart"></i> Agregar</text>
+                                            }
+                                        </button>
+
+                                        @* Botón Deseos *@
+                                        @{
+                                            var listaDeseosIds = ViewBag.ProductosDeseosIds as List<Guid> ?? new List<Guid>();
+                                            bool enDeseos = listaDeseosIds.Contains(producto.id);
+    
+                                            // Variables para las clases de Tailwind
+                                            string btnClass = enDeseos ? "bg-pink-100 text-pink-700 hover:bg-pink-200" : "bg-gray-200 text-gray-800 hover:bg-red-50 hover:text-red-600";
+                                            string iconClass = enDeseos ? "fa-solid" : "fa-regular";
                                         }
-                                        else
-                                        {
-                                            <text><i class="fas fa-shopping-cart"></i>  Agregar</text>
-                                        }
-                                    </button>
+
+                                        <button id="btnDeseos_@producto.id"
+                                                onclick="event.preventDefault(); toggleListaDeseos('@producto.id')"
+                                                class="lg:w-1/6 shrink-0 font-bold rounded-xl transition-all duration-200 flex justify-center items-center @btnClass">
+                                            <i id="iconDeseos_@producto.id" class="@iconClass fa-heart text-lg"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </a>
                         }
@@ -178,21 +195,45 @@
         })
             .then(r => r.json())
             .then(data => {
-        if (data.ok) {
-            mostrarToast('Producto agregado al carrito', 'success');
-            actualizarContadorCarrito(data.contador); // <--- Llama a la función del Layout
-        }
-        else mostrarToast(data.mensaje || 'Error al agregar', 'error');
-    })
+                if (data.ok) {
+                    mostrarToast('Producto agregado al carrito', 'success');
+                    actualizarContadorCarrito(data.contador); //
+                }
+                else mostrarToast(data.mensaje || 'Error al agregar', 'error');
+            })
             .catch(() => mostrarToast('No se pudo conectar', 'error'));
     }
 
-    function mostrarToast(msg, tipo) {
-        const toast = document.createElement('div');
-        toast.className = `fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-semibold transition-all
-            ${tipo === 'success' ? 'bg-teal-600' : 'bg-red-500'}`;
-        toast.textContent = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+    
+
+    function toggleListaDeseos(productoId) {
+        fetch('/ListaDeseos/Toggle?productoId=' + productoId, {
+            method: 'POST'
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) {
+                    
+                    mostrarToast(data.mensaje, data.agregado ? 'success' : 'info');
+            
+                    const btn = document.getElementById('btnDeseos_' + productoId);
+                    const icono = document.getElementById('iconDeseos_' + productoId);
+            
+                    if (btn && icono) {
+                        if (data.agregado) {
+                            
+                            btn.className = "lg:w-1/6 shrink-0 font-bold rounded-xl transition-all duration-200 flex justify-center items-center bg-red-100 text-red-700 hover:bg-pink-200";
+                            icono.className = "fa-solid fa-heart text-lg scale-110 transition-transform";
+                        } else {
+                            
+                            btn.className = "lg:w-1/6 shrink-0 font-bold rounded-xl transition-all duration-200 flex justify-center items-center bg-gray-200 text-gray-800 hover:bg-red-50 hover:text-red-600";
+                            icono.className = "fa-regular fa-heart text-lg scale-100 transition-transform";
+                        }
+                    }
+                } else {
+                    mostrarToast(data.mensaje, 'error');
+                }
+            })
+            .catch(() => mostrarToast('Error de conexión', 'error'));
     }
 </script>

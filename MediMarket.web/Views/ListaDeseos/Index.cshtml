@@ -12,7 +12,7 @@
     
     <div class="mb-8 flex items-baseline gap-3">
         <h1 class="text-3xl font-bold text-gray-900">
-            <i class="fa-solid fa-heart text-red-500 mr-2"></i>Lista de Deseos
+            Lista de Deseos
         </h1>
         <span class="text-gray-500 font-medium">(@Model.Count() artículos)</span>
     </div>
@@ -76,7 +76,7 @@
                             <button onclick="agregarAlCarrito('@producto.id')"
                                     class="text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 transition-colors px-4 py-2 rounded-xl shadow-sm flex items-center gap-2"
                                     @(producto.stock_disponible == 0 ? "disabled" : "")>
-                                <i class="fa-solid fa-cart-plus"></i> @(producto.stock_disponible == 0 ? "Agotado" : "Añadir al carrito")
+                                <i class="fas fa-shopping-cart"></i> @(producto.stock_disponible == 0 ? "Agotado" : "Añadir al carrito")
                             </button>
                         </div>
                     </div>

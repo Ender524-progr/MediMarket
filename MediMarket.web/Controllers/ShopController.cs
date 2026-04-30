@@ -30,6 +30,29 @@ namespace MediMarket.web.Controllers
         {
             using (var db = new ConexionModel())
             {
+                // Solo si el usuario inició sesión
+                if (Request.IsAuthenticated)
+                {
+                    var userIdStr = ((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                    // Blindaje: Solo intentamos convertir si el string no viene vacío
+                    if (!string.IsNullOrEmpty(userIdStr))
+                    {
+                        var uId = Guid.Parse(userIdStr);
+                        var miClinica = db.clinicas.FirstOrDefault(c => c.usuario_id == uId);
+
+                        if (miClinica != null)
+                        {
+                            var idsDeseos = db.lista_deseos
+                                              .Where(l => l.clinica_id == miClinica.id)
+                                              .Select(l => l.producto_id)
+                                              .ToList();
+
+                            ViewBag.ProductosDeseosIds = idsDeseos;
+                        }
+                    }
+                }
+
                 // Base: solo productos activos con sus imágenes y proveedor
                 var query = db.productos
                     .Include("producto_imagenes")
@@ -70,33 +93,32 @@ namespace MediMarket.web.Controllers
                 return View(vm);
             }
         }
-// ─── DETAILS ─────────────────────────────────────────────────────────────
+        // ─── DETAILS ─────────────────────────────────────────────────────────────
         public ActionResult Details(Guid id)
-{
-    using (var db = new ConexionModel())
-    {
-        ViewBag.EnListaDeseos = false; // Por defecto
-
-        if (Request.IsAuthenticated)
         {
-            var userIdStr = ((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdStr != null)
+            using (var db = new ConexionModel())
             {
-                var uId = Guid.Parse(userIdStr);
-                // OJO AQUÍ: Asegúrate de que esta consulta sí encuentre tu clínica
-                var miClinica = db.clinicas.FirstOrDefault(c => c.usuario_id == uId);
-                
-                if (miClinica != null)
+                ViewBag.EnListaDeseos = false; // Por defecto
+
+                if (Request.IsAuthenticated)
                 {
-                    // DEBUG: Manda el ID a la vista para que verifiques que sea el correcto
-                    ViewBag.MiClinicaDebug = miClinica.id; 
-                    
-                    // Buscamos si existe el registro
-                    bool existe = db.lista_deseos.Any(l => l.producto_id == id && l.clinica_id == miClinica.id);
-                    ViewBag.EnListaDeseos = existe;
+                    var userIdStr = ((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    if (userIdStr != null)
+                    {
+                        var uId = Guid.Parse(userIdStr);
+                        // OJO AQUÍ: Asegúrate de que esta consulta sí encuentre tu clínica
+                        var miClinica = db.clinicas.FirstOrDefault(c => c.usuario_id == uId);
+
+                        if (miClinica != null)
+                        {
+                            ViewBag.MiClinicaId = miClinica.id;
+
+                            // Buscamos si existe el registro
+                            bool existe = db.lista_deseos.Any(l => l.producto_id == id && l.clinica_id == miClinica.id);
+                            ViewBag.EnListaDeseos = existe;
+                        }
+                    }
                 }
-            }
-        }
 
                 // 2. Traemos el producto con sus comentarios reales
                 var producto = db.productos
@@ -155,5 +177,32 @@ namespace MediMarket.web.Controllers
                 return RedirectToAction("Details", new { id = producto_id });
             }
         }
+
+        [Authorize]
+public ActionResult MisPedidos()
+{
+    using (var db = new ConexionModel())
+    {
+        var userIdStr = ((System.Security.Claims.ClaimsIdentity)User.Identity).FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdStr)) return RedirectToAction("Login", "Account");
+
+        var uId = Guid.Parse(userIdStr);
+        var miClinica = db.clinicas.FirstOrDefault(c => c.usuario_id == uId);
+
+        if (miClinica == null) return RedirectToAction("Index", "Shop");
+
+        // Traemos los pedidos con todo su árbol genealógico de detalles
+        var misPedidos = db.pedidos
+            .Include("detalle_pedidos")
+            .Include("detalle_pedidos.productos")
+            .Include("detalle_pedidos.productos.proveedores")
+            .Include("detalle_pedidos.productos.producto_imagenes")
+            .Where(p => p.clinica_id == miClinica.id)
+            .OrderByDescending(p => p.creado_en)
+            .ToList();
+
+        return View(misPedidos);
+    }
+}
     }
 }

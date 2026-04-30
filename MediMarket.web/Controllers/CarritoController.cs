@@ -43,10 +43,8 @@ namespace MediMarket.web.Controllers
 
                     if (producto == null) return Json(new { ok = false, mensaje = "Producto no encontrado" });
 
-                    // Obtener o crear el carrito en la sesión
                     var carrito = Session["Carrito"] as List<CarritoItem> ?? new List<CarritoItem>();
 
-                    // ¿Ya está el producto en el carrito?
                     var itemExistente = carrito.FirstOrDefault(i => i.ProductoId == productoId);
 
                     if (itemExistente != null)
@@ -76,6 +74,57 @@ namespace MediMarket.web.Controllers
             }
         }
 
+        [HttpPost]
+public JsonResult ActualizarCantidad(Guid productoId, int cantidad)
+{
+    if (cantidad < 1) return Json(new { ok = false, mensaje = "La cantidad mínima es 1" });
+
+    try
+    {
+        var carrito = Session["Carrito"] as List<CarritoItem>;
+        if (carrito == null) return Json(new { ok = false, mensaje = "El carrito está vacío" });
+
+        var item = carrito.FirstOrDefault(i => i.ProductoId == productoId);
+        if (item == null) return Json(new { ok = false, mensaje = "Producto no encontrado en el carrito" });
+
+        using (var db = new ConexionModel())
+        {
+            // Verificamos el stock real en la BD
+            var producto = db.productos.FirstOrDefault(p => p.id == productoId);
+            if (producto == null) return Json(new { ok = false, mensaje = "Producto no encontrado" });
+
+            if (cantidad > producto.stock_disponible)
+            {
+                return Json(new { ok = false, mensaje = $"¡Ups! Solo hay {producto.stock_disponible} unidades disponibles" });
+            }
+
+            // 1. Actualizamos la memoria
+            item.Cantidad = cantidad;
+            Session["Carrito"] = carrito;
+
+            // 2. Recalculamos toda la matemática exactamente como en tu vista
+            int totalArticulos = carrito.Sum(i => i.Cantidad);
+            decimal subtotal = carrito.Sum(i => i.Subtotal);
+            decimal envio = 50 * totalArticulos; 
+            decimal totalPago = subtotal + envio;
+
+            // 3. Devolvemos los números ya formateados al frontend
+            return Json(new {
+                ok = true,
+                nuevoSubtotalLinea = item.Subtotal.ToString("N2"),
+                nuevoSubtotalCarrito = subtotal.ToString("N2"),
+                nuevoEnvio = envio.ToString("N2"),
+                nuevoTotal = totalPago.ToString("N2"),
+                totalArticulos = totalArticulos
+            });
+        }
+    }
+    catch (Exception ex)
+    {
+        return Json(new { ok = false, mensaje = "Error: " + ex.Message });
+    }
+}
+
         // POST: /Carrito/Eliminar
         [HttpPost]
         public ActionResult Eliminar(Guid productoId)
@@ -88,5 +137,84 @@ namespace MediMarket.web.Controllers
             }
             return RedirectToAction("Index");
         }
+
+        [HttpPost]
+public ActionResult ProcesarPagoFalso()
+{
+    var carrito = Session["Carrito"] as List<CarritoItem>;
+    if (carrito == null || !carrito.Any()) return RedirectToAction("Index", "Shop");
+
+    using (var db = new ConexionModel())
+    {
+        // 1. Identificar a la clínica
+        var userIdStr = ((System.Security.Claims.ClaimsIdentity)User.Identity).FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var uId = Guid.Parse(userIdStr);
+        var miClinica = db.clinicas.FirstOrDefault(c => c.usuario_id == uId);
+
+        if (miClinica == null) return RedirectToAction("Index", "Shop");
+
+        // 2. Matemáticas finales
+        int totalArticulos = carrito.Sum(i => i.Cantidad);
+        decimal subtotal = carrito.Sum(i => i.Subtotal);
+        decimal envio = 50 * totalArticulos;
+        decimal totalPago = subtotal + envio;
+
+        // Generamos un número de orden estilo tu diseño: #ORD-7842-MC
+        string numOrden = $"ORD-{new Random().Next(1000, 9999)}-MC";
+
+        // 3. Crear el Pedido Principal
+        var nuevoPedido = new pedidos
+        {
+            id = Guid.NewGuid(),
+            clinica_id = miClinica.id,
+            numero_pedido = numOrden,
+            estado = "confirmado", // Ya está pagado en nuestra simulación
+            total = totalPago,
+            metodo_pago = "Simulación Efectivo",
+            creado_en = DateTime.Now
+        };
+        db.pedidos.Add(nuevoPedido);
+
+        // 4. Crear los Detalles del Pedido y Restar Stock
+        foreach (var item in carrito)
+        {
+            var detalle = new detalle_pedidos
+            {
+                id = Guid.NewGuid(),
+                pedido_id = nuevoPedido.id,
+                producto_id = item.ProductoId,
+                cantidad = item.Cantidad,
+                precio_unitario = item.Precio
+            };
+            db.detalle_pedidos.Add(detalle);
+
+            // ¡Magia! Restamos el stock del inventario
+            var productoDB = db.productos.Find(item.ProductoId);
+            if (productoDB != null)
+            {
+                productoDB.stock_disponible -= item.Cantidad;
+            }
+        }
+
+        // 5. Guardar en SQL y vaciar carrito
+        db.SaveChanges();
+        Session.Remove("Carrito");
+
+        // 6. Mandar datos a la pantalla final usando TempData (vive por 1 sola recarga)
+        TempData["NumeroOrden"] = numOrden;
+        TempData["TotalPago"] = totalPago;
+
+        return RedirectToAction("Exito");
+    }
+}
+
+// La vista que carga tu diseño de éxito
+public ActionResult Exito()
+{
+    // Si entran de chismosos sin haber comprado, los pateamos a la tienda
+    if (TempData["NumeroOrden"] == null) return RedirectToAction("Index", "Shop");
+    
+    return View();
+}
     }
 }

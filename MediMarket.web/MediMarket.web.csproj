@@ -281,6 +281,8 @@
     <Content Include="Views\ListaDeseos\Index.cshtml" />
     <Content Include="Views\Rfqs\Index.cshtml" />
     <Content Include="Views\Rfqs\Details.cshtml" />
+    <Content Include="Views\Carrito\Exito.cshtml" />
+    <Content Include="Views\Shop\MisPedidos.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
