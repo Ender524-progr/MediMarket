@@ -1,0 +1,169 @@
+﻿@model List<MediMarket.web.Models.pedidos>
+@{
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+    ViewBag.Title = "Mis Pedidos";
+}
+
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 min-h-[80vh]">
+
+    <a href="@Url.Action("Index", "Shop")" class="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-teal-600 transition-colors mb-6 group">
+        <i class="fa-solid fa-arrow-left-long group-hover:-translate-x-1 transition-transform"></i> Seguir comprando
+    </a>
+
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-teal-900 mb-2">Mis Pedidos</h1>
+        <p class="text-gray-500">Seguimiento y registro de adquisiciones clínicas.</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
+            <i class="fa-solid fa-box-open text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-800">Aún no tienes pedidos</h3>
+            <p class="text-gray-500 mt-2 mb-6">Tus compras aparecerán aquí.</p>
+            <a href="@Url.Action("Index", "Shop")" class="bg-teal-700 text-white px-6 py-2 rounded-xl font-bold hover:bg-teal-800">Ir de compras</a>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-4">
+            @foreach (var pedido in Model)
+            {
+                // Configurar colores según el estado
+                string colorBadge = "bg-gray-100 text-gray-700";
+                string iconS = "fa-box";
+                if (pedido.estado == "confirmado") { colorBadge = "bg-blue-100 text-blue-700"; iconS = "fa-check-circle"; }
+                if (pedido.estado == "en_proceso") { colorBadge = "bg-amber-100 text-amber-700"; iconS = "fa-spinner"; }
+                if (pedido.estado == "enviado") { colorBadge = "bg-teal-100 text-teal-700"; iconS = "fa-truck-fast"; }
+                if (pedido.estado == "entregado") { colorBadge = "bg-green-100 text-green-700"; iconS = "fa-box-open"; }
+                if (pedido.estado == "cancelado") { colorBadge = "bg-red-100 text-red-700"; iconS = "fa-ban"; }
+
+                int totalArticulos = pedido.detalle_pedidos.Sum(d => d.cantidad);
+
+                @* ── TARJETA DEL PEDIDO ── *@
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-md transition-shadow">
+
+                    <div class="flex items-center gap-5 w-full md:w-auto">
+                        <div class="w-14 h-14 shrink-0 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 border border-gray-200">
+                            <i class="fa-solid @iconS text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-3 mb-1">
+                                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">#@pedido.numero_pedido</span>
+                                <span class="text-xs text-gray-400">• @pedido.creado_en.ToString("dd MMM yyyy")</span>
+                            </div>
+                            <h3 class="font-bold text-gray-900 text-lg">Pedido de @totalArticulos artículos</h3>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto">
+                        <div class="text-left md:text-right">
+                            <span class="block text-2xl font-black text-teal-700">$@pedido.total.ToString("N2")</span>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider @colorBadge flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-current opacity-75"></span>
+                                @pedido.estado.Replace("_", " ")
+                            </span>
+
+                            <button onclick="abrirModal('@pedido.id')" class="text-sm font-bold text-teal-600 hover:text-teal-800 transition-colors uppercase tracking-wider">
+                                Ver Detalles
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                @* ── MODAL FLOTANTE CON BLUR (Oculto por defecto) ── *@
+                <div id="modal_@pedido.id" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity">
+                    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col overflow-hidden animate-fade-in-up">
+
+                        @* Header del Modal *@
+                        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <div>
+                                <h3 class="font-bold text-gray-900">Detalles del Pedido #@pedido.numero_pedido</h3>
+                                <p class="text-xs text-gray-500">Realizado el @pedido.creado_en.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                            <button onclick="cerrarModal('@pedido.id')" class="text-gray-400 hover:text-red-500 text-xl transition-colors">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        @* Cuerpo del Modal (Scrollable) *@
+                        <div class="p-6 overflow-y-auto flex-1 bg-white">
+                            <div class="space-y-4">
+                                @foreach (var detalle in pedido.detalle_pedidos)
+                                {
+                                    var img = detalle.productos.producto_imagenes.FirstOrDefault(i => i.es_principal)?.url ?? "/Content/img/no-image.png";
+                                    <div class="flex gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                                        <img src="@img" class="w-16 h-16 object-cover rounded-lg border border-gray-200 bg-gray-50" />
+                                        <div class="flex-1">
+                                            <h4 class="font-bold text-gray-800 text-sm">@detalle.productos.nombre</h4>
+                                            <p class="text-xs text-gray-400">Proveedor: @detalle.productos.proveedores.nombre_empresa</p>
+                                            <div class="flex justify-between items-center mt-2">
+                                                <span class="text-sm font-semibold text-gray-600">@detalle.cantidad x $@detalle.precio_unitario.ToString("N2")</span>
+                                                <span class="font-bold text-teal-700">$@((detalle.subtotal ?? 0).ToString("N2"))</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        @* Footer del Modal *@
+                        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-gray-600">Total pagado:</span>
+                                <span class="text-2xl font-black text-teal-800">$@pedido.total.ToString("N2")</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@* ── SCRIPT PARA LOS MODALES ── *@
+<script>function abrirModal(id) {
+        const modal = document.getElementById('modal_' + id);
+        if(modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Evita que la página de fondo haga scroll
+        }
+    }
+
+    function cerrarModal(id) {
+        const modal = document.getElementById('modal_' + id);
+        if(modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Restaura el scroll
+        }
+    }
+
+    // Cerrar modal al dar clic afuera (en la zona borrosa)
+    document.addEventListener('click', function(event) {
+        if (event.target.id && event.target.id.startsWith('modal_')) {
+            cerrarModal(event.target.id.split('_')[1]);
+        }
+    });</script>
+
+<style>
+    /* Una pequeña animación CSS para que el modal entre suavecito */
+    .animate-fade-in-up {
+        animation: fadeInUp 0.3s ease-out forwards;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

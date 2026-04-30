@@ -35,7 +35,7 @@ namespace MediMarket.web.Controllers
 
         // ─── POST: Agregar (Llamado por JS fetch desde Details) ──────────────
         [HttpPost]
-        public JsonResult Agregar(Guid productoId)
+        public JsonResult Toggle(Guid productoId)
         {
             try
             {
@@ -44,12 +44,21 @@ namespace MediMarket.web.Controllers
                     var userId = Guid.Parse(((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier).Value);
                     var clinica = db.clinicas.FirstOrDefault(c => c.usuario_id == userId);
 
-                    if (clinica == null) return Json(new { ok = false, mensaje = "Solo las clínicas pueden guardar favoritos." });
+                    if (clinica == null) return Json(new { ok = false, mensaje = "Solo las clínicas pueden usar favoritos." });
 
-                    // Verificamos que no lo haya guardado ya para no duplicar
-                    var existe = db.lista_deseos.Any(l => l.clinica_id == clinica.id && l.producto_id == productoId);
-                    if (!existe)
+                    // Buscamos si ya lo tiene guardado
+                    var deseoExistente = db.lista_deseos.FirstOrDefault(l => l.clinica_id == clinica.id && l.producto_id == productoId);
+
+                    if (deseoExistente != null)
                     {
+                        // SI YA EXISTE: Lo eliminamos
+                        db.lista_deseos.Remove(deseoExistente);
+                        db.SaveChanges();
+                        return Json(new { ok = true, agregado = false, mensaje = "Eliminado de deseos 💔" });
+                    }
+                    else
+                    {
+                        // SI NO EXISTE: Lo agregamos
                         db.lista_deseos.Add(new lista_deseos
                         {
                             id = Guid.NewGuid(),
@@ -58,8 +67,8 @@ namespace MediMarket.web.Controllers
                             fecha_agregado = DateTime.Now
                         });
                         db.SaveChanges();
+                        return Json(new { ok = true, agregado = true, mensaje = "Guardado en deseos 💖" });
                     }
-                    return Json(new { ok = true, mensaje = "Guardado en tu Lista de Deseos 💖" });
                 }
             }
             catch (Exception ex)
