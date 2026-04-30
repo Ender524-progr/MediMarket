@@ -212,5 +212,51 @@ namespace MediMarket.web.Controllers
                 return RedirectToAction("Configuracion");
             }
         }
+
+        // ─── BUSCADOR GLOBAL ───────────────────────────────────────────────
+        public ActionResult BusquedaGlobal(string q)
+        {
+            if (string.IsNullOrWhiteSpace(q)) return RedirectToAction("Index");
+
+            var userIdStr = ((ClaimsIdentity)User.Identity).FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdStr)) return RedirectToAction("Login", "Account");
+            var userId = Guid.Parse(userIdStr);
+
+            using (var db = new ConexionModel())
+            {
+                var prov = db.proveedores.FirstOrDefault(p => p.usuario_id == userId);
+                if (prov == null) return HttpNotFound("Proveedor no encontrado");
+
+                // 1. Buscar en Productos (Por nombre o SKU)
+                var misProductos = db.productos
+                    .Include("categorias")
+                    .Where(p => p.proveedor_id == prov.id && (p.nombre.Contains(q) || p.sku.Contains(q)))
+                    .ToList();
+
+                // 2. Buscar en Órdenes (Por número de pedido)
+                var misOrdenes = db.detalle_pedidos
+                    .Include("pedidos")
+                    .Where(d => d.productos.proveedor_id == prov.id && d.pedidos.numero_pedido.Contains(q))
+                    .Select(d => d.pedidos)
+                    .Distinct()
+                    .ToList();
+
+                // 3. Buscar en Cotizaciones / RFQs
+                // (Nota: Si tu tabla no se llama 'rfqs' o el campo no es 'titulo', ajusta estos nombres a los de tu BD)
+                var misRfqs = db.solicitudes_rfq
+                    .Where(r => r.titulo.Contains(q) || r.descripcion.Contains(q))
+                    .ToList();
+
+                ViewBag.PalabraBuscada = q;
+                ViewBag.Productos = misProductos;
+                ViewBag.Ordenes = misOrdenes;
+                ViewBag.Rfqs = misRfqs;
+
+                // Contamos el total para saber si encontramos algo
+                ViewBag.TotalResultados = misProductos.Count + misOrdenes.Count + misRfqs.Count;
+
+                return View();
+            }
+        }
     }
 }

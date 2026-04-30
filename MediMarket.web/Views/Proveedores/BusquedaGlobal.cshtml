@@ -1,0 +1,121 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutProveedores.cshtml";
+    ViewBag.Title = "Resultados de Búsqueda";
+
+    // Convertimos los ViewBags a listas para poder usarlos más fácil en el HTML
+    var productos = ViewBag.Productos as List<MediMarket.web.Models.productos>;
+    var ordenes = ViewBag.Ordenes as List<MediMarket.web.Models.pedidos>;
+    // Cambia el modelo 'rfqs' por el nombre exacto de tu clase si es distinto
+    var cotizaciones = ViewBag.Rfqs as List<MediMarket.web.Models.solicitudes_rfq>;
+}
+
+<div class="p-8 max-w-6xl mx-auto">
+
+    @* ENCABEZADO DE RESULTADOS *@
+    <div class="mb-8 border-b border-gray-200 pb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Resultados de búsqueda</h1>
+        <p class="text-gray-500 mt-2 text-lg">
+            Encontramos <span class="font-bold text-teal-600">@ViewBag.TotalResultados</span> resultados para <span class="bg-gray-100 px-2 py-1 rounded text-gray-700 italic">"@ViewBag.PalabraBuscada"</span>
+        </p>
+    </div>
+
+    @if (ViewBag.TotalResultados == 0)
+    {
+        @* ESTADO VACÍO *@
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
+            <i class="fas fa-search text-6xl text-gray-200 mb-4"></i>
+            <h2 class="text-xl font-bold text-gray-700 mb-2">No encontramos nada</h2>
+            <p class="text-gray-500">Intenta buscar con palabras más cortas, revisar la ortografía o buscar por número de pedido exacto.</p>
+            <a href="@Url.Action("Index", "Proveedores")" class="inline-block mt-6 text-teal-600 font-bold hover:text-teal-700 transition">
+                <i class="fas fa-arrow-left mr-1"></i> Volver al Inicio
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-8">
+
+            @* ─── SECCIÓN: PRODUCTOS ─── *@
+            @if (productos != null && productos.Any())
+            {
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-slate-50 border-b border-gray-100 px-6 py-4 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fas fa-box"></i></div>
+                        <h3 class="font-bold text-gray-800">Productos en Catálogo (@productos.Count)</h3>
+                    </div>
+                    <div class="divide-y divide-gray-100">
+                        @foreach (var p in productos)
+                        {
+                            <div class="p-6 hover:bg-gray-50 transition flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-800">@p.nombre</p>
+                                        <p class="text-sm text-gray-500">SKU: @(p.sku ?? "N/A") | Precio: $@p.precio_unitario</p>
+                                    </div>
+                                </div>
+                                <a href="@Url.Action("Details", "MiCatalogo", new { id = p.id })" class="text-teal-600 hover:text-teal-800 bg-teal-50 hover:bg-teal-100 px-4 py-2 rounded-lg text-sm font-bold transition">
+                                    Ver Producto
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* ─── SECCIÓN: ÓRDENES ─── *@
+            @if (ordenes != null && ordenes.Any())
+            {
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-slate-50 border-b border-gray-100 px-6 py-4 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fas fa-shopping-cart"></i></div>
+                        <h3 class="font-bold text-gray-800">Órdenes de Compra (@ordenes.Count)</h3>
+                    </div>
+                    <div class="divide-y divide-gray-100">
+                        @foreach (var o in ordenes)
+                        {
+                            <div class="p-6 hover:bg-gray-50 transition flex items-center justify-between">
+                                <div>
+                                    <p class="font-bold text-emerald-700 text-lg">@o.numero_pedido</p>
+                                    <p class="text-sm text-gray-500">Fecha: @o.creado_en.ToString("dd MMM yyyy") | Total: $@o.total</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
+                                    @(o.estado == "confirmado" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700")">
+                                    @o.estado
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* ─── SECCIÓN: COTIZACIONES (RFQs) ─── *@
+            @if (cotizaciones != null && cotizaciones.Any())
+            {
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-slate-50 border-b border-gray-100 px-6 py-4 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center"><i class="fas fa-file-invoice"></i></div>
+                        <h3 class="font-bold text-gray-800">Cotizaciones (RFQs) (@cotizaciones.Count)</h3>
+                    </div>
+                    <div class="divide-y divide-gray-100">
+                        @foreach (var c in cotizaciones)
+                        {
+                            <div class="p-6 hover:bg-gray-50 transition flex items-center justify-between">
+                                <div>
+                                    <p class="font-bold text-gray-800">@c.titulo</p>
+                                    <p class="text-sm text-gray-500">Publicado el: @c.creado_en.ToString("dd MMM yyyy")</p>
+                                </div>
+                                <a href="@Url.Action("Details", "RFQs", new { id = c.id })" class="text-purple-600 hover:text-purple-800 text-sm font-bold transition">
+                                    Ver Detalles <i class="fas fa-chevron-right ml-1"></i>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+        </div>
+    }
+</div>

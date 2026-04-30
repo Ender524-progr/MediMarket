@@ -473,6 +473,7 @@
     <Content Include="Views\Analisis\Index.cshtml" />
     <Content Include="Views\Proveedores\MiEmpresa.cshtml" />
     <Content Include="Views\Proveedores\Configuracion.cshtml" />
+    <Content Include="Views\Proveedores\BusquedaGlobal.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
