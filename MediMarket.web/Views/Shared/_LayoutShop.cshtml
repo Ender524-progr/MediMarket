@@ -19,10 +19,13 @@
         var fotoUrl = identity.FindFirst("foto_url")?.Value ?? identity.FindFirst("picture")?.Value ?? identity.FindFirst("urn:google:picture")?.Value;
         var userName = identity.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? identity.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? User.Identity.Name ?? "Usuario";
 
-        // NOTIFICACIONES GLOBALES
+        // NOTIFICACIONES GLOBALES Y MULTI-CLÍNICA
         var db = new MediMarket.web.Models.ConexionModel();
         var misNotificaciones = new List<MediMarket.web.Models.notificaciones_clinicas>();
         int totalSinLeer = 0;
+        
+        var misClinicas = new List<MediMarket.web.Models.clinicas>();
+        MediMarket.web.Models.clinicas clinicaActiva = null;
 
         if (Request.IsAuthenticated)
         {
@@ -30,12 +33,24 @@
             if (!string.IsNullOrEmpty(uidStr))
             {
                 var uid = Guid.Parse(uidStr);
-                var mClinica = db.clinicas.FirstOrDefault(c => c.usuario_id == uid);
-                if (mClinica != null)
+                
+                // 1. Traemos TODAS las clínicas de este compa
+                misClinicas = db.clinicas.Where(c => c.usuario_id == uid).ToList();
+                
+                // 2. Buscamos cuál está activa en la sesión
+                var activaId = Session["ClinicaActivaId"] as Guid?;
+                clinicaActiva = misClinicas.FirstOrDefault(c => c.id == activaId) ?? misClinicas.FirstOrDefault();
+
+                if (clinicaActiva != null)
                 {
-                    // Traemos las últimas 10 notificaciones de esta clínica
+                    // Aseguramos la sesión
+                    if (activaId == null) 
+                    {
+                        Session["ClinicaActivaId"] = clinicaActiva.id;
+                    }
+                    // 3. Traemos las notificaciones SOLO de la clínica que está usando ahorita
                     misNotificaciones = db.notificaciones_clinicas
-                                          .Where(n => n.clinica_id == mClinica.id)
+                                          .Where(n => n.clinica_id == clinicaActiva.id)
                                           .OrderByDescending(n => n.creado_en)
                                           .Take(10)
                                           .ToList();
@@ -223,8 +238,23 @@
                         <p class="font-bold text-teal-700 truncate text-sm">@(ViewBag.NombreClinica ?? "Mi Clínica")</p>
                         <p class="text-xs text-gray-500 truncate">RFC: @(ViewBag.RfcClinica ?? "Sin registrar")</p>
                     </div>
-                    
-                    @* 3. Tus enlaces originales *@
+
+                    @if (misClinicas != null && misClinicas.Count > 1)
+                    {
+                        <div class="px-5 py-2 bg-gray-50 border-b border-gray-100 max-h-32 overflow-y-auto">
+                            <p class="text-[9px] font-bold text-gray-400 uppercase mb-2">Cambiar de clínica</p>
+                            <div class="flex flex-col gap-1">
+                                @foreach (var c in misClinicas)
+                                {
+                                    <a href="@Url.Action("SwitchClinica", "Clinica", new { id = c.id })" 
+                                       class="text-xs py-1.5 px-2 rounded-lg transition-colors @(clinicaActiva != null && clinicaActiva.id == c.id ? "bg-teal-600 text-white font-bold shadow-sm" : "text-gray-600 hover:bg-gray-200")">
+                                        @c.nombre_clinica
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    }
+
                     <ul class="py-1">
                         <li>
                             <a href="@Url.Action("MiPerfil", "Clinica")" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:translate-x-1 hover:text-teal-600 transition-all">
