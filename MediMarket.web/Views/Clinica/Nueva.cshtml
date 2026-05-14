@@ -1,0 +1,234 @@
+﻿@model MediMarket.web.Models.clinicas
+
+@{
+    ViewBag.Title = "Registrar Nueva Clínica";
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+    var misClinicas = ViewBag.MisClinicas as List<MediMarket.web.Models.clinicas> ?? new List<MediMarket.web.Models.clinicas>();
+}
+
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-8 pt-24 pb-12 px-4">
+
+    @* ── COLUMNA IZQUIERDA: LISTA DE CLÍNICAS ── *@
+    <div class="w-full md:w-1/3 lg:w-1/4 bg-white border border-gray-100 rounded-3xl p-4 shadow-sm h-fit shrink-0">
+        <h2 class="text-lg font-bold text-gray-800 mb-4 px-2">Mis Clínicas</h2>
+        <div class="space-y-2">
+            @foreach (var clinica in misClinicas)
+            {
+                <a href="@Url.Action("MiPerfil", new { id = clinica.id })" 
+                   class="flex items-center gap-3 p-3 rounded-2xl transition-all hover:bg-gray-50 border border-transparent">
+                    <div class="size-10 shrink-0 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold">
+                        @clinica.nombre_clinica.Substring(0, 1).ToUpper()
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="font-bold text-sm text-gray-800 truncate">@clinica.nombre_clinica</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest truncate">@clinica.ciudad</p>
+                    </div>
+                </a>
+            }
+            
+            <div class="flex items-center justify-center gap-2 p-4 mt-4 border-2 border-dashed border-teal-400 rounded-2xl text-teal-600 bg-teal-50 transition-all text-sm font-bold">
+                <i class="fa-solid fa-plus"></i> Nueva clínica
+            </div>
+        </div>
+    </div>
+
+    @* ── COLUMNA DERECHA: FORMULARIO DE REGISTRO DESGLOSADO ── *@
+    <div class="w-full md:flex-1">
+        <div class="mb-6 flex justify-between items-end">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800">Registrar Sucursal</h2>
+                <p class="text-sm text-gray-500 mt-1">Agrega una nueva clínica o sucursal a tu cuenta.</p>
+            </div>
+        </div>
+
+        @* OJO AQUÍ: Como tu controlador va a recibir campos sueltos, no usamos el 'model' genérico, usamos inputs con nombres manuales igual que en tu Onboarding *@
+        @using (Html.BeginForm("Nueva", "Clinica", FormMethod.Post, new { @class = "bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden mb-8" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="text-xs font-bold text-gray-400 uppercase">Nombre de la Clínica *</label>
+                        <input type="text" name="nombreClinica" placeholder="Ej: Clínica San Juan" required class="w-full p-3 focus:border-teal-500 bg-gray-50 rounded-xl border outline-none font-bold text-gray-800" />
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase">RFC</label>
+                        <input type="text" name="rfc" placeholder="Ej: ABC123456789" class="w-full p-3 bg-gray-50 focus:border-teal-500 rounded-xl border outline-none uppercase" maxlength="13" />
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase">Cédula Profesional</label>
+                        <input type="text" name="cedula" placeholder="Ej: 123456" class="w-full p-3 bg-gray-50 focus:border-teal-500 rounded-xl border outline-none" />
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase">Especialidad</label>
+                        <input type="text" name="especialidad" placeholder="Ej: Cardiología" class="w-full p-3 bg-gray-50 focus:border-teal-500 rounded-xl border outline-none" />
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase">Teléfono</label>
+                        <input type="text" name="telefono" placeholder="Ej: 9611234567" class="w-full p-3 bg-gray-50 focus:border-teal-500 rounded-xl border outline-none" />
+                    </div>
+                </div>
+
+                <div class="col-span-2 border-t border-gray-200 mt-8 mb-6 pt-6">
+                    <h3 class="text-sm font-bold text-teal-800 mb-4"><i class="fa-solid fa-location-dot"></i> Ubicación</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase">Código Postal</label>
+                        <div class="relative">
+                            <input type="text" id="cp_clinica" name="cp" placeholder="Ej: 29096" maxlength="5" required class="w-full p-3 bg-gray-50 focus:border-teal-500 rounded-xl border outline-none" />
+                            <span id="loading_cp" class="absolute right-3 top-3 text-xs text-teal-600 hidden animate-pulse font-bold">Buscando...</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase">Estado</label>
+                        <input type="text" id="estado_clinica" name="estado" placeholder="Ej: Chiapas" readonly class="w-full p-3 bg-gray-200 text-gray-600 rounded-xl border outline-none cursor-not-allowed" />
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase">Municipio / Alcaldía</label>
+                        <input type="text" id="municipio_clinica" name="municipio" placeholder="Ej: Tuxtla Gutiérrez" required class="w-full p-3 bg-gray-50 focus:border-teal-500 rounded-xl border outline-none" />
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase">Colonia</label>
+                        <select id="colonia_clinica" name="colonia" required class="w-full p-3 bg-gray-50 focus:border-teal-500 rounded-xl border outline-none">
+                            <option value="">Ingresa un CP primero...</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="text-xs font-bold text-gray-400 uppercase">Calle</label>
+                        <input type="text" name="calle" placeholder="Ej: Blvd. Belisario Domínguez" required class="w-full p-3 bg-gray-50 focus:border-teal-500 rounded-xl border outline-none" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-gray-400 uppercase">Num. Ext</label>
+                            <input type="text" name="num_ext" placeholder="Ej: 1081" required class="w-full p-3 bg-gray-50 focus:border-teal-500 rounded-xl border outline-none" />
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-400 uppercase">Num. Int (Opc.)</label>
+                            <input type="text" name="num_int" placeholder="Ej: Piso 2" class="w-full p-3 bg-gray-50 focus:border-teal-500 rounded-xl border outline-none" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-8 py-5 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+                <a href="@Url.Action("MiPerfil")" class="px-4 py-2.5 rounded-lg text-gray-500 hover:bg-gray-200 text-sm font-semibold transition-colors">
+                    Cancelar
+                </a>
+
+                <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-8 rounded-xl transition shadow-md flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Guardar Nueva Clínica
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@* SCRIPT DE AUTOCOMPLETADO Y VALIDACIONES (Igual al tuyo) *@
+<script>
+    function habilitarAutocompletadoCP(inputId, loadingId, selectColoniaId, inputEstadoId, inputMunicipioId) {
+        const inputElement = document.getElementById(inputId);
+        if (!inputElement) return;
+
+        inputElement.addEventListener('input', async function (e) {
+            const cp = e.target.value;
+
+            if (cp.length === 5) {
+                const loading = document.getElementById(loadingId);
+                const selectColonia = document.getElementById(selectColoniaId);
+                const inputEstado = document.getElementById(inputEstadoId);
+                const inputMunicipio = document.getElementById(inputMunicipioId);
+
+                loading.style.display = 'block';
+
+                try {
+                    const response = await fetch(`https://api.zippopotam.us/mx/${cp}`);
+                    if (!response.ok) throw new Error("La API no encontró el CP");
+
+                    const data = await response.json();
+
+                    if (data && data.places && data.places.length > 0) {
+                        inputEstado.value = data.places[0].state;
+                        inputMunicipio.value = data.places[0]["place name"]; // Auto-llenamos municipio
+
+                        selectColonia.innerHTML = '<option value="">Selecciona tu colonia</option>';
+                        data.places.forEach(place => {
+                            const option = document.createElement('option');
+                            option.value = place["place name"];
+                            option.textContent = place["place name"];
+                            selectColonia.appendChild(option);
+                        });
+                    }
+                } catch (error) {
+                    console.warn(`Plan B activado:`, error);
+                    inputEstado.value = "Chiapas";
+                    selectColonia.innerHTML = '<option value="">Selecciona tu colonia</option>';
+                    const coloniasPrueba = ["Centro", "San Francisco", "Los Lagos", "Evolución"];
+                    coloniasPrueba.forEach(col => {
+                        const option = document.createElement('option');
+                        option.value = col;
+                        option.textContent = col;
+                        selectColonia.appendChild(option);
+                    });
+                } finally {
+                    loading.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    habilitarAutocompletadoCP('cp_clinica', 'loading_cp', 'colonia_clinica', 'estado_clinica', 'municipio_clinica');
+
+    function habilitarValidaciones() {
+        const reglas = {
+            'rfc': {
+                regex: /^([A-ZÑ&]{3,4}) ?(?:- ?)?(\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])) ?(?:- ?)?([A-Z\d]{2})([A\d])$/i,
+                mensaje: 'RFC inválido. Deben ser 12 o 13 caracteres correctos.'
+            },
+            'telefono': {
+                regex: /^\d{10}$/,
+                mensaje: 'El teléfono debe tener exactamente 10 números.'
+            },
+            'cedula': {
+                regex: /^\d{7,8}$/,
+                mensaje: 'La cédula debe tener 7 u 8 números.'
+            }
+        };
+
+        Object.keys(reglas).forEach(campo => {
+            const inputs = document.querySelectorAll(`input[name="${campo}"]`);
+
+            inputs.forEach(input => {
+                const errorSpan = document.createElement('span');
+                errorSpan.className = 'text-xs text-red-500 font-bold mt-1 hidden w-full block';
+                input.parentNode.appendChild(errorSpan);
+
+                input.addEventListener('input', function (e) {
+                    const valor = e.target.value.trim();
+                    const regla = reglas[campo];
+
+                    if (valor === '') {
+                        errorSpan.classList.add('hidden');
+                        input.classList.remove('border-red-500', 'border-green-500', 'bg-red-50', 'bg-green-50');
+                        return;
+                    }
+
+                    if (!regla.regex.test(valor)) {
+                        errorSpan.textContent = regla.mensaje;
+                        errorSpan.classList.remove('hidden');
+                        input.classList.add('border-red-500', 'bg-red-50');
+                        input.classList.remove('border-green-500', 'bg-green-50');
+                    } else {
+                        errorSpan.classList.add('hidden');
+                        input.classList.remove('border-red-500', 'bg-red-50');
+                        input.classList.add('border-green-500', 'bg-green-50');
+                    }
+                });
+            });
+        });
+    }
+
+    habilitarValidaciones();
+</script>

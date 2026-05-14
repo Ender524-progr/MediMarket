@@ -474,6 +474,7 @@
     <Content Include="Views\Proveedores\MiEmpresa.cshtml" />
     <Content Include="Views\Proveedores\Configuracion.cshtml" />
     <Content Include="Views\Proveedores\BusquedaGlobal.cshtml" />
+    <Content Include="Views\Clinica\Nueva.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

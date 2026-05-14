@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = "Mi Clínica";
     Layout = "~/Views/Shared/_LayoutShop.cshtml";
+    var misClinicas = ViewBag.MisClinicas as List<MediMarket.web.Models.clinicas> ?? new List<MediMarket.web.Models.clinicas>();
 }
 
 @* ──────────────── TOAST DE ÉXITO ──────────────── *@
@@ -28,140 +29,181 @@
     </script>
 }
 
-<div class="max-w-5xl mx-auto py-10 pt-20 px-4">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-8 pt-24 pb-12 px-4">
 
-    <a href="@Url.Action("Index", "Shop")" class="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-teal-600 transition-colors mb-6 group">
-        <i class="fa-solid fa-arrow-left-long group-hover:-translate-x-1 transition-transform"></i> Seguir comprando
-    </a>
-
-    <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-800">Perfil de la Clínica</h2>
-        <p class="text-sm text-gray-500 mt-1">Administra la identidad y preferencias de tu institución médica.</p>
+    @* ── COLUMNA IZQUIERDA: LISTA DE CLÍNICAS ── *@
+    <div class="w-full md:w-1/3 lg:w-1/4 bg-white border border-gray-100 rounded-3xl p-4 shadow-sm h-fit shrink-0">
+        <h2 class="text-lg font-bold text-gray-800 mb-4 px-2">Mis Clínicas</h2>
+        <div class="space-y-2">
+            @foreach (var clinica in misClinicas)
+            {
+                bool esLaSeleccionada = Model != null && Model.id == clinica.id;
+                <a href="@Url.Action("MiPerfil", new { id = clinica.id })" 
+                   class="flex items-center gap-3 p-3 rounded-2xl transition-all @(esLaSeleccionada ? "bg-teal-50 border border-teal-100" : "hover:bg-gray-50 border border-transparent")">
+                    <div class="size-10 shrink-0 rounded-full @(esLaSeleccionada ? "bg-teal-600" : "bg-gray-300") text-white flex items-center justify-center font-bold">
+                        @clinica.nombre_clinica.Substring(0, 1).ToUpper()
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="font-bold text-sm text-gray-800 truncate">@clinica.nombre_clinica</p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest truncate">@clinica.ciudad</p>
+                    </div>
+                </a>
+            }
+            
+            <a href="@Url.Action("Nueva")" class="flex items-center justify-center gap-2 p-4 mt-4 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400 hover:border-teal-400 hover:text-teal-600 transition-all text-sm font-bold bg-gray-50/50">
+                <i class="fa-solid fa-plus"></i> Registrar otra clínica
+            </a>
+        </div>
     </div>
 
-    @* Formulario principal (Con enctype para las fotos) *@
-    @using (Html.BeginForm("MiPerfil", "Clinica", FormMethod.Post, new { enctype = "multipart/form-data", @class = "bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-8" }))
-    {
-        @Html.AntiForgeryToken()
-        @Html.HiddenFor(m => m.id)
-
-        @* ── CABECERA: BANNER Y LOGO ── *@
-        <div class="relative group">
-            <div class="w-full h-48 bg-gray-200 relative overflow-hidden">
-                <div class="w-full h-full bg-gradient-to-r from-teal-700 to-slate-800 flex items-center justify-center">
-                    <i class="fas fa-hospital text-white/30 text-5xl"></i>
-                </div>
-                <label class="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-gray-800 text-xs font-bold px-4 py-2 rounded-lg cursor-pointer shadow transition backdrop-blur-sm">
-                    <i class="fas fa-camera mr-1"></i> Cambiar Portada
-                    <input type="file" name="bannerFile" accept="image/*" class="hidden" />
-                </label>
+    @* ── COLUMNA DERECHA: FORMULARIO PRINCIPAL Y EDICIÓN ── *@
+    <div class="w-full md:flex-1">
+        <div class="mb-6 flex justify-between items-end">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800">Perfil de la Clínica</h2>
+                <p class="text-sm text-gray-500 mt-1">Administra la identidad y preferencias de @(Model?.nombre_clinica ?? "tu institución médica").</p>
             </div>
-            <div class="absolute -bottom-10 left-8 flex items-end">
-                <div class="relative">
-                    <div class="w-28 h-28 rounded-2xl bg-white p-1.5 shadow-md border border-gray-100 flex items-center justify-center text-teal-600 bg-teal-50">
-                        <i class="fas fa-user-md text-4xl"></i>
-                    </div>
-                    <label class="absolute -bottom-2 -right-2 bg-teal-600 hover:bg-teal-700 text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer shadow-sm transition ring-4 ring-white">
-                        <i class="fas fa-pen text-xs"></i>
-                        <input type="file" name="logoFile" accept="image/*" class="hidden" />
-                    </label>
-                </div>
-            </div>
+            @if(Model != null)
+            {
+                <span class="px-3 py-1 bg-teal-100 text-teal-800 text-[10px] font-bold uppercase rounded-full tracking-wider hidden sm:block">
+                    ID: @Model.id.ToString().Substring(0, 8)
+                </span>
+            }
         </div>
 
-        @* ── DATOS CLÍNICOS ── *@
-        <div class="pt-16 pb-8 px-8 border-b border-gray-100">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">Nombre de la Clínica *</label>
-                    @Html.TextBoxFor(m => m.nombre_clinica, new { @class = "w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-2 focus:ring-teal-500 font-bold text-gray-800 text-lg" })
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">Especialidad</label>
-                    @Html.TextBoxFor(m => m.especialidad, new { @class = "w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-2 focus:ring-teal-500 text-gray-600" })
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">RFC</label>
-                    @Html.TextBoxFor(m => m.rfc, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm uppercase focus:ring-2 focus:ring-teal-500" })
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">Teléfono</label>
-                    @Html.TextBoxFor(m => m.telefono, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500" })
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">Ciudad</label>
-                    @Html.TextBoxFor(m => m.ciudad, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500" })
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-6">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">Dirección completa</label>
-                    @Html.TextBoxFor(m => m.direccion, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500" })
-                </div>
-            </div>
-        </div>
-
-        @* ── PREFERENCIAS DE NOTIFICACIÓN ── *@
-        <div class="p-8 bg-gray-50/50">
-            <h3 class="font-bold text-gray-800 mb-5 flex items-center gap-2"><i class="fas fa-bell text-teal-600"></i> Alertas y Correos</h3>
-            <div class="space-y-4">
-                <label class="flex items-start gap-3 cursor-pointer group">
-                    <input type="checkbox" checked class="mt-1 w-5 h-5 text-teal-600 rounded border-gray-300 focus:ring-teal-500">
-                    <div>
-                        <p class="font-bold text-gray-800 group-hover:text-teal-700 transition">Actualizaciones de mis Pedidos</p>
-                        <p class="text-sm text-gray-500">Avisarme cuando mi compra cambie a 'Enviado' o 'Entregado'.</p>
-                    </div>
-                </label>
-                <label class="flex items-start gap-3 cursor-pointer group">
-                    <input type="checkbox" checked class="mt-1 w-5 h-5 text-teal-600 rounded border-gray-300 focus:ring-teal-500">
-                    <div>
-                        <p class="font-bold text-gray-800 group-hover:text-teal-700 transition">Respuestas a Cotizaciones (RFQ)</p>
-                        <p class="text-sm text-gray-500">Notificarme cuando un proveedor me envíe una propuesta.</p>
-                    </div>
-                </label>
-            </div>
-        </div>
-
-        @* ── BOTONES DE ACCIÓN ── *@
-        <div class="px-8 py-5 border-t border-gray-100 flex items-center justify-between bg-white">
-            <button type="button" onclick="document.getElementById('modalEliminar').classList.remove('hidden')" 
-                    class="px-4 py-2.5 rounded-lg text-red-500 hover:bg-red-50 text-sm font-semibold transition-colors flex items-center gap-2 border border-transparent hover:border-red-200">
-                <i class="fa-solid fa-trash"></i> Eliminar cuenta
-            </button>
-
-            <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-6 rounded-lg transition shadow-sm flex items-center gap-2">
-                <i class="fas fa-save"></i> Guardar Perfil
-            </button>
-        </div>
-    }
-</div>
-
-@* ──────────────── MODAL DE ELIMINACIÓN (Intacto) ──────────────── *@
-<div id="modalEliminar" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
-    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center">
-        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-        </div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">Eliminar cuenta</h3>
-        <p class="text-sm text-gray-500 mb-6">
-            Esta acción es irreversible y borrará permanentemente tus datos de usuario así como tu(s) clínica(s) e historial.
-        </p>
-
-        @using (Html.BeginForm("EliminarCuenta", "Clinica", FormMethod.Post))
+        @if (Model != null)
         {
-            @Html.AntiForgeryToken()
-            <div class="flex gap-3 w-full">
-                <button type="button" onclick="document.getElementById('modalEliminar').classList.add('hidden')" 
-                        class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-600 font-semibold text-sm hover:bg-gray-50">
-                    Cancelar
-                </button>
-                <button type="submit" class="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 rounded-xl text-white font-semibold text-sm shadow-sm transition-colors">
-                    Sí, eliminar
-                </button>
+            @* Formulario principal (Con enctype para las fotos) *@
+            using (Html.BeginForm("MiPerfil", "Clinica", FormMethod.Post, new { enctype = "multipart/form-data", @class = "bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden mb-8" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.id)
+
+                @* ── CABECERA: BANNER Y LOGO ── *@
+                <div class="relative group">
+                    <div class="w-full h-48 bg-gray-200 relative overflow-hidden">
+                        <div class="w-full h-full bg-gradient-to-r from-teal-700 to-slate-800 flex items-center justify-center">
+                            <i class="fas fa-hospital text-white/30 text-5xl"></i>
+                        </div>
+                        <label class="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-gray-800 text-xs font-bold px-4 py-2 rounded-lg cursor-pointer shadow transition backdrop-blur-sm">
+                            <i class="fas fa-camera mr-1"></i> Cambiar Portada
+                            <input type="file" name="bannerFile" accept="image/*" class="hidden" />
+                        </label>
+                    </div>
+                    <div class="absolute -bottom-10 left-8 flex items-end">
+                        <div class="relative">
+                            <div class="w-28 h-28 rounded-2xl bg-white p-1.5 shadow-md border border-gray-100 flex items-center justify-center text-teal-600 bg-teal-50">
+                                <i class="fas fa-user-md text-4xl"></i>
+                            </div>
+                            <label class="absolute -bottom-2 -right-2 bg-teal-600 hover:bg-teal-700 text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer shadow-sm transition ring-4 ring-white">
+                                <i class="fas fa-pen text-xs"></i>
+                                <input type="file" name="logoFile" accept="image/*" class="hidden" />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                @* ── DATOS CLÍNICOS ── *@
+                <div class="pt-16 pb-8 px-8 border-b border-gray-100">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">Nombre de la Clínica *</label>
+                            @Html.TextBoxFor(m => m.nombre_clinica, new { @class = "w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-2 focus:ring-teal-500 font-bold text-gray-800 text-lg", required = "required" })
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">Especialidad</label>
+                            @Html.TextBoxFor(m => m.especialidad, new { @class = "w-full border border-gray-300 rounded-lg py-2.5 px-3 focus:ring-2 focus:ring-teal-500 text-gray-600" })
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">RFC</label>
+                            @Html.TextBoxFor(m => m.rfc, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm uppercase focus:ring-2 focus:ring-teal-500", maxlength = "13" })
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">Teléfono</label>
+                            @Html.TextBoxFor(m => m.telefono, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500" })
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">Ciudad / Municipio</label>
+                            @Html.TextBoxFor(m => m.ciudad, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500" })
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">Dirección completa</label>
+                            @Html.TextBoxFor(m => m.direccion, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500" })
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">Estado</label>
+                            @Html.TextBoxFor(m => m.estado, new { @class = "w-full border border-gray-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500" })
+                        </div>
+                    </div>
+                </div>
+
+                @* ── PREFERENCIAS DE NOTIFICACIÓN ── *@
+                <div class="p-8 bg-gray-50/50">
+                    <h3 class="font-bold text-gray-800 mb-5 flex items-center gap-2"><i class="fas fa-bell text-teal-600"></i> Alertas y Correos</h3>
+                    <div class="space-y-4">
+                        <label class="flex items-start gap-3 cursor-pointer group">
+                            <input type="checkbox" checked class="mt-1 w-5 h-5 text-teal-600 rounded border-gray-300 focus:ring-teal-500">
+                            <div>
+                                <p class="font-bold text-gray-800 group-hover:text-teal-700 transition">Actualizaciones de mis Pedidos</p>
+                                <p class="text-sm text-gray-500">Avisarme cuando mi compra cambie a 'Enviado' o 'Entregado'.</p>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-3 cursor-pointer group">
+                            <input type="checkbox" checked class="mt-1 w-5 h-5 text-teal-600 rounded border-gray-300 focus:ring-teal-500">
+                            <div>
+                                <p class="font-bold text-gray-800 group-hover:text-teal-700 transition">Respuestas a Cotizaciones (RFQ)</p>
+                                <p class="text-sm text-gray-500">Notificarme cuando un proveedor me envíe una propuesta.</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                @* ── BOTONES DE ACCIÓN ── *@
+                <div class="px-8 py-5 border-t border-gray-100 flex items-center justify-between bg-white">
+                    <button type="button" onclick="document.getElementById('modalEliminar').classList.remove('hidden')" 
+                            class="px-4 py-2.5 rounded-lg text-red-500 hover:bg-red-50 text-sm font-semibold transition-colors flex items-center gap-2 border border-transparent hover:border-red-200">
+                        <i class="fa-solid fa-trash"></i> Eliminar sucursal
+                    </button>
+
+                    <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-8 rounded-xl transition shadow-md flex items-center gap-2">
+                        <i class="fas fa-save"></i> Guardar Perfil
+                    </button>
+                </div>
+            }
+
+            @* ──────────────── MODAL DE ELIMINACIÓN DE SUCURSAL ──────────────── *@
+            <div id="modalEliminar" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
+                <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-2xl">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">¿Eliminar esta clínica?</h3>
+                    <p class="text-sm text-gray-500 mb-6">
+                        Se borrarán los datos de <strong>@Model.nombre_clinica</strong>. Esta acción no se puede deshacer.
+                    </p>
+
+                    @using (Html.BeginForm("EliminarSucursal", "Clinica", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="idClinica" value="@Model.id" />
+                        
+                        <div class="flex gap-3 w-full">
+                            <button type="button" onclick="document.getElementById('modalEliminar').classList.add('hidden')" 
+                                    class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-600 font-semibold text-sm hover:bg-gray-50 transition-colors">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 rounded-xl text-white font-semibold text-sm shadow-sm transition-colors">
+                                Sí, eliminar
+                            </button>
+                        </div>
+                    }
+                </div>
             </div>
         }
     </div>
